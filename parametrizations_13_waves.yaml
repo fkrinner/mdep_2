@@ -265,6 +265,39 @@ cohBKG(2-+)1+_f2_pi_S:
    value: 1.275
 
 ########################################
+# 3++ Sector:
+########################################
+a3(1875):
+ parametrization: 0
+ parameters:
+ - name: M_a3(1875)
+   value: 1.874
+ - name: G_a3(1875)
+   value: 0.385
+
+cohBKG(3++)1+_rho_pi_G:
+ parametrization: 3
+ parameters:
+ - name: cohBKG(3++)1+_rho_pi_G__b
+   value: -4.3411
+ constants:
+ - name: mP
+   value: 0.139
+ - name: mR
+   value: 0.770
+
+cohBKG(3++)0+_rho3_pi_S:
+ parametrization: 3
+ parameters:
+ - name: cohBKG(3++)0+_rho3_pi_S__b
+   value: -4.3411
+ constants:
+ - name: mP
+   value: 0.139
+ - name: mR3
+   value: 1.690
+
+########################################
 # 4++ Sector:
 ########################################
 a4(2040):
@@ -296,6 +329,8 @@ cohBKG(4++)1+_rho_pi_G:
    value: 0.139
  - name: mR
    value: 0.770
+
+
 
 ########################################
 # Isobar:

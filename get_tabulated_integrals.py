@@ -19,7 +19,9 @@ waves = [
 		'1-(2-+)1+ f2 pi S',
 		'1-(4++)1+ f2 pi F',
 		'1-(4++)1+ rho pi G',
-		'1-(1-+)1+ rho pi P'
+		'1-(1-+)1+ rho pi P',
+		'1-(3++)1+ rho pi G',
+		'1-(3++)0+ rho3 pi S',
 					]
 
 numbers={
@@ -36,7 +38,9 @@ numbers={
 	"1-(2-+)1+ f2 pi S":10,
 	"1-(2-+)0+ rho pi F":11,
 	"1-(2-+)0+ f2 pi D":12,
-	"1-(1-+)1+ rho pi P":13
+	"1-(1-+)1+ rho pi P":13,
+	"1-(3++)1+ rho pi G":14,
+	"1-(3++)0+ rho3 pi S":15
 }
 nwaves=str(len(waves))
 numbers_inverse={}

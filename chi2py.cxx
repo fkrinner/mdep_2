@@ -159,8 +159,8 @@ BOOST_PYTHON_MODULE(libchi2py){
 	chi2.def("className",				&chi2py::className				);
 	chi2.def("printStatus",				&chi2py::printStatus				);
 	chi2.def("printParameters",			&chi2py::printParameters			);
+	chi2.def("setParameter",			&chi2py::setParameter				);
 	chi2.def("getParameter",			&chi2py::getParameter				);
-	chi2.def("setParameter",			&chi2py::getParameter				);
 	
 	chi2.def("parameterNames",			&chi2py::parameterNames				);
 	chi2.def("setRandomCpl",			&chi2py::setRandomCpl				);

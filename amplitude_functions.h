@@ -69,7 +69,7 @@ template<typename xdouble> xdouble barrierFactor(xdouble q, int L){
 };
 
 template<typename xdouble>  // Some different definition for Barrier factors... used by Dimas program.
-xdouble fdl(xdouble P, xdouble R, int L){
+xdouble fdl(xdouble P, xdouble R, xdouble L){
 	xdouble X = P*R;
 	if (L==0){
 		return 1.;
@@ -88,7 +88,7 @@ xdouble fdl(xdouble P, xdouble R, int L){
 };
 
 template<typename xdouble>
-xdouble psl(xdouble m, xdouble m1, xdouble m2, xdouble R, int L){
+xdouble psl(xdouble m, xdouble m1, xdouble m2, xdouble R, xdouble L){
 	xdouble ampor = m1+m2;
 	if (m > ampor){
 		xdouble E = (m*m + m1*m1 - m2 * m2)/(2*m);

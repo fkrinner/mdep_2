@@ -56,4 +56,12 @@
 1-(1-+)1+ rho pi P:
   phase_space: 1013
   spin: 1
-  isobar_spin_ 1
+  isobar_spin: 1
+1-(3++)1+ rho pi G:
+  phase_space: 1014
+  spin: 3
+  isobar_spin: 1
+1-(3++)0+ rho3 pi S:
+  phase_space: 1015
+  spin: 3
+  isobar_spin: 3

@@ -129,7 +129,7 @@ class two_channel_breit_wigner : public amplitude{
 #endif//ADOL_ON	
 };
 
-two_channel_breit_wigner::two_channel_breit_wigner():amplitude(1,2,4,2){
+two_channel_breit_wigner::two_channel_breit_wigner():amplitude(1,2,6,2){
 
 	_name = "unnamed_two_channel_breit_wigner";
 
@@ -145,11 +145,16 @@ two_channel_breit_wigner::two_channel_breit_wigner():amplitude(1,2,4,2){
 	_con_types[1] = "m_Iso1";
 	_con_types[2] = "m_Iso2";
 	_con_types[3] = "branching";
+	_con_types[4] = "L1";
+	_con_types[5] = "L2";
+
 
 	_con_names[0] = "m_Pi";
 	_con_names[1] = "m_Iso1";
 	_con_names[2] = "m_Iso2";
 	_con_names[3] = "branching";
+	_con_names[4] = "L1";
+	_con_names[5] = "L2";
 };
 
 template <typename xdouble>
@@ -164,13 +169,16 @@ std::complex<xdouble> two_channel_breit_wigner::template_eval(const double* var,
 	xdouble mIso2 = con[2];
 	xdouble X  = con[3];
 
+	xdouble L1 = con[4];
+	xdouble L2 = con[5];
+
 	xdouble R = 5.;
 
-	xdouble psl1 = psl<xdouble>(m, mPi, mIso1, R, _L);
-	xdouble psl2 = psl<xdouble>(m, mPi, mIso2, R, _L);
+	xdouble psl1 = psl<xdouble>(m, mPi, mIso1, R, L1);
+	xdouble psl2 = psl<xdouble>(m, mPi, mIso2, R, L2);
 
-	xdouble psl10= psl<xdouble>(m0, mPi, mIso1, R, _L);
-	xdouble psl20= psl<xdouble>(m0, mPi, mIso2, R, _L);
+	xdouble psl10= psl<xdouble>(m0, mPi, mIso1, R, L1);
+	xdouble psl20= psl<xdouble>(m0, mPi, mIso2, R, L2);
 
 	xdouble G = G0 * m0/m * ((1-X) * psl1/psl10 + X * psl2/psl20);
 
