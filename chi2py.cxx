@@ -99,6 +99,18 @@ struct chi2py:public minimize{
 	void setParLimits(std::string name, double upper, double lower){
 		minimize::setParLimits(name,upper,lower);
 	};
+	void setParameterFile(std::string fileName){
+		_method->setParameterFile(fileName);
+	};
+	void setNout(size_t n){
+		_method->setNoutFile(n);
+	};
+	void writeParameters(){
+		_method->writeParameters();
+	};
+	void readParameters(std::string fileName){
+		_method->readParameters(fileName);
+	};
 };
 
 struct chi2py_wrap: chi2py, bp::wrapper<chi2py>{
@@ -177,6 +189,10 @@ BOOST_PYTHON_MODULE(libchi2py){
 
 	chi2.def("write_plots",				&chi2py::write_plots				);
 	chi2.def("setParLimits",			&chi2py::setParLimits				);
+	chi2.def("setParameterFile",			&chi2py::setParameterFile			);
+	chi2.def("setNout",				&chi2py::setNout				);
+	chi2.def("writeParameters",			&chi2py::writeParameters			);
+	chi2.def("readParameters",			&chi2py::readParameters				);
 };
 
 

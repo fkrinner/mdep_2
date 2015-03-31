@@ -143,6 +143,46 @@ void method::init_upper_limits(int n){
 	_upper_parameter_limits = std::vector<double>(n,0.);
 };
 //########################################################################################################################################################
+/// Writes parametes to a YAML file (#ifdef USE_YAML
+void method::writeParameters(				const double* 					param)						const{
+
+#ifdef USE_YAML
+	if (not _parameterFile.size() ==0){
+		YAML::Node YAML_parameters;
+		for (size_t i=0;i<_nTot;++i){
+			YAML_parameters[_parNames[i]] = parameters()[i];
+		};
+		std::ofstream fout(_parameterFile.c_str());
+		fout<<YAML_parameters;
+		fout.close();	
+	};
+#else//USE_YAML
+	std::cout<<"method::writeParameters(): Error: YAML not used, do nothig"<<std::endl;
+#endif//USE_YAML
+};
+//########################################################################################################################################################
+/// Wirtes internal paramters to a YAML file
+void method::writeParameters()																const{
+
+	if (_parameterFile.size() ==0){
+		std::cout<<"method::writeParameters(): Warning: No fileName given, use the 'setParameterFile()' method"<<std::endl;
+	}else{
+		writeParameters(&parameters()[0]);
+	};
+};
+//########################################################################################################################################################
+/// Reads parameters from a YAML file
+void method::readParameters(				std::string					fileName){
+#ifdef USE_YAML
+	YAML::Node YAML_parameters = YAML::LoadFile(fileName);
+	for( YAML::const_iterator it=YAML_parameters.begin(); it != YAML_parameters.end(); ++it){
+		setParameter(it->first.as<std::string>(), it->second.as<double>());
+	};
+#else//USE_YAML
+	std::cout<<"method::readParameters(): Error: YAML not used, do nothig"<<std::endl;
+#endif//USE_YAML
+};
+//########################################################################################################################################################
 ///Gets the couplings-without-branchings from couplings-with-branchings and branchings for one t' bin
 std::vector<std::complex<double> > method::getUnbranchedCouplings(
 							const std::vector<std::complex<double> >	&cpl,

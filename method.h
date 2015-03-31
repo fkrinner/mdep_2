@@ -7,8 +7,8 @@
 
 class method{
 	public:
-		method():_waveset(),_nOut(1000),_count(0),_nOutFile(1000000), _parameterFile("none"){};
-		method(std::string card):_waveset(card),_nOut(1000),_count(0),_nOutFile(1000000),_parameterFile("none"){};
+		method():_waveset(),_nOut(1000),_count(0),_nOutFile(1000000), _parameterFile(""){};
+		method(std::string card):_waveset(card),_nOut(1000),_count(0),_nOutFile(1000000),_parameterFile(""){};
 
 		double				operator()						()											{return mainEval(&parameters()[0]);};
 		double 				operator()						(std::vector<double> &xx)								{return mainEval(&xx[0]);};
@@ -32,7 +32,7 @@ class method{
 		void 					setParameter					(size_t i, double par);
 		double					getParameter					(size_t i)									const;
 		void 					setParameters					(std::vector<double> pars);
-		const std::vector<double>		parameters					()const;
+		const std::vector<double>		parameters					()										const;
 		bool 					setParameter					(std::string name, double par);
 		int 					getParNumber					(std::string name)								const;
 		void 					setParLimits					(int i, double upper, double lower);
@@ -41,7 +41,9 @@ class method{
 		void					init_upper_limits				(int n=-1);
 		void					setNoutFile					(size_t n)										{_nOutFile = n;};
 		void					setParameterFile				(std::string fileName)									{_parameterFile = fileName;};
-		void					writeParameters					(const double * param)								const	{};
+		void					writeParameters					()										const;
+		void					writeParameters					(const double * param)								const;
+		void					readParameters					(std::string fileName);
 		std::vector<std::complex<double> >	getUnbranchedCouplings				(const std::vector<std::complex<double> > &cpl,const std::vector<std::complex<double> > &bra) 	const;
 		void 					update_min_max_bin				();
 
