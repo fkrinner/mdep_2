@@ -78,6 +78,9 @@ double old_method::mainEval(const double							*xx){
 	if (0==_count%_nOut){ // Write every _nOut evaluation
 		std::cout<<"#"<<_count<<": "<<chi2<<std::endl;
 	};
+	if (0==_count%_nOutFile){
+		writeParameters(xx);
+	};
 	return chi2;
 };
 //########################################################################################################################################################

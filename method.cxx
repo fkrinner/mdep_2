@@ -91,7 +91,7 @@ int method::getParNumber(
 	return -1;
 };
 //########################################################################################################################################################
-///Set Parameter limits
+///Set Parameter limits. If upper < lower, no limits will be applied
 void method::setParLimits(
 							int 						par,
 							double 						upper,
@@ -103,8 +103,26 @@ void method::setParLimits(
 	if(_upper_parameter_limits.size() != _nTot){
 		init_upper_limits();
 	};
+	if (upper < lower){
+		std::cout<<"method::setParLimits(...): Warning: Trying to set limits for parameter number #"<<par<<": Upper limit smaller than lower limit( "<<upper<<" < "<<lower<<" )"<<std::endl;
+	};
 	_upper_parameter_limits[par]=upper;
 	_lower_parameter_limits[par]=lower;
+};
+//########################################################################################################################################################
+void method::setParLimits(
+							std::string					name,
+							double 						upper,
+							double 						lower){
+
+	int number = getParNumber(name);
+	if (-1==number){
+		std::cerr << "Error: Parameter '"<<name<<"' not found"<<std::endl;
+	}else if ((int)_nTot <= number){
+		std::cerr << "Error: Parameter number too high"<<std::endl;
+	}else{
+		setParLimits(number,upper,lower);
+	};
 };
 //########################################################################################################################################################
 ///Inits all lower parateter limits to 1.

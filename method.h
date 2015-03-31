@@ -7,8 +7,8 @@
 
 class method{
 	public:
-		method():_waveset(),_nOut(1000),_count(0){};
-		method(std::string card):_waveset(card),_nOut(1000),_count(0){};
+		method():_waveset(),_nOut(1000),_count(0),_nOutFile(1000000), _parameterFile("none"){};
+		method(std::string card):_waveset(card),_nOut(1000),_count(0),_nOutFile(1000000),_parameterFile("none"){};
 
 		double				operator()						()											{return mainEval(&parameters()[0]);};
 		double 				operator()						(std::vector<double> &xx)								{return mainEval(&xx[0]);};
@@ -36,8 +36,12 @@ class method{
 		bool 					setParameter					(std::string name, double par);
 		int 					getParNumber					(std::string name)								const;
 		void 					setParLimits					(int i, double upper, double lower);
+		void					setParLimits					(std::string name, double upper, double lower);
 		void					init_lower_limits				(int n=-1);
 		void					init_upper_limits				(int n=-1);
+		void					setNoutFile					(size_t n)										{_nOutFile = n;};
+		void					setParameterFile				(std::string fileName)									{_parameterFile = fileName;};
+		void					writeParameters					(const double * param)								const	{};
 		std::vector<std::complex<double> >	getUnbranchedCouplings				(const std::vector<std::complex<double> > &cpl,const std::vector<std::complex<double> > &bra) 	const;
 		void 					update_min_max_bin				();
 
@@ -94,7 +98,8 @@ class method{
 
 		// OTHER MEMBERS
 		size_t 									_nOut; 			// Print output after _nOut iterations
+		size_t									_nOutFile;		// Write parameters to file after _nOutFile iterations
 		size_t 									_count;			// Count of calls
-
+		std::string								_parameterFile;		//Path to write the parameters
 };
 #endif//METHOD_METHOD_METHOD

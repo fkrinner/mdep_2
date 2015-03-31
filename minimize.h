@@ -40,6 +40,8 @@ class minimize{
 		METHOD*			method()							{return _method;};
 		void 			setParameter			(int i, double par		);
 		void 			setParameter			(std::string name, double par	);
+		void			setParLimits			(int i, double upper, double lower);
+		void			setParLimits			(std::string name, double upper, double lower);
 		void 			setParameters			(std::vector<double> pars	);
 		void 			setStepSize			(int i, double step		);
 		void 			setStepSize			(std::string name, double par	);

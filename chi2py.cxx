@@ -96,6 +96,9 @@ struct chi2py:public minimize{
 		std::vector<std::complex<double> > ampl = _method->amplitudes(mass, tbin, _method->parameters());
 		return std_vector_to_py_list(ampl);
 	};
+	void setParLimits(std::string name, double upper, double lower){
+		minimize::setParLimits(name,upper,lower);
+	};
 };
 
 struct chi2py_wrap: chi2py, bp::wrapper<chi2py>{
@@ -173,6 +176,7 @@ BOOST_PYTHON_MODULE(libchi2py){
 	chi2.def("parameters",				&chi2py::parameters				);
 
 	chi2.def("write_plots",				&chi2py::write_plots				);
+	chi2.def("setParLimits",			&chi2py::setParLimits				);
 };
 
 

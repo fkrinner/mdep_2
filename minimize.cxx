@@ -71,6 +71,7 @@ minimize::minimize(
 ///Actual call for fitter. At the moment the instance is copied and fitted, this might be improved...
 double minimize::fit(){ 
 
+	reload_par_definitions();
 	print_vector(_released);
 	if (_method_type == 0){
 		_f=ROOT::Math::Functor(*((anchor_t*)_method),_method->nTot());
@@ -266,6 +267,30 @@ void minimize::setParameter(
 	};
 };
 //########################################################################################################################################################
+///Set Parameter limits by number
+void minimize::setParLimits(				int 						i,
+							double 						upper,
+							double 						lower					){
+
+	_method->setParLimits(i,upper,lower);
+	reload_par_definitions(i);
+};
+//########################################################################################################################################################
+/// Set Parameter limits by name
+void minimize::setParLimits(				std::string 					name,
+							double						upper,
+							double						lower){
+
+	int number = _method->getParNumber(name);
+	if (-1==number){
+		std::cerr << "Error: Parameter '"<<name<<"' not found"<<std::endl;
+	}else if ((int)_method->nTot() <= number){
+		std::cerr << "Error: Parameter number too high"<<std::endl;
+	}else{
+		setParLimits(number,upper,lower);
+	};
+};
+//########################################################################################################################################################
 ///Sets all parameters at once
 void minimize::setParameters(
 							std::vector<double> 				pars){
@@ -452,6 +477,7 @@ void minimize::reload_par_definitions(
 			if(_released[i]){
 				if((*_method->lower_parameter_limits())[i] < (*_method->upper_parameter_limits())[i]){
 					_min->SetLimitedVariable(i,(*_method->parNames())[i],_method->parameters()[i],_step_sizes[i],(*_method->lower_parameter_limits())[i],(*_method->upper_parameter_limits())[i]);
+//					std::cout<<(*_method->parNames())[i]<<" limited to "<<(*_method->lower_parameter_limits())[i]<<"-"<<(*_method->upper_parameter_limits())[i]<<std::endl;
 				}else{
 					_min->SetVariable(i,(*_method->parNames())[i],_method->parameters()[i],_step_sizes[i]);
 				};
