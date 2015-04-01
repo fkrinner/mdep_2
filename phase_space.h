@@ -83,7 +83,7 @@ bool phase_space_func::get_binning(std::string integralFile){
 	_mmin = masses[0]; // At the moment assume equidistant binning of the integrals
 	_mmax = masses[masses.size()-1];
 	_step = binwidth0;
-	_nStep= masses.size()-1;
+	_nStep= masses.size();
 	_integrals = std::vector<double>(_nStep);
 	return true;
 };
@@ -109,6 +109,9 @@ bool phase_space_func::fill_integral(std::string waveName, std::string integralF
 				countdown--;
 			};
 		};
+	};
+	if (int_count != _nStep){
+		std::cerr<<"phase_space::fill_integral(...): Error: Not all integrals found."<<std::endl;
 	};
 	return true;
 };

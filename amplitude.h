@@ -71,7 +71,7 @@ class mass_dep_breit_wigner : public amplitude{
 #endif//ADOL_ON	
 };
 
-mass_dep_breit_wigner::mass_dep_breit_wigner():amplitude(1,2,2,1){
+mass_dep_breit_wigner::mass_dep_breit_wigner():amplitude(1,2,3,1){
 
 	_name = "unnamed_mass_dep_breit_wigner";
 
@@ -85,9 +85,13 @@ mass_dep_breit_wigner::mass_dep_breit_wigner():amplitude(1,2,2,1){
 
 	_con_types[0] = "m_Pi";
 	_con_types[1] = "m_Iso";
+	_con_types[2] = "angular_momentum";
 
 	_con_names[0] = "m_Pi";
 	_con_names[1] = "m_Iso";
+	_con_names[2] = "L";
+
+	
 };
 
 template <typename xdouble>
@@ -102,8 +106,8 @@ std::complex<xdouble> mass_dep_breit_wigner::template_eval(const double* var, co
 
 	xdouble q0 = breakupMomentumReal<xdouble>(m0*m0,mPi*mPi,mIso*mIso);
 	xdouble q  = breakupMomentumReal<xdouble>(m* m ,mPi*mPi,mIso*mIso);
-	xdouble Fl = barrierFactor<xdouble>(q,_L);
-	xdouble Fl0= barrierFactor<xdouble>(q0,_L);
+	xdouble Fl = barrierFactor<xdouble>(q,con[2]);
+	xdouble Fl0= barrierFactor<xdouble>(q0,con[2]);
 
 	xdouble G  = G0* m0/m * q*Fl*Fl/q0/Fl0/Fl0; //G0 * m0/m q*Fl^2/(q0*Fl0^2)
 	std::complex<xdouble> denominator = std::complex<xdouble>(m0*m0-m*m,-m0*G);
@@ -513,7 +517,7 @@ class mass_dep_bw_2 : public amplitude{
 #endif//ADOL_ON	
 };
 
-mass_dep_bw_2::mass_dep_bw_2():amplitude(1,2,4,22){
+mass_dep_bw_2::mass_dep_bw_2():amplitude(1,2,6,22){
 
 	_name = "unnamed_mass_dep_bw_2";
 
@@ -529,11 +533,15 @@ mass_dep_bw_2::mass_dep_bw_2():amplitude(1,2,4,22){
 	_con_types[1] = "m_Iso1";
 	_con_types[2] = "m_Iso2";
 	_con_types[3] = "branching";
+	_con_types[4] = "angular_momentum_1";
+	_con_types[5] = "angular_momentum_2";
 
 	_con_names[0] = "m_Pi";
 	_con_names[1] = "m_Iso1";
 	_con_names[2] = "m_Iso2";
 	_con_names[3] = "branching";
+	_con_names[4] = "L1";
+	_con_names[5] = "L2";
 
 };
 
@@ -553,10 +561,10 @@ std::complex<xdouble> mass_dep_bw_2::template_eval(const double* var, const xdou
 	xdouble q10= breakupMomentumReal<xdouble>(m0*m0,mPi*mPi,mIso1*mIso1);
 	xdouble q2 = breakupMomentumReal<xdouble>(m*m,mPi*mPi,mIso2*mIso2);
 	xdouble q20= breakupMomentumReal<xdouble>(m0*m0,mPi*mPi,mIso2*mIso2);
-	xdouble Fl1= barrierFactor<xdouble>(q1,_L);
-	xdouble Fl10=barrierFactor<xdouble>(q10,_L);
-	xdouble Fl2= barrierFactor<xdouble>(q2,_L);
-	xdouble Fl20=barrierFactor<xdouble>(q20,_L);	
+	xdouble Fl1= barrierFactor<xdouble>(q1,con[4]);
+	xdouble Fl10=barrierFactor<xdouble>(q10,con[4]);
+	xdouble Fl2= barrierFactor<xdouble>(q2,con[5]);
+	xdouble Fl20=barrierFactor<xdouble>(q20,con[5]);	
 
 	xdouble G  = G0 * m0/m* ((1-X)*q1*Fl1*Fl1/q10/Fl10/Fl10 + X* q2*Fl2*Fl2/q20/Fl20/Fl20);
 	std::complex<xdouble> denominator = std::complex<xdouble>(m0*m0-m*m,-m0*G);

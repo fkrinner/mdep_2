@@ -47,7 +47,7 @@ template< typename xdouble> xdouble breakupMomentumReal(xdouble M2, xdouble m12,
 	};
 };
 
-template<typename xdouble> xdouble barrierFactor(xdouble q, int L){
+template<typename xdouble> xdouble barrierFactor(xdouble q, xdouble L){
 	double pr = 0.1973;
 	xdouble z=q*q/pr/pr;
 	xdouble res;
