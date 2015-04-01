@@ -70,6 +70,7 @@ class minimize{
 		void 			setRandomBra			();										// X
 		void			findRandRange			();
 		void 			finish_setUp			();
+		void			setMaxCalls			(size_t nCalls);
 
 	// MULTINEST
 		void			cube				(double* in)	const;

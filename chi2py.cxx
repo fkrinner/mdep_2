@@ -193,6 +193,7 @@ BOOST_PYTHON_MODULE(libchi2py){
 	chi2.def("setNout",				&chi2py::setNout				);
 	chi2.def("writeParameters",			&chi2py::writeParameters			);
 	chi2.def("readParameters",			&chi2py::readParameters				);
+	chi2.def("setMaxCalls",				&chi2py::setMaxCalls				);
 };
 
 

@@ -456,6 +456,13 @@ void minimize::update_definitions(){
 	};
 };
 //########################################################################################################################################################
+///Sets maxFunction Calls
+void minimize::setMaxCalls(				size_t						nCalls){
+
+	_maxFunctionCalls = nCalls;
+	update_definitions();
+};
+//########################################################################################################################################################
 ///Update the parameter definitions for parameter number mara_peter, if mara_peter ==-1, then all are updated
 void minimize::reload_par_definitions(
 							int 						mara_peter){ 
@@ -601,6 +608,9 @@ void minimize::loadFitterDefinitions(
 
 	if (waveset["min_step_size"]){
 		_minStepSize = waveset["min_step_size"].as<double>();
+	};
+	if (waveset["maxCalls"]){
+		setMaxCalls(waveset["maxCalls"].as<size_t>());
 	};
 	int nPar = _method->Waveset()->getNpar();
 	int nCpl = _method->nCpl();
