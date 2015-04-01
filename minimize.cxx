@@ -60,11 +60,11 @@ minimize::minimize(
 //	_method = anchor_t(card);
 
 
-	std::cout<<"Load fitter definitions"<<std::endl;
+	std::cout<<"minimize::minimize(...): Load fitter definitions"<<std::endl;
 	loadFitterDefinitions(Ycard);
-	std::cout<<"Fitter definitions loaded\nFinish setup"<<std::endl;
+	std::cout<<"minimize::minimize(...): Fitter definitions loaded\nFinish setup"<<std::endl;
 	finish_setUp();
-	std::cout<<"Setup finished"<<std::endl;
+	std::cout<<"minimize::minimize(...): Setup finished"<<std::endl;
 };
 #endif//USE_YAML
 //########################################################################################################################################################
@@ -89,7 +89,7 @@ double minimize::fit(){
 		};
 		return (*_method)(xs);
 	}else{
-		std::cerr<<"Error: Fitter not initialized"<<std::endl;
+		std::cerr<<"minimize::fit(): Error: Fitter not initialized"<<std::endl;
 		return std::numeric_limits<double>::quiet_NaN();
 	};
 };
@@ -99,7 +99,7 @@ void minimize::initCouplings(
 							size_t 						nSeeds){ 
 
 
-	std::cout<<"Initialize couplings"<<std::endl;
+	std::cout<<"minimize::initCouplings(...): Initialize couplings"<<std::endl;
 
 	size_t nTbin = _method->Waveset()->nTbin();
 	size_t cpls = _method->nCpl()/nTbin;
@@ -114,7 +114,7 @@ void minimize::initCouplings(
 		};
 	};
 	for (size_t seed=0;seed<nSeeds;++seed){
-		std::cout<<"Seed #"<<seed<<std::endl;
+		std::cout<<"minimize::initCouplings(...): Seed #"<<seed<<std::endl;
 		setRandomCpl(); // Set random couplings
 		if (not _method->setUseBranch(false)){
 			setRandomBra();
@@ -125,7 +125,7 @@ void minimize::initCouplings(
 
 		for(size_t tbin=0; tbin<_method->Waveset()->nTbin();tbin++){ // Find cpl for each t' bin
 			_method->Waveset()->setEvalTbin(tbin,true);
-			std::cout<<"tBin #"<<tbin<<std::endl;
+			std::cout<<"minimize::initCouplings(...): tBin #"<<tbin<<std::endl;
 			for (size_t i =0;i<2*_method->nCpl();i++){
 //				std::cout<<"fix "<<i<<std::endl;
 				fixPar(i);
@@ -146,12 +146,12 @@ void minimize::initCouplings(
 					bestBras[tbin][bestbra] = actpar[2*_method->nCpl()+_method->nPar()+bestbra];
 				};
 			};
-			std::cout <<"... Chi2 = "<<onetbinchi2<<std::endl;
+			std::cout <<"minimize::initCouplings(...): ... Chi2 = "<<onetbinchi2<<std::endl;
 			_method->Waveset()->setEvalTbin(tbin,false);
 		};
 	};
 	for (size_t tbin=0;tbin<nTbin;++tbin){
-		std::cout<<"best Chi2 for tbin #"<<tbin<<": "<<bestChi2Tbin[tbin]<<std::endl;
+		std::cout<<"minimize::initCouplings(...): Best Chi2 for tbin #"<<tbin<<": "<<bestChi2Tbin[tbin]<<std::endl;
 
 		for (size_t cpl=0;cpl<2*cpls;++cpl){
 			setParameter(2*cpls*tbin+cpl,bestCplTbin[tbin][cpl]);
@@ -214,7 +214,7 @@ void minimize::initCouplings(
 			relPar(2*_method->nCpl()+_method->nPar()+i);
 		};
 		fit();
-		std::cout<<"Couplings and branchings"<<std::endl;
+		std::cout<<"minimize::initCouplings(...): Couplings and branchings"<<std::endl;
 		for (size_t i =0;i<2*_method->nCpl();i++){ // Rel couplings
 			relPar(i);
 		};
@@ -225,9 +225,9 @@ void minimize::initCouplings(
 			relPar(2*i+1);
 		};
 	};
-	std::cout<<"Total: "<<(*_method)(_min->X())<<std::endl;
-	std::cout<<"Couplings and branchings found"<<std::endl;
-	std::cout<<"Setting automatic limits for couplings and branchings"<<std::endl;
+	std::cout<<"minimize::initCouplings(...): Total: "<<(*_method)(_min->X())<<std::endl;
+	std::cout<<"minimize::initCouplings(...): Couplings and branchings found"<<std::endl;
+	std::cout<<"minimize::initCouplings(...): Setting automatic limits for couplings and branchings"<<std::endl;
 	for (size_t i=0;i<_method->nCpl();i++){
 		double val = std::max(_method->parameters()[2*i]*_method->parameters()[2*i],_method->parameters()[2*i+1]*_method->parameters()[2*i+1]);
 		val = pow(val,.5);
@@ -259,9 +259,9 @@ void minimize::setParameter(
 
 	int number = _method->getParNumber(name);
 	if (-1==number){
-		std::cerr << "Error: Parameter '"<<name<<"' not found"<<std::endl;
+		std::cerr << "minimize::setParameter(...): Error: Parameter '"<<name<<"' not found"<<std::endl;
 	}else if ((int)_method->nTot() <= number){
-		std::cerr << "Error: Parameter number too high"<<std::endl;
+		std::cerr << "minimize::setParameter(...): Error: Parameter number too high"<<std::endl;
 	}else{
 		setParameter(number,par);
 	};
@@ -283,9 +283,9 @@ void minimize::setParLimits(				std::string 					name,
 
 	int number = _method->getParNumber(name);
 	if (-1==number){
-		std::cerr << "Error: Parameter '"<<name<<"' not found"<<std::endl;
+		std::cerr << "minimize::setParLimits(...): Error: Parameter '"<<name<<"' not found"<<std::endl;
 	}else if ((int)_method->nTot() <= number){
-		std::cerr << "Error: Parameter number too high"<<std::endl;
+		std::cerr << "minimize::setParLimits(...): Error: Parameter number too high"<<std::endl;
 	}else{
 		setParLimits(number,upper,lower);
 	};
@@ -320,9 +320,9 @@ void minimize::setStepSize(
 
 	int number = _method->getParNumber(name);
 	if (-1==number){
-		std::cerr << "Error: Parameter '"<<name<<"' not found"<<std::endl;
+		std::cerr << "minimize::setStepSize(...): Error: Parameter '"<<name<<"' not found"<<std::endl;
 	}else if ((int)_method->nTot() <= number){
-		std::cerr << "Error: Parameter number too high"<<std::endl;
+		std::cerr << "minimize::setStepSize(...): Error: Parameter number too high"<<std::endl;
 	}else{
 		setStepSize(number,par);
 	};
@@ -336,7 +336,7 @@ void minimize::setStepSizes(
 		_step_sizes=steps;
 		reload_par_definitions();
 	}else{
-		std::cerr<<"Error: Input steps.size() too small"<<std::endl;
+		std::cerr<<"minimize::setStepSizes(...): Error: Input steps.size() too small"<<std::endl;
 	};
 };
 //########################################################################################################################################################
@@ -366,7 +366,7 @@ void minimize::relPar(
 		reload_par_definitions(i);
 	}else{
 		std::cout<<_method->nTot()<<" "<<_method->parameters().size()<<" "<<_released.size()<<std::endl;
-		std::cerr<<"Error: _released is not initialized."<<std::endl;
+		std::cerr<<"minimize::relPar(...): Error: _released is not initialized."<<std::endl;
 	};
 };
 //########################################################################################################################################################
@@ -379,7 +379,7 @@ void minimize::fixPar(
 		reload_par_definitions(i);
 	}else{
 		std::cout<<_method->nTot()<<" "<<_method->parameters().size()<<" "<<_released.size()<<std::endl;
-		std::cerr<<"Error: _released is not initialized."<<std::endl;
+		std::cerr<<"minimize(...)::fixPar(...): Error: _released is not initialized."<<std::endl;
 	};
 };
 //########################################################################################################################################################
@@ -389,9 +389,9 @@ void minimize::relPar(
 
 	int number = _method->getParNumber(name);
 	if (-1==number){
-		std::cerr << "Error: Parameter '"<<name<<"' not found"<<std::endl;
+		std::cerr << "minimize::relPar(...): Error: Parameter '"<<name<<"' not found"<<std::endl;
 	}else if ((int)_method->nTot() <= number){
-		std::cerr << "Error: Parameter number too high"<<std::endl;
+		std::cerr << "minimize::relPar(...): Error: Parameter number too high"<<std::endl;
 	}else{
 		relPar(number);
 	};
@@ -403,9 +403,9 @@ void minimize::fixPar(
 
 	int number = _method->getParNumber(name);
 	if (-1==number){
-		std::cerr << "Error: Parameter '"<<name<<"' not found"<<std::endl;
+		std::cerr << "minimize(...)::fixPar(...): Error: Parameter '"<<name<<"' not found"<<std::endl;
 	}else if ((int)_method->nTot() <= number){
-		std::cerr << "Error: Parameter number too high"<<std::endl;
+		std::cerr << "minimize(...)::fixPar(...): Error: Parameter number too high"<<std::endl;
 	}else{
 		fixPar(number);
 	};
@@ -492,19 +492,19 @@ void minimize::reload_par_definitions(
 bool minimize::initialize(std::string s1, std::string s2){ 
 
 	if (_method->parameters().size()<_method->nTot()){
-		std::cout<<"_method->parameters().size() < _method->nTot(). Abort initialize(initialization."<<std::endl;
+		std::cerr<<"minimize::initialize(...): Error: _method->parameters().size() < _method->nTot(). Abort initialize(initialization."<<std::endl;
 		return false;
 	};
 	if ((*_method->parNames()).size()<_method->nTot()){
-		std::cout<<"(*_method->parNames()).size() < _method->nTot(). Abort initialization."<<std::endl;
+		std::cerr<<"minimize::initialize(...): Error: (*_method->parNames()).size() < _method->nTot(). Abort initialization."<<std::endl;
 		return false;
 	};
 	if (_step_sizes.size()<_method->nTot()){
-		std::cout<<"_step_sizes.size() < _method->nTot(). Abort initialization."<<std::endl;
+		std::cerr<<"minimize::initialize(...): Error: _step_sizes.size() < _method->nTot(). Abort initialization."<<std::endl;
 		return false;
 	};
 	if (_released.size()<_method->nTot()){
-		std::cout<<"_released.size() < _method->nTot(). Abort initialization."<<std::endl;
+		std::cerr<<"minimize::initialize(...): Error: _released.size() < _method->nTot(). Abort initialization."<<std::endl;
 		return false;
 	};
 	_min = ROOT::Math::Factory::CreateMinimizer(s1,s2);
@@ -566,7 +566,7 @@ void minimize::findRandRange(){
 			};
 		};
 	};
-	std::cout<<"Found best _randRange to be: "<<basis<<"^"<<minDim<<" with Chi2 approx.: "<<minChi2<<std::endl; 
+	std::cout<<"minimize::findRandRange(...): Found best _randRange to be: "<<basis<<"^"<<minDim<<" with Chi2 approx.: "<<minChi2<<std::endl; 
 	setRandRange(pow(basis,minDim));
 	setRandomCpl();
 };

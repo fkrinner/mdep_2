@@ -34,12 +34,12 @@ full_covariance::full_covariance(
 	setTbinning((*_waveset.t_binning()));
 	update_definitions();
 	update_min_max_bin();
-	std::cout<<"Load full_covariance from YAML file\nLoad data and coma"<<std::endl;
+	std::cout<<"full_covariance::full_covariance(...): Load full_covariance from YAML file\nLoad data and coma"<<std::endl;
 	loadDataComa(Ycard);
-	std::cout<<"Data and coma loaded\nLoad parameter values"<<std::endl;
+	std::cout<<"full_covariance::full_covariance(...): Data and coma loaded\nLoad parameter values"<<std::endl;
 	loadParameterValues(Ycard, Yparam);
-	std::cout<<"Paramter values loaded"<<std::endl;
-	std::cout<<"full_covariance loaded"<<std::endl;
+	std::cout<<"full_covariance::full_covariance(...): Paramter values loaded"<<std::endl;
+	std::cout<<"full_covariance::full_covariance(...): full_covariance loaded"<<std::endl;
 };
 #endif//USE_YAML
 //########################################################################################################################################################
@@ -80,7 +80,9 @@ double full_covariance::mainEval(
 		std::cout<<"#"<<_count<<": "<<chi2<<std::endl;
 	};
 	if (0==_count%_nOutFile){
-		writeParameters(xx);
+		if (not _parameterFile.size() == 0){
+			writeParameters(xx,_parameterFile);
+		};
 	};
 	return chi2;
 };
@@ -401,7 +403,7 @@ bool full_covariance::set_coma(
 	if (coma.size() == _waveset.nPoints()*_waveset.nPoints()){
 		for (size_t i=0;i<coma.size();i++){
 			if (coma[i].size() != coma.size()){
-				std::cout<<"Warning: Set coma is not quadratic."<<std::endl;
+				std::cout<<"full_covariance::set_coma(...): Warning: Set coma is not quadratic."<<std::endl;
 				return false;
 			};
 		};
@@ -433,9 +435,9 @@ void full_covariance::loadComa(
 		};
 	};
 	if (_waveset.nBins() != _coma[tbin].size()){
-		std::cout << "'full_covariance.cxx' loadComa(...): Warning: _waveset.nBins()="<<_waveset.nBins()<<" != _coma.size()="<<_coma[tbin].size() << std::endl;
+		std::cout << "full_covariance::loadComa(...): Warning: _waveset.nBins()="<<_waveset.nBins()<<" != _coma.size()="<<_coma[tbin].size() << std::endl;
 	}else{
-		std::cout<< "'full_covariance.cxx' loadComa(...): File delivered the right size for _coma"<<std::endl;
+		std::cout<< "full_covariance::loadComa(...): File delivered the right size for _coma"<<std::endl;
 	};
 };
 //########################################################################################################################################################
@@ -475,13 +477,13 @@ void full_covariance::setTbinning(std::vector<std::vector<double> > binning){
 	_waveset.setTbinning(binning);
 	if (_data.size() != _waveset.nTbin()){
 		if (_data.size() != 0){
-			std::cout<<"Warning: _data.size() != _waveset.nTbin(), but nonzero. Previous set _data[][][] will be lost."<<std::endl;
+			std::cout<<"full_covariance::setTbinning(...): Warning: _data.size() != _waveset.nTbin(), but nonzero. Previous set _data[][][] will be lost."<<std::endl;
 		};
 		_data = std::vector<std::vector<std::vector<double> > >(_waveset.nTbin());
 	};
 	if (_coma.size() != _waveset.nTbin()){
 		if (_coma.size() != 0){
-			std::cout<<"Warning: _coma.size() != _waveset.nTbin(), bun nonzero. Previous set _coma[][][][] will be lost."<<std::endl;
+			std::cout<<"full_covariance::setTbinning(...): Warning: _coma.size() != _waveset.nTbin(), bun nonzero. Previous set _coma[][][][] will be lost."<<std::endl;
 		};
 		_coma = std::vector<std::vector<std::vector<std::vector<double> > > >(_waveset.nTbin());
 	};
@@ -505,7 +507,7 @@ void full_covariance::write_plots(
 	};
 	std::ofstream write_out;
 	write_out.open(filename.c_str());
-	std::cout<<"write_plots(...): Chi2 for the used paramters is: "<<EvalTbin(tbin,&cpl_all[0],&par[0],&iso[0])<<std::endl;//[0]//
+	std::cout<<"full_covariance::write_plots(...): write_plots(...): Chi2 for the used paramters is: "<<EvalTbin(tbin,&cpl_all[0],&par[0],&iso[0])<<std::endl;//[0]//
 	for (size_t bin=0;bin<_waveset.nBins();bin++){
 		double mass = _waveset.get_m(bin);
 		std::vector<double> var = _waveset.getVar(mass,tbin);

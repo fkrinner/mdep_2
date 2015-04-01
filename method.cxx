@@ -18,11 +18,11 @@ void method::setParameter(
 	}else if(i<2*_nCpl+_nPar+2*_nBra+_nIso){
 		_waveset.setIsoPar(i-2*_nCpl-_nPar-2*_nBra,par);
 	}else{
-		std::cerr<<"Error: Can't set parameter #"<<i<<std::endl;
+		std::cerr<<"method::setParameter(...): Error: Can't set parameter #"<<i<<std::endl;
 	};
 };
 //#######################################################################################################################################################
-double method::getParameter(size_t i)															const{
+double method::getParameter(				size_t 						i)						const{
 
 	if(i<2*_nCpl){
 		return _parameters[i];
@@ -33,7 +33,7 @@ double method::getParameter(size_t i)															const{
 	}else if(i<2*_nCpl+_nPar+2*_nBra+_nIso){
 		return _waveset.getIsoPar(i-2*_nCpl-_nPar-2*_nBra);
 	}else{
-		std::cerr<<"Error: Can't get parameter #"<<i<<std::endl;
+		std::cerr<<"method::getParameter(...): Error: Can't get parameter #"<<i<<std::endl;
 		return std::numeric_limits<double>::quiet_NaN();
 	};
 };
@@ -47,7 +47,7 @@ void method::setParameters(
 			setParameter(i,pars[i]);
 		};
 	}else{
-		std::cerr<<"Error: Input pars.size() too small"<<std::endl;
+		std::cerr<<"method::setParameters(...): Error: Input pars.size() too small"<<std::endl;
 	};
 };
 //#######################################################################################################################################################
@@ -68,10 +68,10 @@ bool method::setParameter(
 
 	int number = getParNumber(name);
 	if (-1==number){
-		std::cerr << "Error: Parameter '"<<name<<"' not found"<<std::endl;
+		std::cerr << "method::setParameter(...): Error: Parameter '"<<name<<"' not found"<<std::endl;
 		return false;
 	}else if ((int)_nTot <= number){
-		std::cerr << "Error: Parameter number too high"<<std::endl;
+		std::cerr << "method::setParameter(...): Error: Parameter number too high"<<std::endl;
 		return false;
 	}else{
 		setParameter(number,par);
@@ -117,9 +117,9 @@ void method::setParLimits(
 
 	int number = getParNumber(name);
 	if (-1==number){
-		std::cerr << "Error: Parameter '"<<name<<"' not found"<<std::endl;
+		std::cerr << "method::setParLimits: Error: Parameter '"<<name<<"' not found"<<std::endl;
 	}else if ((int)_nTot <= number){
-		std::cerr << "Error: Parameter number too high"<<std::endl;
+		std::cerr << "method::setParLimits: Error: Parameter number too high"<<std::endl;
 	}else{
 		setParLimits(number,upper,lower);
 	};
@@ -144,17 +144,23 @@ void method::init_upper_limits(int n){
 };
 //########################################################################################################################################################
 /// Writes parametes to a YAML file (#ifdef USE_YAML
-void method::writeParameters(				const double* 					param)						const{
+void method::writeParameters(				const double* 					param,
+							std::string					fileName)					const{
 
 #ifdef USE_YAML
-	if (not _parameterFile.size() ==0){
-		YAML::Node YAML_parameters;
-		for (size_t i=0;i<_nTot;++i){
-			YAML_parameters[_parNames[i]] = parameters()[i];
+	if (fileName.size() ==0){
+		std::cout<<"method::writeParameters(...): Warning: No fileName given"<<std::endl;
+	}else{
+		if (not _parameterFile.size() == 0){
+			YAML::Node YAML_parameters;
+			for (size_t i=0;i<_nTot;++i){
+				YAML_parameters[_parNames[i]] = parameters()[i];
+			};
+			std::ofstream fout(fileName.c_str());
+			fout<<YAML_parameters;
+			fout.close();	
+			std::cout<<"method::writeParameters(...): Parameters written to '"<<fileName<<"'"<<std::endl;
 		};
-		std::ofstream fout(_parameterFile.c_str());
-		fout<<YAML_parameters;
-		fout.close();	
 	};
 #else//USE_YAML
 	std::cout<<"method::writeParameters(): Error: YAML not used, do nothig"<<std::endl;
@@ -162,13 +168,9 @@ void method::writeParameters(				const double* 					param)						const{
 };
 //########################################################################################################################################################
 /// Wirtes internal paramters to a YAML file
-void method::writeParameters()																const{
+void method::writeParameters(				std::string					fileName)					const{
 
-	if (_parameterFile.size() ==0){
-		std::cout<<"method::writeParameters(): Warning: No fileName given, use the 'setParameterFile()' method"<<std::endl;
-	}else{
-		writeParameters(&parameters()[0]);
-	};
+	writeParameters(&parameters()[0], fileName);
 };
 //########################################################################################################################################################
 /// Reads parameters from a YAML file
@@ -207,8 +209,8 @@ void method::update_min_max_bin(){
 //	std::cout<<"Call update_min_max_bin()"<<std::endl;
 	_waveset.setMaxBin((*_waveset.binning()).size());
 	if ((*_waveset.lowerLims()).size() == 0 or (*_waveset.upperLims()).size() == 0){
-		std::cout<< "Warning: Wave limits not set, omitting internal setting of _waveset.minBin() and _waveset.maxBin()"<<std::endl;
-		std::cout<< "Warning: Setting _waveset.minBin() = 0; _waveset.maxBin() = _binning.size() = "<<(*_waveset.binning()).size()<<std::endl;
+		std::cout<< "method::update_min_max_bin(): Warning: Wave limits not set, omitting internal setting of _waveset.minBin() and _waveset.maxBin()"<<std::endl;
+		std::cout<< "method::update_min_max_bin(): Warning: Setting _waveset.minBin() = 0; _waveset.maxBin() = _binning.size() = "<<(*_waveset.binning()).size()<<std::endl;
 		_waveset.setMinBin(0);
 		_waveset.setMaxBin((*_waveset.binning()).size());
 		return;
@@ -217,7 +219,7 @@ void method::update_min_max_bin(){
 	double ancMax = (*_waveset.upperLims())[0];
 //	std::cout<<ancMin<<"-"<<ancMax<<std::endl;
 	if ((*_waveset.binning()).size() == 0){
-		std::cout<< "Warning: No binning set, cannot determine _waveset.minBin(), _waveset.maxBin()" <<std::endl;
+		std::cout<< "method::update_min_max_bin(): Warning: No binning set, cannot determine _waveset.minBin(), _waveset.maxBin()" <<std::endl;
 	};
 	for (size_t i=0;i<(*_waveset.binning()).size()-1;i++){
 		double up = (*_waveset.binning())[i+1];
@@ -241,10 +243,10 @@ bool method::loadDataComa(
 
 
 	if (waveset["data_files"].size() != _waveset.nTbin() ){
-		std::cerr<<"Error: Number of data-files does not match number of t' bins"<<std::endl;
+		std::cerr<<"method::loadDataComa(...): Error: Number of data-files does not match number of t' bins"<<std::endl;
 	};
 	if (waveset["coma_files"].size() != _waveset.nTbin()){
-		std::cerr<<"Error: Number of coma-files does not match number of t' bins"<<std::endl;
+		std::cerr<<"method::loadDataComa(...): Error: Number of coma-files does not match number of t' bins"<<std::endl;
 	};
 	update_min_max_bin(); //Has to be called to set internal definitions right, since not all belong to the same class now
 	update_definitions(); // Has to be called once with all functions set, to get internal handling of parameter numbers right
@@ -254,7 +256,7 @@ bool method::loadDataComa(
 			loadComa(i,waveset["coma_files"][i].as<std::string>().c_str());
 		};
 	}else{
-		std::cerr<<"Error: Wrong number of files, no _data or _coma loaded"<<std::endl;
+		std::cerr<<"method::loadDataComa(...): Error: Wrong number of files, no _data or _coma loaded"<<std::endl;
 		return false;
 	};
 	if (waveset["conjugate_fit_result"]){
@@ -310,7 +312,7 @@ bool method::loadParameterValues(
 				};
 			}else{
 				ookk = false;
-				std::cerr << "Error: '"<<fName<<"' not defined in parametrization file, no values set"<<std::endl;
+				std::cerr << "method::loadParameterValues(...): Error: '"<<fName<<"' not defined in parametrization file, no values set"<<std::endl;
 			};
 			if (isisobar){
 				if(param[iName]){
@@ -342,7 +344,7 @@ bool method::loadParameterValues(
 			std::string name = waveset["parameters"][i]["name"].as<std::string>();
 			int par = getParNumber(name);
 			if (par==-1){
-				std::cout<<"Warning: Unknown parameter in YAML file: "<<name<<std::endl;
+				std::cout<<"method::loadParameterValues(...): Warning: Unknown parameter in YAML file: "<<name<<std::endl;
 				ookk = false;
 			}else{
 				if (waveset["parameters"][i]["value"]){

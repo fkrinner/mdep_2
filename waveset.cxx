@@ -53,36 +53,36 @@ waveset::waveset(
 	std::string waves = Ycard["wave_file"].as<std::string>();
 	YAML::Node Yparam  = YAML::LoadFile(parametrizations);
 	YAML::Node Ywaves  = YAML::LoadFile(waves);
-	std::cout<<"Take parametrizations from: "<<parametrizations<<std::endl;
-	std::cout<<"Take wave-definitions from: "<<waves<<std::endl;
-	std::cout<<"Initialize waveset from YAML file: "<<card<<std::endl;
-	std::cout<<"Load phase space"<<std::endl;
+	std::cout<<"waveset::waveset(...): Take parametrizations from: "<<parametrizations<<std::endl;
+	std::cout<<"waveset::waveset(...): Take wave-definitions from: "<<waves<<std::endl;
+	std::cout<<"waveset::waveset(...): Initialize waveset from YAML file: "<<card<<std::endl;
+	std::cout<<"waveset::waveset(...): Load phase space"<<std::endl;
 	loadGlobalPhaseSpace(Ycard);
-	std::cout<<"Phase space loaded\nLoad functions"<<std::endl;
+	std::cout<<"waveset::waveset(...): Phase space loaded\nLoad functions"<<std::endl;
 	std::map<std::string,int> fMap = loadFunctions(Ycard, Yparam);
-	std::cout<<"Functions loaded\nLoad waves"<<std::endl;
+	std::cout<<"waveset::waveset(...): Functions loaded\nLoad waves"<<std::endl;
 	loadWaves(Ycard, Ywaves);
-	std::cout<<"Waves loaded\nSet parametrizations"<<std::endl;
+	std::cout<<"waveset::waveset(...): Waves loaded\nSet parametrizations"<<std::endl;
 	loadFtw(Ycard, fMap);
-	std::cout<<"Parametrizations set\nSetBranchings"<<std::endl;
+	std::cout<<"waveset::waveset(...): Parametrizations set\nSetBranchings"<<std::endl;
 	loadBranchings(Ycard);
-	std::cout<<"Branchings set\nSet binnings"<<std::endl;
+	std::cout<<"waveset::waveset(...): Branchings set\nSet binnings"<<std::endl;
 	loadBinnings(Ycard);
-	std::cout<<"Binning set"<<std::endl;
+	std::cout<<"waveset::waveset(...): Binning set"<<std::endl;
 	if(_has_isobars){
-		std::cout<<"Try to set isobar binnings"<<std::endl;
+		std::cout<<"waveset::waveset(...): Try to set isobar binnings"<<std::endl;
 		std::string binning_file;
 		if (Ycard["isobar_binnings"]){
 			binning_file = Ycard["isobar_binnings"].as<std::string>();
 		}else{
-			std::cerr<<"Error: No isobar binnings given"<<std::endl;
+			std::cerr<<"waveset::waveset(...): Error: No isobar binnings given"<<std::endl;
 		};
-		std::cout<<"open: "<<binning_file<<std::endl;
+		std::cout<<"waveset::waveset(...): Open: "<<binning_file<<std::endl;
 		YAML::Node Yisob = YAML::LoadFile(binning_file);
 		loadIsoBinnings(Ycard,Yisob);
-		std::cout<<"Isobar binnings set"<<std::endl;
+		std::cout<<"waveset::waveset(...): Isobar binnings set"<<std::endl;
 	};
-	std::cout<<"waveset initialized from YAML file"<<std::endl;
+	std::cout<<"waveset::waveset(...): Waveset initialized from YAML file"<<std::endl;
 };
 #endif//USE_YAML
 //########################################################################################################################################################
@@ -344,7 +344,7 @@ void waveset::couple_funcs(
 							int 						i2){ 	// # of wave 2
 
 	if (i1 == i2){
-		std::cerr<<"Error: Trying to couple two times the same functions"<<std::endl;
+		std::cerr<<"waveset::couple_funcs(...): Error: Trying to couple two times the same functions"<<std::endl;
 		return;
 	};
 	int branch1 = _coupled[i1];
@@ -368,7 +368,7 @@ void waveset::couple_funcs(
 	}else if(-1==branch2){
 		_coupled[i2] = branch1;
 	}else{
-		std::cerr<<"function["<<i1<<"] and function["<<i2<<"] are already in different branchings"<<std::endl;
+		std::cerr<<"waveset::couple_funcs(...): Error: function["<<i1<<"] and function["<<i2<<"] are already in different branchings"<<std::endl;
 	};
 	update_n_cpls();
 	update_n_branch();
@@ -719,7 +719,7 @@ bool waveset::loadGlobalPhaseSpace(
 		sgps=true;
 	};
 	if (not sgps){
-		std::cout<<"Warning: No global phase space set" << std::endl;
+		std::cout<<"waveset::loadGlobalPhaseSpace(...): Warning: No global phase space set" << std::endl;
 	};
 	return sgps;
 };
@@ -747,7 +747,7 @@ std::map<std::string,int> waveset::loadFunctions(
 			std::string iName = "none";
 			bool isisobar = false;
 			if (waveset["waves"][i]["parametrizations"][0].size() != waveset["waves"][i]["parametrizations"][j].size()){
-				std::cerr<<"Error: Isobarred and de-isobarred parametrizations in the same wave"<<std::endl;
+				std::cerr<<"waveset::loadFunctions(...): Error: Isobarred and de-isobarred parametrizations in the same wave"<<std::endl;
 			};
 			if (0==waveset["waves"][i]["parametrizations"][j].size()){
 				fName = waveset["waves"][i]["parametrizations"][j].as<std::string>();
@@ -778,7 +778,7 @@ std::map<std::string,int> waveset::loadFunctions(
 							pCount++;
 						};
 					}else{
-						std::cerr<<"Error: Number of defined parameters ("<<nParDef<<") does not match required number for "<<fName<<" ("<<nPar<<")"<<std::endl;
+						std::cerr<<"waveset::loadFunctions(...): Error: Number of defined parameters ("<<nParDef<<") does not match required number for "<<fName<<" ("<<nPar<<")"<<std::endl;
 					};
 					int nConDef = param[fName]["constants"].size();
 					if(nConDef == nCon){
@@ -790,11 +790,11 @@ std::map<std::string,int> waveset::loadFunctions(
 							cCount++;
 						};
 					}else{
-						std::cerr<<"Error: Number of defined constants ("<<nConDef<<") does not match required number for "<<fName<<" ("<<nCon<<")"<<std::endl;
+						std::cerr<<"waveset::loadFunctions(...): Error: Number of defined constants ("<<nConDef<<") does not match required number for "<<fName<<" ("<<nCon<<")"<<std::endl;
 					};
 				};
 			}else{
-				std::cerr << "Error: '"<<fName<<"' not defined in the parametrization-file"<<std::endl;
+				std::cerr << "waveset::loadFunctions(...): Error: '"<<fName<<"' not defined in the parametrization-file"<<std::endl;
 			};
 			if (isisobar){
 				if(param[iName]){
@@ -814,7 +814,7 @@ std::map<std::string,int> waveset::loadFunctions(
 								ipCount++;
 							};
 						}else{
-							std::cerr<<"Error: Number of defined parameters does not match required number for "<<iName<<std::endl;
+							std::cerr<<"waveset::loadFunctions(...): Error: Number of defined parameters does not match required number for "<<iName<<std::endl;
 						};
 						int nConDef = param[iName]["constants"].size();
 						if(nConDef == nCon){
@@ -826,11 +826,11 @@ std::map<std::string,int> waveset::loadFunctions(
 								icCount++;
 							};
 						}else{
-							std::cerr<<"Error: Number of defined constants does not match required number for "<<iName<<std::endl;
+							std::cerr<<"waveset::loadFunctions(...): Error: Number of defined constants does not match required number for "<<iName<<std::endl;
 						};
 					};
 				}else{
-					std::cerr << "Error: '"<<iName<<"' not defined in the parametrization-file"<<std::endl;
+					std::cerr << "waveset::loadFunctions(...): Error: '"<<iName<<"' not defined in the parametrization-file"<<std::endl;
 				};
 			};
 		};
@@ -853,7 +853,7 @@ bool waveset::loadWaves(
 		setWaveName(i,wName);
 		if (not defs[wName]){
 			ookk=false;
-			std::cerr<<"Error: "<< wName<<" not defined in the wave-definitions file"<<std::endl;
+			std::cerr<<"waveset::loadWaves(...): Error: "<< wName<<" not defined in the wave-definitions file"<<std::endl;
 		};
 		setWaveSpin(i,defs[wName]["spin"].as<int>());
 		if(defs[wName]["isobar_spin"]){
@@ -948,7 +948,7 @@ void waveset::loadBranchings(
 			};
 		};
 		if (wave_numbers.size()<2){
-			std::cerr<<"Error: Branching definition with less than two waves encountered."<<std::endl;
+			std::cerr<<"waveset::loadBranchings(...): Error: Branching definition with less than two waves encountered."<<std::endl;
 		}else{
 			for (size_t cplto = 1; cplto < wave_numbers.size(); cplto++){
 				couple_funcs(wave_numbers[0],wave_numbers[cplto]);
@@ -1015,7 +1015,7 @@ void waveset::loadIsoBinnings(
 					};
 					setWaveIsobarBinning(i,binnings_map[binning_name]-1);
 				}else{
-					std::cerr<<"Error: De-isobarred wave '"<<wName<<"' does not have an isobar binning"<<std::endl;
+					std::cerr<<"waveset::loadIsoBinnings(...): Error: De-isobarred wave '"<<wName<<"' does not have an isobar binning"<<std::endl;
 				};
 			};
 		};
@@ -1334,7 +1334,7 @@ std::string waveset::getParameterName(
 			return _amp_funcs[f]->getParName(i-pCount);
 		};
 	};
-	std::cerr<<"Error: Parameter #"<<i<<" does not exist"<<std::endl;
+	std::cerr<<"waveset::getParameterName(...): Error: Parameter #"<<i<<" does not exist"<<std::endl;
 	return "not_used";
 
 };
@@ -1351,7 +1351,7 @@ std::string waveset::getConstantName(
 			return _amp_funcs[j]->getConName(i-nConst);
 		};
 	};
-	std::cerr<<"Error: Constant #"<<i<<" does not exist"<<std::endl;
+	std::cerr<<"waveset::getConstantName(...): Error: Constant #"<<i<<" does not exist"<<std::endl;
 	return "not_used";
 };
 //########################################################################################################################################################
@@ -1367,7 +1367,7 @@ std::string waveset::getIsoParName(
 			return _amp_isos[iso]->getParName(i-pCount);
 		};
 	};
-	std::cerr<<"Error: Isobar Parameter #"<<i<<" does not exist"<<std::endl;
+	std::cerr<<"waveset::getIsoParName(...): Error: Isobar Parameter #"<<i<<" does not exist"<<std::endl;
 	return "not_used";
 };
 //########################################################################################################################################################
@@ -1382,7 +1382,7 @@ std::string waveset::getIsoConstName(
 			return _amp_isos[iso]->getConName(i-cCount);
 		};
 	};
-	std::cerr<<"Error: Isobar Constant #"<<i<<" does not exist"<<std::endl;
+	std::cerr<<"waveset::getIsoConstName(...): Error: Isobar Constant #"<<i<<" does not exist"<<std::endl;
 	return "not_used";
 };
 //########################################################################################################################################################
@@ -1395,7 +1395,7 @@ int waveset::get_bin(
 			return i;
 		};
 	};
-	std::cerr<<"Error: waveset.cxx: get_bin(): Mass not in range"<<std::endl;
+	std::cerr<<"waveset.cxx::get_bin(): Error: Mass not in range"<<std::endl;
 	return 0;
 };
 //########################################################################################################################################################
@@ -1503,8 +1503,8 @@ void waveset::update_min_max_bin(){
 //	std::cout<<"Call update_min_max_bin()"<<std::endl;
 	_maxBin = _binning.size();
 	if (_lowerLims.size() == 0 or _upperLims.size() == 0){
-		std::cout<< "Warning: Wave limits not set, omitting internal setting of _minBin and _maxBin"<<std::endl;
-		std::cout<< "Warning: Setting _minBin = 0; _maxBin = _binning.size() = "<<_binning.size()<<std::endl;
+		std::cout<< "waveset::update_min_max_bin(): Warning: Wave limits not set, omitting internal setting of _minBin and _maxBin"<<std::endl;
+		std::cout<< "waveset::update_min_max_bin(): Warning: Setting _minBin = 0; _maxBin = _binning.size() = "<<_binning.size()<<std::endl;
 		_minBin =0;
 		_maxBin =_binning.size();
 		return;
@@ -1521,7 +1521,7 @@ void waveset::update_min_max_bin(){
 	};
 //	std::cout<<ancMin<<"-"<<ancMax<<std::endl;
 	if (_binning.size() == 0){
-		std::cout<< "Warning: No binning set, cannot determine _minBin, _maxBin" <<std::endl;
+		std::cout<< "waveset::update_min_max_bin(): Warning: No binning set, cannot determine _minBin, _maxBin" <<std::endl;
 	};
 	for (size_t i=0;i<_binning.size()-1;i++){
 		double up = _binning[i+1];
@@ -1633,54 +1633,54 @@ bool waveset::checkConsistency()											const{
 	int nErr =0;
 	if(_nWaves != _waveNames.size()){
 		nErr+=1;
-		std::cout<< "Inconsistency found: _nWaves does not match _waveNames.size()"<<std::endl;
+		std::cout<< "waveset::checkConsistency(): Inconsistency found: _nWaves does not match _waveNames.size()"<<std::endl;
 	};
 	if(_nFuncs != _amp_funcs.size()){
 		nErr+=1;
-		std::cout << "Inconsistency found: _nFuncs does not match _amp_funcs.size()"<<std::endl;
+		std::cout << "waveset::checkConsistency(): Inconsistency found: _nFuncs does not match _amp_funcs.size()"<<std::endl;
 	};
 	if( _nFuncs != _amp_funcs.size()){
 		nErr+=1;
-		std::cout << "Inconsistecy found: _nFuncs = "<<_nFuncs<<" does not match _amp_funcs.size() = "<<_amp_funcs.size()<<std::endl;
+		std::cout << "waveset::checkConsistency(): Inconsistecy found: _nFuncs = "<<_nFuncs<<" does not match _amp_funcs.size() = "<<_amp_funcs.size()<<std::endl;
 	};
 	for (size_t i=1;i<_borders_waves.size();i++){
 		if (_borders_waves[i] < _borders_waves[i-1]){
 			nErr+=1;
-			std::cout << "Inconsistency found: _borders_waves[] is not sorted"<<std::endl;
+			std::cout << "waveset::checkConsistency(): Inconsistency found: _borders_waves[] is not sorted"<<std::endl;
 		};
 	};
 	for (size_t i=1;i<_borders_par.size();i++){
 		if (_borders_par[i] < _borders_par[i-1]){
 			nErr+=1;
-			std::cout << "Inconsistency found: _borders_par[] is not sorted"<<std::endl;
+			std::cout << "waveset::checkConsistency(): Inconsistency found: _borders_par[] is not sorted"<<std::endl;
 		};
 	};
 	for (size_t i=0;i<_funcs_to_waves.size();i++){
 		if (_funcs_to_waves[i] > (int)_nFuncs-1){
 			nErr+=1;
-			std::cout << "Inconsistency found: Function with number "<<_funcs_to_waves[i]<< " does not exist"<<std::endl;
+			std::cout << "waveset::checkConsistency(): Inconsistency found: Function with number "<<_funcs_to_waves[i]<< " does not exist"<<std::endl;
 		};
 	};
 	if (_wavePs.size() != _nWaves){
 		nErr+=1;
-		std::cout << "Inconsistency found: _wavePs.size() does not match _nWaves" << std::endl;
+		std::cout << "waveset::checkConsistency(): Inconsistency found: _wavePs.size() does not match _nWaves" << std::endl;
 	};
 	if(_nWaves != _L.size()){
 		nErr+=1;
-		std::cout<< "Inconsistency found: _nWaves does not match _L.size()"<<std::endl;
+		std::cout<< "waveset::checkConsistency(): Inconsistency found: _nWaves does not match _L.size()"<<std::endl;
 	};
 	if(_nWaves != _upperLims.size()){
 		nErr+=1;
-		std::cout<< "Inconsistency found: _nWaves does not match _upperLims.size()"<<std::endl;
+		std::cout<< "waveset::checkConsistency(): Inconsistency found: _nWaves does not match _upperLims.size()"<<std::endl;
 	};
 	if(_nWaves != _lowerLims.size()){
 		nErr+=1;
-		std::cout<< "Inconsistency found: _nWaves does not match _lowerLims.size()"<<std::endl;
+		std::cout<< "waveset::checkConsistency(): Inconsistency found: _nWaves does not match _lowerLims.size()"<<std::endl;
 	};
 	if (_iso_to_waves.size()>0){
 		if(_iso_to_waves[0] != -1){
 			nErr++;
-			std::cout<<"Inconsistency found: First wave is de-isobarred"<<std::endl;
+			std::cout<<"waveset::checkConsistency(): Inconsistency found: First wave is de-isobarred"<<std::endl;
 		};
 	};
 	for (size_t iso=0;iso<_nIso;iso++){
@@ -1690,7 +1690,7 @@ bool waveset::checkConsistency()											const{
 			for (size_t wave=1;wave<waves.size();wave++){
 				if (_wave_n_binning[waves[wave]] != binn){
 					nErr++;
-					std::cout<<"Inconsistency found: Different binnings for the same isobar"<<std::endl;
+					std::cout<<"waveset::checkConsistency(): Inconsistency found: Different binnings for the same isobar"<<std::endl;
 				};
 			};
 		};

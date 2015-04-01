@@ -105,8 +105,8 @@ struct chi2py:public minimize{
 	void setNout(size_t n){
 		_method->setNoutFile(n);
 	};
-	void writeParameters(){
-		_method->writeParameters();
+	void writeParameters(std::string fileName){
+		_method->writeParameters(fileName);
 	};
 	void readParameters(std::string fileName){
 		_method->readParameters(fileName);

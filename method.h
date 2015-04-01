@@ -41,8 +41,8 @@ class method{
 		void					init_upper_limits				(int n=-1);
 		void					setNoutFile					(size_t n)										{_nOutFile = n;};
 		void					setParameterFile				(std::string fileName)									{_parameterFile = fileName;};
-		void					writeParameters					()										const;
-		void					writeParameters					(const double * param)								const;
+		void					writeParameters					(std::string fileName)								const;
+		void					writeParameters					(const double * param, std::string fileName)					const;
 		void					readParameters					(std::string fileName);
 		std::vector<std::complex<double> >	getUnbranchedCouplings				(const std::vector<std::complex<double> > &cpl,const std::vector<std::complex<double> > &bra) 	const;
 		void 					update_min_max_bin				();

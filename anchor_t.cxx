@@ -38,12 +38,12 @@ anchor_t::anchor_t(
 	setTbinning((*_waveset.t_binning()));
 	update_definitions();
 	update_min_max_bin();
-	std::cout<<"Load anchor_t from YAML file\nLoad data and coma"<<std::endl;
+	std::cout<<"anchor_t::anchot_t(...): Load anchor_t from YAML file\nLoad data and coma"<<std::endl;
 	loadDataComa(Ycard);
-	std::cout<<"Data and coma loaded\nLoad parameter values"<<std::endl;
+	std::cout<<"anchor_t::anchot_t(...): Data and coma loaded\nLoad parameter values"<<std::endl;
 	loadParameterValues(Ycard, Yparam);
-	std::cout<<"Paramter values loaded"<<std::endl;
-	std::cout<<"anchor_t loaded"<<std::endl;
+	std::cout<<"anchor_t::anchot_t(...): Paramter values loaded"<<std::endl;
+	std::cout<<"anchor_t::anchot_t(...): anchor_t loaded"<<std::endl;
 };
 #endif//USE_YAML
 //########################################################################################################################################################
@@ -88,7 +88,9 @@ double anchor_t::mainEval(
 		std::cout<<"#"<<_count<<": "<<chi2<<std::endl;
 	};
 	if (0==_count%_nOutFile){
-		writeParameters(xx);
+		if (not _parameterFile.size() == 0){
+			writeParameters(xx,_parameterFile);
+		};
 	};
 	return chi2;
 };
@@ -826,7 +828,7 @@ std::vector<std::complex<double> > anchor_t::getAllCouplings(
 		cpl_all = cpl;
 //		std::cout<<"getAllCouplings(...): Take couplings as simple couplings for one t' bin"<<std::endl;
 	}else{
-		std::cerr<<"Error: Can't determine the format of the couplings"<<std::endl;
+		std::cerr<<"anchor_t::getAllCouplings(...): Error: Can't determine the format of the couplings"<<std::endl;
 	};
 	return cpl_all;
 };
@@ -884,7 +886,7 @@ bool anchor_t::set_coma(
 	if (coma.size() == 2*_waveset.nPoints()-1){
 		for (size_t i=0;i<coma.size();i++){
 			if (coma[i].size() != coma.size()){
-				std::cout<<"Warning: Set coma is not quadratic."<<std::endl;
+				std::cout<<"anchor_t::set_coma(...): Warning: Set coma is not quadratic."<<std::endl;
 				return false;
 			};
 		};
@@ -912,9 +914,9 @@ void anchor_t::loadData(
 	};
 	update_is_active();
 	if (_waveset.nBins() != _data[tbin].size()){
-		std::cout << "'anchor_t.cxx' loadData(...): Warning: _waveset.nBins()="<<_waveset.nBins()<<" != _data.size()="<<_data[tbin].size()<<std::endl;
+		std::cout << "anchor_t::loadData(...): Warning: _waveset.nBins()="<<_waveset.nBins()<<" != _data.size()="<<_data[tbin].size()<<std::endl;
 	}else{
-		std::cout << "'anchor_t.cxx' loadData(...): File delivered the right size for _data"<<std::endl;
+		std::cout << "anchor_t::loadData(...): File delivered the right size for _data"<<std::endl;
 	};
 };
 //########################################################################################################################################################
@@ -941,9 +943,9 @@ void anchor_t::loadComa(
 		};
 	};
 	if (_waveset.nBins() != _coma[tbin].size()){
-		std::cout << "'anchor_t.cxx' loadComa(...): Warning: _waveset.nBins()="<<_waveset.nBins()<<" != _coma.size()="<<_coma[tbin].size() << std::endl;
+		std::cout << "anchor_t::loadComa(...): Warning: _waveset.nBins()="<<_waveset.nBins()<<" != _coma.size()="<<_coma[tbin].size() << std::endl;
 	}else{
-		std::cout<< "'anchor_t.cxx' loadComa(...): File delivered the right size for _coma"<<std::endl;
+		std::cout<< "anchor_t::loadComa(...): File delivered the right size for _coma"<<std::endl;
 	};
 };
 //########################################################################################################################################################
@@ -1036,13 +1038,13 @@ void anchor_t::setTbinning(std::vector<std::vector<double> > binning){
 	_waveset.setTbinning(binning);
 	if (_data.size() != _waveset.nTbin()){
 		if (_data.size() != 0){
-			std::cout<<"Warning: _data.size() != _waveset.nTbin(), but nonzero. Previous set _data[][][] will be lost."<<std::endl;
+			std::cout<<"anchor_t::setTbinning(...): Warning: _data.size() != _waveset.nTbin(), but nonzero. Previous set _data[][][] will be lost."<<std::endl;
 		};
 		_data = std::vector<std::vector<std::vector<double> > >(_waveset.nTbin());
 	};
 	if (_coma.size() != _waveset.nTbin()){
 		if (_coma.size() != 0){
-			std::cout<<"Warning: _coma.size() != _waveset.nTbin(), bun nonzero. Previous set _coma[][][][] will be lost."<<std::endl;
+			std::cout<<"anchor_t::setTbinning(...): Warning: _coma.size() != _waveset.nTbin(), bun nonzero. Previous set _coma[][][][] will be lost."<<std::endl;
 		};
 		_coma = std::vector<std::vector<std::vector<std::vector<double> > > >(_waveset.nTbin());
 	};
@@ -1122,7 +1124,7 @@ void anchor_t::write_plots(
 	};
 	std::ofstream write_out;
 	write_out.open(filename.c_str());
-	std::cout<<"write_plots(...): Chi2 for the used paramters is: "<<EvalTbin(tbin,&cpl_all[0],&par[0],&iso[0])<<std::endl;//[0]//
+	std::cout<<"anchor_t::write_plots(...): Chi2 for the used paramters is: "<<EvalTbin(tbin,&cpl_all[0],&par[0],&iso[0])<<std::endl;//[0]//
 	for (size_t bin=0;bin<_waveset.nBins();bin++){
 		double mass = _waveset.get_m(bin);
 		std::vector<double> var = _waveset.getVar(mass,tbin);

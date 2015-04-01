@@ -34,12 +34,12 @@ old_method::old_method(
 	setTbinning((*_waveset.t_binning()));
 	update_definitions();
 	update_min_max_bin();
-	std::cout<<"Load old_method from YAML file\nLoad data and coma"<<std::endl;
+	std::cout<<"old_method::old_method(...): Load old_method from YAML file\nLoad data and coma"<<std::endl;
 	loadDataComa(Ycard);
-	std::cout<<"Data and coma loaded\nLoad parameter values"<<std::endl;
+	std::cout<<"old_method::old_method(...): Data and coma loaded\nLoad parameter values"<<std::endl;
 	loadParameterValues(Ycard, Yparam);
-	std::cout<<"Paramter values loaded"<<std::endl;
-	std::cout<<"old_method loaded"<<std::endl;
+	std::cout<<"old_method::old_method(...): Paramter values loaded"<<std::endl;
+	std::cout<<"old_method::old_method(...): old_method loaded"<<std::endl;
 };
 #endif//USE_YAML
 //########################################################################################################################################################
@@ -79,7 +79,9 @@ double old_method::mainEval(const double							*xx){
 		std::cout<<"#"<<_count<<": "<<chi2<<std::endl;
 	};
 	if (0==_count%_nOutFile){
-		writeParameters(xx);
+		if (not _parameterFile.size() == 0){
+			writeParameters(xx,_parameterFile);
+		};
 	};
 	return chi2;
 };
@@ -405,9 +407,9 @@ void old_method::loadComa(
 		};
 	};
 	if (_waveset.nBins() != _coma[tbin].size()){
-		std::cout << "'old_method.cxx' loadComa(...): Warning: _waveset.nBins()="<<_waveset.nBins()<<" != _coma.size()="<<_coma[tbin].size() << std::endl;
+		std::cout << "old_method::loadComa(...): Warning: _waveset.nBins()="<<_waveset.nBins()<<" != _coma.size()="<<_coma[tbin].size() << std::endl;
 	}else{
-		std::cout<< "'old_method.cxx' loadComa(...): File delivered the right size for _coma"<<std::endl;
+		std::cout<< "old_method::loadComa(...): File delivered the right size for _coma"<<std::endl;
 	};
 };
 //########################################################################################################################################################
@@ -432,13 +434,13 @@ void old_method::setTbinning(std::vector<std::vector<double> > binning){
 	_waveset.setTbinning(binning);
 	if (_data.size() != _waveset.nTbin()){
 		if (_data.size() != 0){
-			std::cout<<"Warning: _data.size() != _waveset.nTbin(), but nonzero. Previous set _data[][][] will be lost."<<std::endl;
+			std::cout<<"old_method::setTbinning: Warning: _data.size() != _waveset.nTbin(), but nonzero. Previous set _data[][][] will be lost."<<std::endl;
 		};
 		_data = std::vector<std::vector<std::vector<double> > >(_waveset.nTbin());
 	};
 	if (_coma.size() != _waveset.nTbin()){
 		if (_coma.size() != 0){
-			std::cout<<"Warning: _coma.size() != _waveset.nTbin(), bun nonzero. Previous set _coma[][][][] will be lost."<<std::endl;
+			std::cout<<"old_method::setTbinning: Warning: _coma.size() != _waveset.nTbin(), bun nonzero. Previous set _coma[][][][] will be lost."<<std::endl;
 		};
 		_coma = std::vector<std::vector<std::vector<double> > >(_waveset.nTbin());
 	};
@@ -462,7 +464,7 @@ void old_method::write_plots(
 	};
 	std::ofstream write_out;
 	write_out.open(filename.c_str());
-	std::cout<<"write_plots(...): Chi2 for the used paramters is: "<<EvalTbin(tbin,&cpl_all[0],&par[0],&iso[0])<<std::endl;//[0]//
+	std::cout<<"old_method::write_plots(...): Chi2 for the used paramters is: "<<EvalTbin(tbin,&cpl_all[0],&par[0],&iso[0])<<std::endl;//[0]//
 	for (size_t bin=0;bin<_waveset.nBins();bin++){
 		double mass = _waveset.get_m(bin);
 		std::vector<double> var = _waveset.getVar(mass,tbin);
