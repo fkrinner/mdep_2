@@ -193,7 +193,7 @@ std::vector<double> waveset::phase_space(
 	double global_ps = phaseSpace(m[0],_globalPs,0,0.);
 	std::vector<double> ps = std::vector<double>(_nWaves);
 	for(size_t wave=0;wave<_nWaves;wave++){
-		ps[wave]=global_ps*phaseSpace(m[0],_wavePs[wave],0,0.);
+		ps[wave]=global_ps*_wave_phase_space[wave](m);
 	};
 	return ps;
 };
@@ -218,7 +218,7 @@ size_t waveset::add_wave(){
 	_L.push_back(DEFAULT_L);
 	_upperLims.push_back(UPPER_MASS_LIMIT);
 	_lowerLims.push_back(LOWER_MASS_LIMIT);
-	_wavePs.push_back(0);
+	_wave_phase_space.push_back(phase_space_func());
 	_waveNames.push_back("unnamed_wave");
 	_L_iso.push_back(DEFAULT_L);
 	_wave_n_binning.push_back(-1);
@@ -412,10 +412,11 @@ void waveset::setGlobalPhaseSpace(
 //########################################################################################################################################################
 ///Simple setter for the wave-specific phase space factors
 void waveset::setWavePhaseSpace(
-							int 							i, 	// # of wave
-							int 							ps){	// # of phase space function
+							int 							i,	// # of wave
+							std::string						name,	// Wavename
+							std::string						integralFile){	//IntegralFile
 
-	_wavePs[i] = ps;
+	_wave_phase_space[i] = phase_space_func(name,integralFile);
 };
 //########################################################################################################################################################
 ///Sets the isobar binning for a certain wave
@@ -879,7 +880,7 @@ bool waveset::loadWaves(
 			};
 		};
 		if (set_phase_space){
-			setWavePhaseSpace(i,defs[wName]["phase_space"].as<int>());
+			setWavePhaseSpace(i,wName,waveset["integralFile"].as<std::string>());
 		};
 	};
 	return ookk;
@@ -1661,9 +1662,9 @@ bool waveset::checkConsistency()											const{
 			std::cout << "waveset::checkConsistency(): Inconsistency found: Function with number "<<_funcs_to_waves[i]<< " does not exist"<<std::endl;
 		};
 	};
-	if (_wavePs.size() != _nWaves){
+	if (_wave_phase_space.size() != _nWaves){
 		nErr+=1;
-		std::cout << "waveset::checkConsistency(): Inconsistency found: _wavePs.size() does not match _nWaves" << std::endl;
+		std::cout << "waveset::checkConsistency(): Inconsistency found: _wave_phase_space.size() does not match _nWaves" << std::endl;
 	};
 	if(_nWaves != _L.size()){
 		nErr+=1;
@@ -1791,8 +1792,6 @@ void waveset::printStatus()												const{
 	std::cout<<std::endl<<std::endl<<"PHASE SPACE: "<<std::endl;
 	std::cout<<"_globalPs: "<<_globalPs<<std::endl;
 	std::cout << std::endl;
-	std::cout << "_wavePs" << std::endl;
-	print_vector(_wavePs);
 	std::cout << std::endl;
 	std::cout<<std::endl<<std::endl<<"BINNING: "<<std::endl;
 	std::cout<<"_nBins: "<<_nBins<<std::endl<<std::endl<<"_binning"<<std::endl;

@@ -3,7 +3,6 @@
 
 #include <complex>
 #include "amplitude_functions.h" // Barrier factors and breakup momentum are defined in 'breitWigners.h'
-#include "tabulated_integrals.h" // Tabulated phase-space integrals
 
 double phaseSpace(double m3Pi, int mode=0, int L=0, double m_isobar=1.){
 	if (mode == 0){ // Flat phase space.
@@ -53,9 +52,6 @@ double phaseSpace(double m3Pi, int mode=0, int L=0, double m_isobar=1.){
 		double expOne = 2.4749;
 		double expTwo = 2.8420;
 		return sqrt(one/pow(m3Pi,expOne) - two/pow(m3Pi,expTwo));
-	};
-	if(mode >= 1000 and mode < 2000){
-		return tabulated_integrals(m3Pi,mode-1000);
 	};
 	std::cerr << "phaseSpace.h: Error: Unknown phase space model: "<<mode<<std::endl;
 	return 1.;

@@ -135,6 +135,10 @@ a2(1320):
    value: 0.547
  - name: BR
    value: 0.2
+ - name: L1
+   value: 2.
+ - name: L2
+   value: 2.
 
 a2(1700):
  parametrization: 0

@@ -4,6 +4,7 @@
 #include<complex>
 #include<fstream>
 #include<iostream>
+#include"phase_space.h"
 
 #ifdef USE_YAML
 #include "yaml-cpp/yaml.h"
@@ -57,7 +58,7 @@ class waveset {
 		void 				setWaveSpin		(int i, int L);
 		void 				setWaveIsobarSpin	(int wave, int L);
 		void 				setGlobalPhaseSpace	(int i);
-		void 				setWavePhaseSpace	(int i, int ps);
+		void 				setWavePhaseSpace	(int i, std::string name, std::string integralFile);
 		void 				setWaveIsobarBinning	(int wave, int binning);
 		void 				setConst		(int i,double con);
 		void 				set_iso_const		(int con, double value);
@@ -229,7 +230,7 @@ class waveset {
 
 	// PHASE SPACE
 		int					_globalPs; 		// Assume only ONE global PS and   //Also assume ps that does not depend on the isobar mass
-		std::vector<int> 			_wavePs; 		// One PS for each wave // Or the spin
+		std::vector<phase_space_func>		_wave_phase_space;	// Phase spaces from integral files for the waves
 
 	// BINNING
 		size_t 					_nBins; 		// Number of bins
