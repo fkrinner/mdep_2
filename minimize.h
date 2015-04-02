@@ -34,7 +34,7 @@ class minimize{
 
 		// Fitting routines
 		double 			fit				();
-		void 			initCouplings			(size_t nSeeds = 1		);
+		void 			initCouplings			(size_t nSeeds = 1, int ntbin = -1);
 
 	// Setters and getters
 		METHOD*			method()							{return _method;};

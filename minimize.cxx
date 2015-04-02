@@ -96,14 +96,28 @@ double minimize::fit(){
 //########################################################################################################################################################
 ///Finds start values for couplings and branchings // works only for anchot_t, for full_covariance not
 void minimize::initCouplings(
-							size_t 						nSeeds){ 
+							size_t 						nSeeds,
+							int						init_tbin){ 
 
 
 	std::cout<<"minimize::initCouplings(...): Initialize couplings"<<std::endl;
-
 	size_t nTbin = _method->Waveset()->nTbin();
+	size_t tmin=0;
+	size_t tmax=0;
+	size_t nnnt=0;
+	if (0>init_tbin){
+		tmin =0;
+		tmax = nTbin;
+		nnnt = nTbin;
+	}else if((size_t)init_tbin > nTbin-1){
+		std::cerr<<"minimize::init_couplings(...): Error: Tbin to large"<<std::endl;
+	}else{
+		tmin = init_tbin;
+		tmax = init_tbin+1;
+		nnnt = 1;
+	};
 	size_t cpls = _method->nCpl()/nTbin;
-	std::vector<double> bestChi2Tbin(nTbin);
+	std::vector<double> bestChi2Tbin(nTbin,1./0.);
 	std::vector<std::vector<double> >bestCplTbin(nTbin,std::vector<double>(2*cpls));
 	size_t nBra = _method->nBra();
 	std::vector<std::vector<double> > bestBras = std::vector<std::vector<double> >(nTbin,std::vector<double >(2*nBra));
@@ -123,7 +137,7 @@ void minimize::initCouplings(
 			_method->Waveset()->setEvalTbin(tbin,false);
 		};
 
-		for(size_t tbin=0; tbin<_method->Waveset()->nTbin();tbin++){ // Find cpl for each t' bin
+		for(size_t tbin=tmin; tbin<tmax;tbin++){ // Find cpl for each t' bin
 			_method->Waveset()->setEvalTbin(tbin,true);
 			std::cout<<"minimize::initCouplings(...): tBin #"<<tbin<<std::endl;
 			for (size_t i =0;i<2*_method->nCpl();i++){
@@ -150,97 +164,95 @@ void minimize::initCouplings(
 			_method->Waveset()->setEvalTbin(tbin,false);
 		};
 	};
-	for (size_t tbin=0;tbin<nTbin;++tbin){
+	for (size_t tbin=tmin;tbin<nTbin;++tbin){
 		std::cout<<"minimize::initCouplings(...): Best Chi2 for tbin #"<<tbin<<": "<<bestChi2Tbin[tbin]<<std::endl;
 
 		for (size_t cpl=0;cpl<2*cpls;++cpl){
 			setParameter(2*cpls*tbin+cpl,bestCplTbin[tbin][cpl]);
 		};
 	};
-
 	for(size_t tbin=0;tbin<_method->Waveset()->nTbin();tbin++){ // Switch on all t' bins
 		_method->Waveset()->setEvalTbin(tbin,true);
 	};
-	std::vector<std::complex<double> > couplings(_method->nCpl());
-	std::vector<double> par(_method->nPar());
-	for (size_t i=0;i<_method->nCpl();i++){
-		couplings[i] = std::complex<double>(_method->parameters()[2*i],_method->parameters()[2*i+1]);
-	};
-	for (size_t tbin=0;tbin<nTbin;++tbin){
-		std::complex<double> firstcpl = couplings[cpls*tbin];
-		std::complex<double> phase = conj(firstcpl)/abs(firstcpl);
-		for (size_t cpl =0; cpl<cpls; ++cpl){
-			size_t nn = tbin*cpls+cpl;
-			couplings[nn]*=phase;
-			setParameter(2*nn  ,couplings[nn].real());
-			setParameter(2*nn+1,couplings[nn].imag());
+	if (init_tbin == -1){ // Do the branching stuff only, if all tbins are initialzed
+		std::vector<std::complex<double> > couplings(_method->nCpl());
+		std::vector<double> par(_method->nPar());
+		for (size_t i=0;i<_method->nCpl();i++){
+			couplings[i] = std::complex<double>(_method->parameters()[2*i],_method->parameters()[2*i+1]);
 		};
-		for (size_t bra=0;bra<nBra;++bra){
-			std::complex<double> cc(bestBras[tbin][2*bra],bestBras[tbin][2*bra+1]);
-			cc*=phase;
-			bestBras[tbin][2*bra  ] = cc.real();
-			bestBras[tbin][2*bra+1] = cc.imag();
-		};
-
-
-	};
-
-
-	for (size_t i=0;i<_method->nPar();i++){
-		par[i] = _method->parameters()[2*_method->nCpl()+i];
-	};
-	std::vector<double> iso_par(_method->nIso());
-	for (size_t i=0;i<_method->nIso();i++){
-		iso_par[i] = _method->parameters()[2*_method->nCpl()+_method->nPar()+2*_method->nBra()+i];
-	};
-//	std::cout << "Total with _method->EvalAutoCpl() (For consistency check): "<< _method->EvalAutoCpl(&couplings[0],&par[0],&iso_par[0])<<std::endl; Removed do to convertability
-	_method->setUseBranch(true);
-	if (_method->nBra()>0){
-		std::vector<double> branchings(2*nBra,0.);
-		for (size_t bra = 0;bra<2*nBra;++bra){
-			for (size_t tbin=0;tbin<nTbin;++tbin){
-				branchings[bra]+=bestBras[tbin][bra];
+		for (size_t tbin=0;tbin<nTbin;++tbin){
+			std::complex<double> firstcpl = couplings[cpls*tbin];
+			std::complex<double> phase = conj(firstcpl)/abs(firstcpl);
+			for (size_t cpl =0; cpl<cpls; ++cpl){
+				size_t nn = tbin*cpls+cpl;
+				couplings[nn]*=phase;
+				setParameter(2*nn  ,couplings[nn].real());
+				setParameter(2*nn+1,couplings[nn].imag());
 			};
-			branchings[bra]/=nTbin;
-			setParameter(2*_method->nCpl()+_method->nPar()+bra,branchings[bra]);
+			for (size_t bra=0;bra<nBra;++bra){
+				std::complex<double> cc(bestBras[tbin][2*bra],bestBras[tbin][2*bra+1]);
+				cc*=phase;
+				bestBras[tbin][2*bra  ] = cc.real();
+				bestBras[tbin][2*bra+1] = cc.imag();
+			};
 		};
+		for (size_t i=0;i<_method->nPar();i++){
+			par[i] = _method->parameters()[2*_method->nCpl()+i];
+		};
+		std::vector<double> iso_par(_method->nIso());
+		for (size_t i=0;i<_method->nIso();i++){
+			iso_par[i] = _method->parameters()[2*_method->nCpl()+_method->nPar()+2*_method->nBra()+i];
+		};
+	//	std::cout << "Total with _method->EvalAutoCpl() (For consistency check): "<< _method->EvalAutoCpl(&couplings[0],&par[0],&iso_par[0])<<std::endl; Removed do to convertability
+		_method->setUseBranch(true);
+		if (_method->nBra()>0){
+			std::vector<double> branchings(2*nBra,0.);
+			for (size_t bra = 0;bra<2*nBra;++bra){
+				for (size_t tbin=0;tbin<nTbin;++tbin){
+					branchings[bra]+=bestBras[tbin][bra];
+				};
+				branchings[bra]/=nTbin;
+				setParameter(2*_method->nCpl()+_method->nPar()+bra,branchings[bra]);
+			};
 
-		// branchCouplingsToOne(); // Set all coupled couplings to one, since all should be in the branchings right now // Somehow Chi2 is better, when this is not done
-//std::cout << "With the found branchings, Chi2(...)="<< _method->EvalAutoCplBranch(&bra[0],&couplings[0],&par[0],&iso_par[0])<<" ('_method->EvalAutoCplBranch(...)')"<<std::endl; //[0]//
-		for (size_t i =0;i<2*_method->nCpl();i++){ // Fix couplings
-			fixPar(i);
+			// branchCouplingsToOne(); // Set all coupled couplings to one, since all should be in the branchings right now // Somehow Chi2 is better, when this is not done
+	//std::cout << "With the found branchings, Chi2(...)="<< _method->EvalAutoCplBranch(&bra[0],&couplings[0],&par[0],&iso_par[0])<<" ('_method->EvalAutoCplBranch(...)')"<<std::endl; //[0]//
+			for (size_t i =0;i<2*_method->nCpl();i++){ // Fix couplings
+				fixPar(i);
+			};
+			for (size_t i=0;i<2*_method->nBra();i++){ // Rel Branchings
+				relPar(2*_method->nCpl()+_method->nPar()+i);
+			};
+			fit();
+			std::cout<<"minimize::initCouplings(...): Couplings and branchings"<<std::endl;
+			for (size_t i =0;i<2*_method->nCpl();i++){ // Rel couplings
+				relPar(i);
+			};
+			fit();
+		}else{
+			for(size_t i=0;i<_method->nCpl();i++){
+				relPar(2*i);
+				relPar(2*i+1);
+			};
 		};
-		for (size_t i=0;i<2*_method->nBra();i++){ // Rel Branchings
-			relPar(2*_method->nCpl()+_method->nPar()+i);
+		std::cout<<"minimize::initCouplings(...): Total: "<<(*_method)(_min->X())<<std::endl;
+		std::cout<<"minimize::initCouplings(...): Couplings and branchings found"<<std::endl;
+		std::cout<<"minimize::initCouplings(...): Setting automatic limits for couplings and branchings"<<std::endl;
+		for (size_t i=0;i<_method->nCpl();i++){
+			double val = std::max(_method->parameters()[2*i]*_method->parameters()[2*i],_method->parameters()[2*i+1]*_method->parameters()[2*i+1]);
+			val = pow(val,.5);
+			_method->setParLimits(2*i  ,3*val,-3*val);
+			_method->setParLimits(2*i+1,3*val,-3*val);
 		};
-		fit();
-		std::cout<<"minimize::initCouplings(...): Couplings and branchings"<<std::endl;
-		for (size_t i =0;i<2*_method->nCpl();i++){ // Rel couplings
-			relPar(i);
-		};
-		fit();
-	}else{
-		for(size_t i=0;i<_method->nCpl();i++){
-			relPar(2*i);
-			relPar(2*i+1);
+		int par_bef = 2*_method->nCpl() +_method->nPar();
+		for (size_t i=0;i<_method->nBra();i++){
+			double val = std::max(_method->parameters()[par_bef+2*i]*_method->parameters()[par_bef+2*i],_method->parameters()[par_bef+2*i+1]*_method->parameters()[par_bef+2*i+1]);
+			val = pow(val,.5);
+			_method->setParLimits(par_bef+2*i  ,3*val,-3*val);
+			_method->setParLimits(par_bef+2*i+1,3*val,-3*val);
 		};
 	};
-	std::cout<<"minimize::initCouplings(...): Total: "<<(*_method)(_min->X())<<std::endl;
-	std::cout<<"minimize::initCouplings(...): Couplings and branchings found"<<std::endl;
-	std::cout<<"minimize::initCouplings(...): Setting automatic limits for couplings and branchings"<<std::endl;
-	for (size_t i=0;i<_method->nCpl();i++){
-		double val = std::max(_method->parameters()[2*i]*_method->parameters()[2*i],_method->parameters()[2*i+1]*_method->parameters()[2*i+1]);
-		val = pow(val,.5);
-		_method->setParLimits(2*i  ,3*val,-3*val);
-		_method->setParLimits(2*i+1,3*val,-3*val);
-	};
-	int par_bef = 2*_method->nCpl() +_method->nPar();
-	for (size_t i=0;i<_method->nBra();i++){
-		double val = std::max(_method->parameters()[par_bef+2*i]*_method->parameters()[par_bef+2*i],_method->parameters()[par_bef+2*i+1]*_method->parameters()[par_bef+2*i+1]);
-		val = pow(val,.5);
-		_method->setParLimits(par_bef+2*i  ,3*val,-3*val);
-		_method->setParLimits(par_bef+2*i+1,3*val,-3*val);
-	};
+	std::cout<<"minimize::init_couplings(...): Ended successfully"<<std::endl;
 };
 //########################################################################################################################################################
 ///Call lower 'setParamter' and sets internal definitions

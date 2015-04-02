@@ -111,6 +111,12 @@ struct chi2py:public minimize{
 	void readParameters(std::string fileName){
 		_method->readParameters(fileName);
 	};
+	void initCouplings(size_t nseeds){
+		minimize::initCouplings(nseeds,-1);
+	};
+	void initSingleTbin(size_t nseeds, size_t tbin){
+		minimize::initCouplings(nseeds,tbin);
+	};
 };
 
 struct chi2py_wrap: chi2py, bp::wrapper<chi2py>{
@@ -183,6 +189,7 @@ BOOST_PYTHON_MODULE(libchi2py){
 
 	chi2.def("fit",					&chi2py::fit					);
 	chi2.def("initCouplings",			&chi2py::initCouplings				);
+	chi2.def("initSingleTbin",			&chi2py::initSingleTbin			);
 	chi2.def("relPar",				&chi2py::relPar					);
 	chi2.def("fixPar",				&chi2py::fixPar					);
 	chi2.def("parameters",				&chi2py::parameters				);
