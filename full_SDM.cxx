@@ -119,7 +119,7 @@ void full_SDM::loadData(
 };
 //########################################################################################################################################################
 ///Returns the number of couplings
-int full_SDM::getNcpl(){
+size_t full_SDM::getNcpl()																const{
 	std::vector<size_t> nnn = *_waveset.n_cpls();
 	size_t n = nnn.size();
 	size_t maxx = 0;
@@ -169,7 +169,7 @@ std::vector<std::vector<std::complex<double> > > full_SDM::full_to_br_cpl(std::v
 };
 //########################################################################################################################################################
 ///Gets the total number of paramters with only anchor couplings
-int full_SDM::getNtot(){
+size_t full_SDM::getNtot()																const{
 
 	return 2*getNcpl() + _waveset.getNpar() + 2*_waveset.nBranch() + _waveset.getNiso();
 };
@@ -221,37 +221,6 @@ void full_SDM::printStatus()																const{
 	std::cout<<std::endl<<"OTHER MEMBERS:"<<std::endl;
 	std::cout<<std::endl<<"_nOut: "<<_nOut<<std::endl;
 	std::cout<<std::endl<<"_count: "<<_count<<std::endl;
-};
-//########################################################################################################################################################
-///Updates internal definitions
-void full_SDM::update_definitions(){
-
-	_nTot = getNtot();
-	_nPar = _waveset.getNpar();
-	_nCpl = getNcpl();
-	_nBra = _waveset.nBranch();
-	_nIso = _waveset.getNiso();
-	std::vector<std::string> names;
-	std::stringstream str_count;
-	for (size_t i=0;i<_nCpl;i++){
-		str_count<<i;
-		names.push_back("reC"+str_count.str());
-		names.push_back("imC"+str_count.str());
-		str_count.str("");
-	};
-	for (size_t i=0;i<_nPar;i++){
-		names.push_back(_waveset.getParameterName(i));
-	};
-	for (size_t i=0;i<_nBra;i++){
-		str_count<<i;
-		names.push_back("reB"+str_count.str());
-		names.push_back("imB"+str_count.str());
-		str_count.str("");
-	};
-	for (size_t i=0;i<_nIso;i++){
-		names.push_back(_waveset.getIsoParName(i));
-	};
-	_parNames = names;
 };
 //########################################################################################################################################################
 ///Updates, which data-point is actually active

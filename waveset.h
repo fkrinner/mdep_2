@@ -99,8 +99,10 @@ class waveset {
 		bool				has_isobars		()		const		{return _has_isobars;};				
 		size_t				minBin			()		const		{return _minBin;};			
 		size_t				maxBin			()		const		{return _maxBin;};			
-		size_t				nBrCpl			()		const		{return _nBrCpl;};			
+		size_t				nBrCpl			()		const		{return _nBrCpl;};		
+		const std::vector<std::string>*	waveNames		()		const		{return &_waveNames;};
 		// // SIMPLE OVER ALL NUMBERS
+		size_t				nWaves			()		const		{return _nWaves;};
 		size_t 				nPoints			()		const		{return _nPoints;};
 		size_t 				nFtw			()		const		{return _nFtw;};
 		size_t 				nTbin			()		const		{return _nTbin;};
@@ -122,10 +124,12 @@ class waveset {
 		const std::vector<size_t>*	point_borders_wave	()		const		{return &_point_borders_wave;};
 		const std::vector<int>*		coupled			()		const		{return &_coupled;};
 
+		const std::vector<amplitude*>*	amp_funcs		()		const		{return &_amp_funcs;};
 		const std::vector<double>*	upperLims		()		const		{return &_upperLims;};
 		const std::vector<double>*	lowerLims		()		const		{return &_lowerLims;};
 		const std::vector<double>*	binning			()		const		{return &_binning;};
 		const std::vector<std::vector<double> >*t_binning	()		const		{return &_t_binning;};
+		std::string			YAML_file		()		const		{return _YAML_file;};
 
 		// // PROPERTIES OF THE WAVES
 		size_t 				getNpar			()		const;
@@ -252,6 +256,7 @@ class waveset {
 		std::vector<size_t> 			_n_cpls;   		// Number of coupling for wave/function
 
 	// INTERNAL
+		std::string				_YAML_file;
 		bool 					_write_out;		// Flag to switch on the text_output
 		std::ofstream*				_outStream;		// Stream for the text output
 		bool 					_has_isobars;		// true, if de-isobarred waves are in the fit

@@ -236,6 +236,69 @@ void method::update_min_max_bin(){
 //	std::cout<<"_waveset.maxBin(): "<<_waveset.maxBin()<<std::endl;
 };
 //########################################################################################################################################################
+///Updates internal definitions
+void method::update_definitions(){
+	_nTot = getNtot();
+	_nPar = _waveset.getNpar();
+	_nCpl = getNcpl();
+	_nBra = _waveset.nBranch();
+	_nIso = _waveset.getNiso();
+	std::vector<std::string> names;
+	std::stringstream str_count;
+	for (size_t i=0;i<_nCpl;i++){
+		str_count<<i;
+		names.push_back("reC"+str_count.str());
+		names.push_back("imC"+str_count.str());
+		str_count.str("");
+	};
+	for (size_t i=0;i<_nPar;i++){
+		names.push_back(_waveset.getParameterName(i));
+	};
+	for (size_t i=0;i<_nBra;i++){
+		str_count<<i;
+		names.push_back("reB"+str_count.str());
+		names.push_back("imB"+str_count.str());
+		str_count.str("");
+	};
+	for (size_t i=0;i<_nIso;i++){
+		names.push_back(_waveset.getIsoParName(i));
+	};
+	size_t nFtw = _waveset.nFtw();
+	size_t nTbin = _waveset.nTbin();
+	size_t wave = 0;
+	size_t cpl_per_t = _nCpl/nTbin;
+	for (size_t ftw = 0;ftw<nFtw;++ftw){
+		if(_waveset.borders_waves()->at(wave) == ftw){
+			++wave;
+		};
+		size_t n_cpl = _waveset.n_cpls()->at(ftw);
+		size_t n_func = _waveset.funcs_to_waves()->at(ftw);
+		int n_bra = _waveset.n_branch()->at(ftw);
+		std::string addname = _waveset.amp_funcs()->at(n_func)->name()+"/"+_waveset.waveNames()->at(wave);
+
+		for (size_t tbin=0;tbin<nTbin;++tbin){
+			str_count<<tbin;
+//			std::cout<<cpl_per_t<<" "<<n_cpl<<" "<<_nCpl<<" uiubai "<<2*(tbin*cpl_per_t+n_cpl)<<std::endl;
+			if (n_cpl < cpl_per_t){ // To prevent auto cpl methods from renaming parameters they don't use
+				names[2*(tbin*cpl_per_t+n_cpl)  ] = "reC/"+str_count.str()+"/"+addname;
+				names[2*(tbin*cpl_per_t+n_cpl)+1] = "imC/"+str_count.str()+"/"+addname;
+			};
+			str_count.str("");
+		};
+		if (n_bra >-1){
+			names[2*_nCpl+_nPar+2*n_bra  ] = "reB/"+addname;
+			names[2*_nCpl+_nPar+2*n_bra+1] = "imB/"+addname;
+		};
+
+
+
+	};
+//	for (size_t i=0;i<_nPar;i++){
+//		names[2*_nCpl+i]=_waveset.getParameterName(i);
+//	};
+	_parNames = names;
+};
+//########################################################################################################################################################
 #ifdef USE_YAML
 //Loads _data and _coma from a YAML file
 bool method::loadDataComa(

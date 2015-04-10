@@ -128,9 +128,12 @@ class anchor_t : public method{
 
 		std::vector<double>			getParameters		()							const;
 
-		int getNtotAnc();
-		int getNanc();
-		bool setUseBranch(bool in);
+		size_t 					getNtotAnc		()							const;
+		size_t 					getNanc			()							const;
+		size_t 					getNtot			()							const			{return getNtotAnc();};
+		size_t					getNcpl			()							const			{return getNanc();};
+		
+		bool 					setUseBranch(bool in);
 
 
 	// OTHER METHODS
@@ -139,7 +142,6 @@ class anchor_t : public method{
 		void 					set_is_ampl		(bool is_ampl);
 		void 					setTbinning		(std::vector<std::vector<double> > binning);
 		void 					update_n_cpls		();
-		void 					update_definitions	();
 		void					update_is_active	();
 
 	// PLOTTING

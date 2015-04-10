@@ -24,6 +24,7 @@ waveset::waveset():
 	_write_out(false),
 	_has_isobars(false),
 	_binning(std::vector<double>(2)){
+	_YAML_file = "";
 	setTbinning(std::vector<std::vector<double> >(2,std::vector<double>(1,0.)));
 };
 //########################################################################################################################################################
@@ -47,6 +48,7 @@ waveset::waveset(
 	_has_isobars(false),
 	_binning(std::vector<double>(2)){
 
+	_YAML_file = card;
 	setTbinning(std::vector<std::vector<double> >(2,std::vector<double>(1,0.)));
 	YAML::Node Ycard   = YAML::LoadFile(card);
 	std::string parametrizations = Ycard["parametrization_file"].as<std::string>();

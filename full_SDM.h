@@ -19,10 +19,9 @@ class full_SDM : public method{
 		std::vector<std::vector<std::complex<double> > > full_to_br_cpl(std::vector<std::complex<double> > &cpl);
 		void 					update_n_cpls();
 		void 					nullify();
-		int getNtot();
-		int getNcpl();
+		size_t 					getNtot()		const;
+		size_t 					getNcpl()		const;
 		void 					printStatus()		const;
-		void 					update_definitions();
 		void					update_is_active();
 	protected:
 		std::vector<std::vector<bool> >						_is_active;		// Flag, which point is actually active

@@ -950,7 +950,7 @@ void anchor_t::loadComa(
 };
 //########################################################################################################################################################
 ///Returns the number of anchor couplings
-int anchor_t::getNanc(){
+size_t anchor_t::getNanc()																const{
 	return _nBrCplAnc * _waveset.nTbin();
 };
 //########################################################################################################################################################
@@ -961,7 +961,7 @@ bool anchor_t::setUseBranch(bool in){
 };
 //########################################################################################################################################################
 ///Gets the total number of paramters with only anchor couplings
-int anchor_t::getNtotAnc(){
+size_t anchor_t::getNtotAnc()																const{
 
 	return 2*getNanc() + _waveset.getNpar() + 2*_waveset.nBranch() + _waveset.getNiso();
 };
@@ -1048,37 +1048,6 @@ void anchor_t::setTbinning(std::vector<std::vector<double> > binning){
 		};
 		_coma = std::vector<std::vector<std::vector<std::vector<double> > > >(_waveset.nTbin());
 	};
-};
-//########################################################################################################################################################
-///Updates internal definitions
-void anchor_t::update_definitions(){
-
-	_nTot = getNtotAnc();
-	_nPar = _waveset.getNpar();
-	_nCpl = getNanc();
-	_nBra = _waveset.nBranch();
-	_nIso = _waveset.getNiso();
-	std::vector<std::string> names;
-	std::stringstream str_count;
-	for (size_t i=0;i<_nCpl;i++){
-		str_count<<i;
-		names.push_back("reC"+str_count.str());
-		names.push_back("imC"+str_count.str());
-		str_count.str("");
-	};
-	for (size_t i=0;i<_nPar;i++){
-		names.push_back(_waveset.getParameterName(i));
-	};
-	for (size_t i=0;i<_nBra;i++){
-		str_count<<i;
-		names.push_back("reB"+str_count.str());
-		names.push_back("imB"+str_count.str());
-		str_count.str("");
-	};
-	for (size_t i=0;i<_nIso;i++){
-		names.push_back(_waveset.getIsoParName(i));
-	};
-	_parNames = names;
 };
 //########################################################################################################################################################
 ///Updates, which data-point is actually active

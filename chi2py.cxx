@@ -42,6 +42,7 @@ struct chi2py:public minimize{
 	size_t nPar(){return _method->Waveset()->getNpar();};
 	size_t nBra(){return _method->Waveset()->nBranch();};
 	size_t nFtw(){return _method->Waveset()->nFtw();};
+	size_t nWaves(){return _method->Waveset()->nWaves();};
 
 	void relPar(std::string inin){
 		minimize::relPar(inin);
@@ -96,6 +97,11 @@ struct chi2py:public minimize{
 		std::vector<std::complex<double> > ampl = _method->amplitudes(mass, tbin, _method->parameters());
 		return std_vector_to_py_list(ampl);
 	};
+	bp::list waveNames(){
+		std::vector<std::string> names = *_method->Waveset()->waveNames();
+		return std_vector_to_py_list(names);
+	};
+
 	void setParLimits(std::string name, double upper, double lower){
 		minimize::setParLimits(name,upper,lower);
 	};
@@ -116,6 +122,9 @@ struct chi2py:public minimize{
 	};
 	void initSingleTbin(size_t nseeds, size_t tbin){
 		minimize::initCouplings(nseeds,tbin);
+	};
+	std::string YAML_file(){
+		_method->Waveset()->YAML_file();
 	};
 };
 
@@ -175,6 +184,7 @@ BOOST_PYTHON_MODULE(libchi2py){
 	chi2.def("nBra",				&chi2py::nBra					);
 	chi2.def("nFtw",				&chi2py::nFtw					);
 	chi2.def("nTbin",				&chi2py::nTbin					);
+	chi2.def("nWaves",				&chi2py::nWaves					);
 
 	chi2.def("method",				&chi2py::method					);
 	chi2.def("className",				&chi2py::className				);
@@ -201,6 +211,8 @@ BOOST_PYTHON_MODULE(libchi2py){
 	chi2.def("writeParameters",			&chi2py::writeParameters			);
 	chi2.def("readParameters",			&chi2py::readParameters				);
 	chi2.def("setMaxCalls",				&chi2py::setMaxCalls				);
+	chi2.def("YAML_file",				&chi2py::YAML_file				);
+	chi2.def("waveNames",				&chi2py::waveNames				);
 };
 
 

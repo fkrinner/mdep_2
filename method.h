@@ -46,10 +46,14 @@ class method{
 		void					readParameters					(std::string fileName);
 		std::vector<std::complex<double> >	getUnbranchedCouplings				(const std::vector<std::complex<double> > &cpl,const std::vector<std::complex<double> > &bra) 	const;
 		void 					update_min_max_bin				();
-
+		void 					update_definitions				();
 		virtual std::string			className					()										const	{return "undefined_method";};
 
-		virtual void 				update_definitions				()											{std::cout<<"method.h: update_definitions() not overwritten"<<std::endl;throw;};
+		virtual size_t				getNtot						()										const	{std::cout<<"method.h: getNtot not overwritten"<<std::endl;throw;return 0;};
+
+		virtual size_t				getNcpl						()										const	{std::cout<<"method.h: getNcpl not overwritten"<<std::endl;throw;return 0;};
+
+
 		virtual void 				update_n_cpls					()											{std::cout<<"method.h: update_n_cpls() not overwritten"<<std::endl;throw;};
 
 		virtual void 				printStatus					()										const	{std::cout<<"method.h: printStatus() not overwritten"<<std::endl;throw;};
