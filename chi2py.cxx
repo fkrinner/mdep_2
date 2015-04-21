@@ -90,18 +90,29 @@ struct chi2py:public minimize{
 	};
 	bp::list Amplitudes(double mass, int tbin, bp::object param_in){
 		std::vector<double> par = to_std_vector<double>(param_in);
-		std::vector<std::complex<double> > amps = _method->amplitudes(mass, tbin, par);
+		std::vector<std::complex<double> > amps = _method->amplitudes(mass, tbin, par, true);
 		return std_vector_to_py_list(amps);
 	};
 	bp::list AmplitudesSelf(double mass, int tbin){
-		std::vector<std::complex<double> > ampl = _method->amplitudes(mass, tbin, _method->parameters());
+		std::vector<std::complex<double> > ampl = _method->amplitudes(mass, tbin, _method->parameters(), true);
 		return std_vector_to_py_list(ampl);
 	};
 	bp::list waveNames(){
 		std::vector<std::string> names = *_method->Waveset()->waveNames();
 		return std_vector_to_py_list(names);
 	};
-
+	bp::list borders_waves(){
+		std::vector<size_t> brd = *_method->Waveset()->borders_waves();
+		return std_vector_to_py_list(brd);
+	};
+	bp::list upperLims(){
+		std::vector<double> lims = *_method->Waveset()->upperLims();
+		return std_vector_to_py_list(lims);
+	};
+	bp::list lowerLims(){
+		std::vector<double> lims = *_method->Waveset()->lowerLims();
+		return std_vector_to_py_list(lims);
+	};
 	void setParLimits(std::string name, double upper, double lower){
 		minimize::setParLimits(name,upper,lower);
 	};
@@ -124,7 +135,10 @@ struct chi2py:public minimize{
 		minimize::initCouplings(nseeds,tbin);
 	};
 	std::string YAML_file(){
-		_method->Waveset()->YAML_file();
+		return _method->Waveset()->YAML_file();
+	};
+	std::string get_component_name(size_t i){
+		return _method->Waveset()->get_component_name(i);
 	};
 };
 
@@ -154,6 +168,9 @@ BOOST_PYTHON_MODULE(libchi2py){
 	;
 	bp::class_<std::vector<int> >("vector_int")
 		.def(bp::vector_indexing_suite<std::vector<int> >())
+	;
+	bp::class_<std::vector<size_t> >("vector_size_t")
+		.def(bp::vector_indexing_suite<std::vector<size_t> >())
 	;
 
 	bp::class_<std::vector<std::complex<double> > >("vector_complex")
@@ -213,6 +230,10 @@ BOOST_PYTHON_MODULE(libchi2py){
 	chi2.def("setMaxCalls",				&chi2py::setMaxCalls				);
 	chi2.def("YAML_file",				&chi2py::YAML_file				);
 	chi2.def("waveNames",				&chi2py::waveNames				);
+	chi2.def("borders_waves",			&chi2py::borders_waves				);
+	chi2.def("lowerLims",				&chi2py::lowerLims				);
+	chi2.def("upperLims",				&chi2py::upperLims				);
+	chi2.def("get_component_name",			&chi2py::get_component_name			);
 };
 
 

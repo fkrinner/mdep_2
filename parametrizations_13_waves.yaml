@@ -3,6 +3,7 @@
 ########################################
 a1(1260):
  parametrization: 5
+ type: resonant
  parameters:
  - name: M_a1(1260)
    value: 1.2794
@@ -11,6 +12,7 @@ a1(1260):
 
 a1(1930):
  parametrization: 0
+ type: resonant
  parameters:
  - name: M_a1(1930)
    value: 2.0108
@@ -19,6 +21,7 @@ a1(1930):
 
 a1(1420):
  parametrization: 0
+ type: resonant
  parameters:
  - name: M_a1(1420)
    value: 1.4093
@@ -27,6 +30,7 @@ a1(1420):
 
 tdepBKG(1++)0+_rho_pi_S:
  parametrization: 101
+ type: non-resonant
  parameters: 
  - name: tdepBKG(1++)0+_rho_pi_S__b
    value: 1.4795
@@ -46,6 +50,7 @@ tdepBKG(1++)0+_rho_pi_S:
 
 cohBKG(1++)0+_f0(980)_pi_P:
  parametrization: 3
+ type: non-resonant
  parameters:
  - name: cohBKG(1++)0+_f0(980)_pi_P__b
    value: -5.8146
@@ -57,6 +62,7 @@ cohBKG(1++)0+_f0(980)_pi_P:
 
 cohBKG(1++)0+_rho_pi_D:
  parametrization: 3
+ type: non-resonant
  parameters:
  - name: cohBKG(1++)0+_rho_pi_D__b
    value: 2.5961
@@ -70,6 +76,7 @@ cohBKG(1++)0+_rho_pi_D:
 ########################################
 pi1(1600):
  parametrization: 0
+ type: resonant
  parameters:
  - name: M_pi1(1600)
    value: 1.60940051682
@@ -78,6 +85,7 @@ pi1(1600):
 
 tdepBKG:
  parametrization: 101
+ type: non-resonant
  parameters:
  - name: tdepBKG(1-+)1+_rho_pi_P__b
    value: 3.98445053613
@@ -99,6 +107,7 @@ tdepBKG:
 ########################################
 pi(1800):
  parametrization: 0
+ type: resonant
  parameters:
  - name: M_pi(1800)
    value: 1.8005
@@ -107,6 +116,7 @@ pi(1800):
 
 cohBKG(0-+)0+_f0(980)_pi_S:
  parametrization: 3
+ type: non-resonant
  parameters:
  - name: cohBKG(0-+)0+_f0(980)_pi_S__b
    value: -3.3995
@@ -121,6 +131,7 @@ cohBKG(0-+)0+_f0(980)_pi_S:
 ########################################
 a2(1320):
  parametrization: 2
+ type: resonant
  parameters:
  - name: M_a2(1320)
    value: 1.3136
@@ -142,6 +153,7 @@ a2(1320):
 
 a2(1700):
  parametrization: 0
+ type: resonant
  parameters:
  - name: M_a2(1700)
    value: 1.6704
@@ -150,6 +162,7 @@ a2(1700):
 
 cohBKG(2++)1+_f2_pi_P:
  parametrization: 3
+ type: non-resonant
  parameters:
  - name: cohBKG(2++)1+_f2_pi_P__b
    value: -0.77708
@@ -161,6 +174,7 @@ cohBKG(2++)1+_f2_pi_P:
 
 tdepBKG(2++)1+_rho_pi_D:
  parametrization: 101
+ type: non-resonant
  parameters:
  - name: tdepBKG(2++)1+_rho_pi_D__b
    value: 0.66388
@@ -180,6 +194,7 @@ tdepBKG(2++)1+_rho_pi_D:
 
 cohBKG(2++)2+_rho_pi_D:
  parametrization: 3
+ type: non-resonant
  parameters:
  - name: cohBKG(2++)2+_rho_pi_D__b
    value: -0.89233
@@ -194,6 +209,7 @@ cohBKG(2++)2+_rho_pi_D:
 ########################################
 pi2(1670):
  parametrization: 0
+ type: resonant
  parameters:
  - name: M_pi2(1670)
    value: 1.6521
@@ -202,6 +218,7 @@ pi2(1670):
 
 pi2(1880):
  parametrization: 0
+ type: resonant
  parameters:
  - name: M_pi2(1880)
    value: 1.8335
@@ -210,6 +227,7 @@ pi2(1880):
  
 cohBKG(2-+)0+_f2_pi_D:
  parametrization: 3
+ type: non-resonant
  parameters:
  - name: cohBKG(2-+)0+_f2_pi_D__b
    value: 2.4491
@@ -221,6 +239,7 @@ cohBKG(2-+)0+_f2_pi_D:
 
 tdepBKG(2-+)0+_f2_pi_S:
  parametrization: 101
+ type: non-resonant
  parameters:
  - name: tdepBKG(2-+)0+_f2_pi_S__b
    value: 2.0204
@@ -240,6 +259,7 @@ tdepBKG(2-+)0+_f2_pi_S:
 
 tdepBKG(2-+)0+_rho_pi_F:
  parametrization: 101
+ type: non-resonant
  parameters:
  - name: tdepBKG(2-+)0+_rho_pi_F__b
    value: -1.3158
@@ -259,6 +279,7 @@ tdepBKG(2-+)0+_rho_pi_F:
 
 cohBKG(2-+)1+_f2_pi_S:
  parametrization: 3
+ type: non-resonant
  parameters:
  - name: cohBKG(2-+)1+_f2_pi_S__b
    value: -0.92364
@@ -273,6 +294,7 @@ cohBKG(2-+)1+_f2_pi_S:
 ########################################
 a3(1875):
  parametrization: 0
+ type: resonant
  parameters:
  - name: M_a3(1875)
    value: 1.874
@@ -281,6 +303,7 @@ a3(1875):
 
 cohBKG(3++)1+_rho_pi_G:
  parametrization: 3
+ type: non-resonant
  parameters:
  - name: cohBKG(3++)1+_rho_pi_G__b
    value: -4.3411
@@ -292,6 +315,7 @@ cohBKG(3++)1+_rho_pi_G:
 
 cohBKG(3++)0+_rho3_pi_S:
  parametrization: 3
+ type: non-resonant
  parameters:
  - name: cohBKG(3++)0+_rho3_pi_S__b
    value: -4.3411
@@ -306,6 +330,7 @@ cohBKG(3++)0+_rho3_pi_S:
 ########################################
 a4(2040):
  parametrization: 0
+ type: resonant
  parameters:
  - name: M_a4(2040)
    value: 1.9256
@@ -314,6 +339,7 @@ a4(2040):
 
 cohBKG(4++)1+_f2_pi_F:
  parametrization: 3
+ type: non-resonant
  parameters:
  - name: cohBKG(4++)1+_f2_pi_F__b
    value: -0.18977
@@ -325,6 +351,7 @@ cohBKG(4++)1+_f2_pi_F:
 
 cohBKG(4++)1+_rho_pi_G:
  parametrization: 3
+ type: non-resonant
  parameters:
  - name: cohBKG(4++)1+_rho_pi_G__b
    value: -4.3411
@@ -341,6 +368,7 @@ cohBKG(4++)1+_rho_pi_G:
 ########################################
 f0(980):
  parametrization: 0
+ type: isobar
  parameters:
  - name: M_f0(980)
    value: 0.980

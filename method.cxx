@@ -463,14 +463,16 @@ void method::write_plots(
 //########################################################################################################################################################
 ///Get the amplitudes for internal parameters
 std::vector<std::complex<double> > method::amplitudes( 	double 							mass, 
-							int							tbin)					const{
+							int							tbin,
+							bool							ignore_limits)				const{
 	return amplitudes(mass, tbin, parameters());
 };
 //########################################################################################################################################################
 
 std::vector<std::complex<double> > method::amplitudes(	double							mass,
 							int							tbin,
-							const std::vector<double>				&param)					const{
+							const std::vector<double>				&param,
+							bool							ignore_limits)				const{
 
 	std::vector<std::complex<double> > cpl(_nCpl);
 	std::vector<double> par(_nPar);	
@@ -499,7 +501,7 @@ std::vector<std::complex<double> > method::amplitudes(	double							mass,
 		iso_eval = _waveset.iso_funcs(&iso[0]);
 	};
 	std::vector<double> var = _waveset.getVar(mass,tbin);
-	std::vector<std::complex<double> > amplitudes = _waveset.amps(&var[0],&cpl_all[0],&par[0],iso_eval);
+	std::vector<std::complex<double> > amplitudes = _waveset.amps(&var[0],&cpl_all[0],&par[0],iso_eval,ignore_limits);
 	return amplitudes;
 };
 //########################################################################################################################################################

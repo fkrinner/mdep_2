@@ -28,19 +28,21 @@ class waveset {
 								const double 						*m,
 								const std::complex<xdouble> 				*cpl,
 								const xdouble	 					*par,
-								std::vector<std::vector<std::complex<xdouble> > > 	&funcEvals2pi) 	const;
+								std::vector<std::vector<std::complex<xdouble> > > 	&funcEvals2pi,
+								bool							ignore_limits = false) 	const;
 
 		template<typename xdouble>
 		std::vector<std::complex<xdouble> > funcs(
 								const double 						*m,
-								const xdouble 						*par) 		const;
+								const xdouble 						*par,
+								bool							ignor_limits = false)	const;
 
 		template<typename xdouble>
 		std::vector<std::vector<std::complex<xdouble> > > iso_funcs(
-								const xdouble 						*par) 		const;
+								const xdouble 						*par) 			const;
 
 		std::vector<double> phase_space(
-								const double 						*m) 		const;
+								const double 						*m) 			const;
 
 	// SET UP WAVESET
 		// // WAVES AND FUNCTIONS
@@ -130,6 +132,7 @@ class waveset {
 		const std::vector<double>*	binning			()		const		{return &_binning;};
 		const std::vector<std::vector<double> >*t_binning	()		const		{return &_t_binning;};
 		std::string			YAML_file		()		const		{return _YAML_file;};
+		std::string			get_component_name	(size_t i)	const;
 
 		// // PROPERTIES OF THE WAVES
 		size_t 				getNpar			()		const;

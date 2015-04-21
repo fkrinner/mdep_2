@@ -79,8 +79,8 @@ class method{
 		virtual void				write_plots(std::string filename, int tbin,const std::vector<std::complex<double> >&cpl,const std::vector<double> &par,const std::vector<std::complex<double> > &bra,const std::vector<double> &iso) const {std::cout<<"method.h: write_plots(...) not overwritten"<<std::endl;throw;};
 		virtual std::vector<std::complex<double> > getAllCouplings(int tbin,const std::vector<std::complex<double> > &cpl,const std::vector<double> &par,const std::vector<std::complex<double> > &bra,const std::vector<double> &iso)const{std::cout<<"method.h: getAllCouplings(...) not overwritten"<<std::endl;throw;};
 
-		std::vector<std::complex<double> > amplitudes					(double m, int tbin) const;
-		std::vector<std::complex<double> > amplitudes					(double m, int tbin, const std::vector<double> &parameters) const;
+		std::vector<std::complex<double> > amplitudes					(double m, int tbin, bool ignore_limits = false) const;
+		std::vector<std::complex<double> > amplitudes					(double m, int tbin, const std::vector<double> &parameters, bool ignore_limits = false) const;
 
 	protected:
 		// WAVESET

@@ -94,9 +94,10 @@ std::vector<std::complex<xdouble> > waveset::amps(
 							const double 						*m,
 							const std::complex<xdouble>	 			*cpl,
 							const xdouble	 					*par,
-							std::vector<std::vector<std::complex<xdouble> > > 	&funcEvals2pi)				const{
+							std::vector<std::vector<std::complex<xdouble> > > 	&funcEvals2pi,
+							bool 							ignore_limits)				const{
 
-	std::vector<std::complex<xdouble> > funcEval = funcs(m,par); // Evalulated BW-functions
+	std::vector<std::complex<xdouble> > funcEval = funcs(m,par,ignore_limits); // Evalulated BW-functions
 	std::vector<std::complex<xdouble> > ampl = std::vector<std::complex<xdouble> >(_nPoints,std::complex<xdouble>(0.,0.)); // Vector of final amplitudes
 	std::vector<double> ps = phase_space(m);
 	std::complex<xdouble> amp; // Actual wave amplitude
@@ -107,7 +108,7 @@ std::vector<std::complex<xdouble> > waveset::amps(
 		int n_iso_bin = _wave_binning_pts[wave];
 		loBor = upBor;
 		upBor = _borders_waves[wave];
-		if (m[0] >= _lowerLims[wave] and m[0]<_upperLims[wave]){
+		if ((m[0] >= _lowerLims[wave] and m[0]<_upperLims[wave]) or ignore_limits){
 			if(-1==n_iso_bin){
 				std::complex<xdouble> amp(0.,0.);
 //				std::cout<<wave<<": ";
@@ -138,13 +139,14 @@ std::vector<std::complex<xdouble> > waveset::amps(
 
 	return ampl;
 };
-template std::vector<std::complex<double> > waveset::amps(const double *m, const std::complex<double> *cpl,const double *par, std::vector<std::vector<std::complex<double> > > &funcEvals2pi) const;
+template std::vector<std::complex<double> > waveset::amps(const double *m, const std::complex<double> *cpl,const double *par, std::vector<std::vector<std::complex<double> > > &funcEvals2pi, bool ignore_limits) const;
 //########################################################################################################################################################
 ///Returns the function values at m3pi = m and shape parameters par
 template<typename xdouble>
 std::vector<std::complex<xdouble> > waveset::funcs(
 							const double 						*m, // Contains also other possible variables
-							const xdouble	 					*par)					const{
+							const xdouble	 					*par,
+							bool							ignore_limits)				const{
 
 	std::vector<std::complex<xdouble> > f = std::vector<std::complex<xdouble> >(_nFuncs);
 	int upPar=0;
@@ -152,7 +154,7 @@ std::vector<std::complex<xdouble> > waveset::funcs(
 	for (size_t func=0; func<_nFuncs; func++){
 		loPar = upPar;
 		upPar = _borders_par[func];
-		if (m[0] >= _funcLowerLims[func] and m[0] < _funcUpperLims[func]){ // Only calculate needed functions
+		if ((m[0] >= _funcLowerLims[func] and m[0] < _funcUpperLims[func]) or ignore_limits){ // Only calculate needed functions
 			f[func]=_amp_funcs[func]->Eval(m,par+loPar);
 		}else{
 			f[func]=std::complex<xdouble>(0.,0.);
@@ -161,7 +163,7 @@ std::vector<std::complex<xdouble> > waveset::funcs(
 	};
 	return f;
 };
-template std::vector<std::complex<double> > waveset::funcs(const double *m,const double *par) const;
+template std::vector<std::complex<double> > waveset::funcs(const double *m,const double *par, bool ignore_limits) const;
 //########################################################################################################################################################
 ///Evaluates the isobar paramterizations at ALL masses, so they do not have to be recalculated each time
 template<typename xdouble>
@@ -202,8 +204,8 @@ std::vector<double> waveset::phase_space(
 //########################################################################################################################################################
 ///Enable Auto-diff, if needed
 #ifdef ADOL_ON
-template std::vector<std::complex<adouble> > waveset::amps(const double* m, const std::complex<adouble> *cpl,const adouble *par, std::vector<std::vector<std::complex<adouble> > > &funcEvals2pi) const;
-template std::vector<std::complex<adouble> > waveset::funcs(const double* m,const adouble *par) const;
+template std::vector<std::complex<adouble> > waveset::amps(const double* m, const std::complex<adouble> *cpl,const adouble *par, std::vector<std::vector<std::complex<adouble> > > &funcEvals2pi, bool ignore_limits) const;
+template std::vector<std::complex<adouble> > waveset::funcs(const double* m,const adouble *par, bool ignore_limits) const;
 template std::vector<std::vector<std::complex<adouble> > > waveset::iso_funcs(const adouble *par) const;
 #endif//ADOL_ON
 //########################################################################################################################################################
@@ -1026,6 +1028,13 @@ void waveset::loadIsoBinnings(
 	updateNpoints();
 };
 #endif//USE_YAML
+//########################################################################################################################################################
+///Returns the name of the funtion for component i
+std::string waveset::get_component_name(		size_t							i)	const{	// # of component
+
+	size_t fcn = _funcs_to_waves[i];
+	return _amp_funcs[fcn]->name();
+};
 //########################################################################################################################################################
 ///Returns the number of parameters (without branchings or couplings)
 size_t waveset::getNpar()												const{
