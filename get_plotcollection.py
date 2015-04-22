@@ -1,17 +1,19 @@
+import os
 import sys
 import yaml
+import math
 sys.path.append("build")
+sys.path.append('/nfs/hicran/project/compass/analysis/fkrinner/fkrinner/trunk/massDependentFit/scripts/chi_squared_retry/plotting/pycpwa/src/')
+
 from libchi2py import chi2
 from rootpy.plotting import HistStack, Hist, Hist2D, Canvas
 from rootpy.io import root_open
 from rootpy import ROOT, asrootpy
-sys.path.append('/nfs/hicran/project/compass/analysis/fkrinner/fkrinner/trunk/massDependentFit/scripts/convertTextOutput')
-sys.path.append('/nfs/hicran/project/compass/analysis/fkrinner/fkrinner/trunk/massDependentFit/scripts/chi_squared_retry/plotting/pycpwa/src/')
 from pycpwa.spindensityplots.plotcollection import PlotCollection, TBinPlots
-from spinDensityMatrix import spinDensityMatrix
+from mass_independent_result import spinDensityMatrix
 from pycpwa.definitions.wave import Wave
 
-import math
+
 def get_fit_histogram(chi2,typ,tbin,wave1, wave2 = None, mmin = .5, mmax = 2.5, nbin = 500,component = -1):
 	"""
 	Gets a single histogram from a chi2 object
@@ -26,14 +28,14 @@ def get_fit_histogram(chi2,typ,tbin,wave1, wave2 = None, mmin = .5, mmax = 2.5, 
 		imag: Imag part of the interference of wave1 and wave2
 		phase: Phase of the interference of wave1 and wave2
 	@type param: str
-	@param wave1: Number of the forst wave
+	@param wave1: Number of the first wave
 	@type wave1: int
-	@param wave2: Number of the forst wave (only for interferences, ignored otherwise)
+	@param wave2: Number of the first wave (only for interferences, ignored otherwise)
 	@type wave2: int
 	@param mmin: Minimum mass for the histogram
-	@type mmin: double
+	@type mmin: float
 	@param mmax: Maximum mass for the histogram
-	@type mmax: double
+	@type mmax: float
 	@param nbin: Number of bins for the histogram
 	@type nbin: int
 	@param component: Number of active component, all active if component == -1 (default)
@@ -89,9 +91,9 @@ def get_plotcollection(chi2, mmin = .5, mmax = 2.5, nbins = 500):
 	@param chi2: Chi2 from which the collection is produced
 	@type chi2: chi2
 	@param mmin: Minimum mass for the histograms
-	@type mmin: double
+	@type mmin: float
 	@param mmax: Maximum mass for the histograms
-	@type mmax: double
+	@type mmax: float
 	@param nbin: Number of bins for the histograms
 	@type nbin: int
 	@return: PlotCollection for chi2
