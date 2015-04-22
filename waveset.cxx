@@ -3,6 +3,7 @@
 #include"phaseSpace.h"
 
 #include"matrix_utilities.h"
+#include"string_utilities.h"
 
 
 double UPPER_MASS_LIMIT = 2.5;
@@ -51,8 +52,8 @@ waveset::waveset(
 	_YAML_file = card;
 	setTbinning(std::vector<std::vector<double> >(2,std::vector<double>(1,0.)));
 	YAML::Node Ycard   = YAML::LoadFile(card);
-	std::string parametrizations = Ycard["parametrization_file"].as<std::string>();
-	std::string waves = Ycard["wave_file"].as<std::string>();
+	std::string parametrizations = get_relative_path(Ycard["parametrization_file"].as<std::string>(),_YAML_file);
+	std::string waves = get_relative_path(Ycard["wave_file"].as<std::string>(),_YAML_file);
 	YAML::Node Yparam  = YAML::LoadFile(parametrizations);
 	YAML::Node Ywaves  = YAML::LoadFile(waves);
 	std::cout<<"waveset::waveset(...): Take parametrizations from: "<<parametrizations<<std::endl;

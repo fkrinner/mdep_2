@@ -58,12 +58,12 @@ def get_fit_histogram(chi2,typ,tbin,wave1, wave2 = None, mmin = .5, mmax = 2.5, 
 		amps = chi2.Amplitudes(m,tbin, parameters)
 		if typ == "intensity":
 			hist.SetBinContent(i,abs(amps[wave1])**2)
-		elif typ == "amp_re":
+		elif typ == "ampl_real":
 			hist.SetBinContent(i,amps[wave1].real)
-		elif typ == "amp_im":
+		elif typ == "ampl_imag":
 			hist.SetBinContent(i,amps[wave1].imag)
-		elif typ == "amp_phase":
-			hist.SetBinContent(i,math.atan2(amps[wave1].imag,amps[wave1].real))
+		elif typ == "ampl_phase":
+			hist.SetBinContent(i,math.atan2(amps[wave1].imag,amps[wave1].real)*180./math.pi)
 		else:
 			interference = amps[wave1]*amps[wave2].conjugate()
 			if typ =="real":
@@ -71,7 +71,7 @@ def get_fit_histogram(chi2,typ,tbin,wave1, wave2 = None, mmin = .5, mmax = 2.5, 
 			elif typ == "imag":
 				hist.SetBinContent(i,interference.imag)
 			elif typ == "phase":
-				phase=math.atan2(interference.imag,interference.real)
+				phase=math.atan2(interference.imag,interference.real)*180./math.pi
 				hist.SetBinContent(i,phase)
 	if component == -1:
 		name = "mass-dependent"
@@ -124,6 +124,10 @@ def get_plotcollection(chi2, mmin = .5, mmax = 2.5, nbins = 500):
 			tbin_plots.intensity_[act_wave].Add(hist)
 			hist = get_fit_histogram(chi2,"intensity",i_tbin,i_wave,mmin=mmin,mmax=mmax,nbin=nbins)
 			tbin_plots.intensity_[act_wave].Add(hist)
+			hist = get_fit_histogram(chi2,"ampl_real",i_tbin,i_wave,mmin=mmin,mmax=mmax,nbin=nbins)
+			tbin_plots.ampl_real_[act_wave].Add(hist)
+			hist = get_fit_histogram(chi2,"ampl_imag",i_tbin,i_wave,mmin=mmin,mmax=mmax,nbin=nbins)
+			tbin_plots.ampl_imag_[act_wave].Add(hist)
 			if i_wave == 0:
 				begin = 0
 			else:
@@ -141,6 +145,10 @@ def get_plotcollection(chi2, mmin = .5, mmax = 2.5, nbins = 500):
 						else:
 							raise ValueError # Unknown component type
 				tbin_plots.intensity_[act_wave].Add(hist)
+				hist = get_fit_histogram(chi2,"ampl_real",i_tbin,i_wave,mmin=mmin,mmax=mmax,nbin=nbins,component = component)
+				tbin_plots.ampl_real_[act_wave].Add(hist)
+				hist = get_fit_histogram(chi2,"ampl_imag",i_tbin,i_wave,mmin=mmin,mmax=mmax,nbin=nbins,component = component)
+				tbin_plots.ampl_imag_[act_wave].Add(hist)
 			for j_wave, wave2 in enumerate(wave_names):
 				act_wave2 = Wave(wave2)
 				# Real
@@ -164,10 +172,5 @@ def get_plotcollection(chi2, mmin = .5, mmax = 2.5, nbins = 500):
 	collection.setLatexnames(LaTeX_namemap)
 	collection.setMassdependentFitRanges(limits_map)
 	collection.setComponentType(component_types)
-	print LaTeX_namemap
-	print
-	print limits_map
-	print
-	print component_types
 	return collection
 

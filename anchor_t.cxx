@@ -7,6 +7,7 @@
 #include<limits>
 
 #include"matrix_utilities.h"
+#include"string_utilities.h"
 
 #ifdef ADOL_ON
 #include "adolc/adolc.h"
@@ -32,7 +33,7 @@ anchor_t::anchor_t(
 	_is_ampl(false),
 	_useBranch(true){
 	YAML::Node Ycard   = YAML::LoadFile(card);
-	std::string parametrizations = Ycard["parametrization_file"].as<std::string>();
+	std::string parametrizations = get_relative_path(Ycard["parametrization_file"].as<std::string>(),_waveset.YAML_file());
 	YAML::Node Yparam  = YAML::LoadFile(parametrizations);
 	update_n_cpls();
 	setTbinning((*_waveset.t_binning()));
