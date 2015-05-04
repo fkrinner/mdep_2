@@ -158,6 +158,8 @@ class waveset {
 		bool				setIsoPar		(int par, double val);
 		double				getIsoPar		(int par)	const;
 		double				getIsoCon		(int con)	const;
+		std::vector<size_t>		getFuncParameters	(size_t ftw)	const;
+
 
 		// // PROPERTIES OF THE ISOBARS
 		std::string 			getIsobarName		(int i)		const;

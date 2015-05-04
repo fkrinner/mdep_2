@@ -2,7 +2,7 @@ import numpy as np
 import numpy.linalg as la
 import os
 import sys
-from convert_text_output import readTextFile, getBestFits, getComaData
+from convert_text_output import readTextFile, getBestFits, getComaData, own_pinv, NUMERICAL_LIMIT
 
 def write_anchor(target_dir,
 		direct, 		# directory of the fit
@@ -76,7 +76,9 @@ def write_anchor(target_dir,
 		coma = reduced_coma[bin]
 		for line in coma:
 			for ptt in line:
-				comaFile.write(str(ptt)+'   ')
+				comaFile.write(str(ptt.real)+'   ')
+				if abs(ptt.imag) > NUMERICAL_LIMIT:
+					raise ValueError
 		comaFile.write('\n')
 		datFile.write('\n')
 	comaFile.close()
@@ -123,26 +125,6 @@ def get_raw_data_coma(
 			coma[2*i  ][2*j+1] = rawData[1][2*iii  ][2*jjj+1]*nEvents
 			coma[2*i+1][2*j+1] = rawData[1][2*iii+1][2*jjj+1]*nEvents
 	return [data,coma]
-
-def own_pinv(matrix, minev =0.):
-	"""
-	Own implementation of the pseudo inverse for symmetric matrices
-	@param matrix: Matrix to invert (list of lists)
-	@type matrix: list
-	@param minev: Minimal absolute value for an eigenvalue that is not assumed to be zero
-	@type minev: float
-	@return: Pseudo-inverte matrix (list of lists)
-	@rtype: list
-	"""
-	val,vec = la.eig(matrix)
-	dim = len(val)
-	new = np.zeros((dim,dim))
-	for i in range(dim):
-		if abs(val[i]) > minev:
-			new[i,i] = 1/val[i]
-	ret = np.dot(vec,np.dot(new,np.transpose(vec)))
-	return ret
-
 
 def invert_coma(matrix,method = 'pinv'):
 	"""

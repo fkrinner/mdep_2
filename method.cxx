@@ -1,5 +1,5 @@
 #include"method.h"
-
+#include"matrix_utilities.h"
 //#######################################################################################################################################################
 ///Set a single parameter by number
 void method::setParameter(
@@ -474,26 +474,30 @@ std::vector<std::complex<double> > method::amplitudes(	double							mass,
 							const std::vector<double>				&param,
 							bool							ignore_limits)				const{
 
-	std::vector<std::complex<double> > cpl(_nCpl);
 	std::vector<double> par(_nPar);	
 	std::vector<std::complex<double> > bra(_nBra);
 	std::vector<double> iso(_nIso);
-	int count =0;
-	for (size_t i=0;i<_nCpl;i++){
-		cpl[i] = std::complex<double>(param[count],param[count+1]);
-		count+=2;
+	size_t count =0;
+	size_t vec_size = param.size();
+	for (size_t i=1;i<=_nIso;++i){ // Di the inverse direction
+		count+=1;
+		iso[_nIso-i] = param[vec_size-count];
+
 	};
-	for (size_t i=0;i<_nPar;i++){
-		par[i] = param[count];
-		count++;
+	for (size_t i=1;i<=_nBra;++i){
+		count+=1;
+		bra[_nBra-i] = std::complex<double> (param[vec_size-count-1],param[vec_size-count]);
+		count+=1;
 	};
-	for (size_t i=0;i<_nBra;i++){
-		bra[i] = std::complex<double>(param[count],param[count+1]);
-		count+=2;
+	for (size_t i=1;i<=_nPar;++i){
+		count+=1;
+		par[_nPar-i] =  param[vec_size-count];
+		
 	};
-	for (size_t i=0;i<_nIso;i++){
-		iso[i]=param[count];
-		count++;
+	size_t diff = vec_size - count;
+	std::vector<std::complex<double> > cpl(diff/2);
+	for (size_t i=0;i<diff/2;++i){
+		cpl[i] = std::complex<double>(param[2*i],param[2*i+1]);
 	};
 	std::vector<std::complex<double> > cpl_all = getAllCouplings(tbin,cpl,par,bra,iso);
 	std::vector<std::vector<std::complex<double> > > iso_eval;

@@ -39,6 +39,7 @@ struct chi2py:public minimize{
 	size_t nTot(){return _method->nTot();};
 	size_t nTbin(){return _method->Waveset()->nTbin();};
 	size_t nCpl(){return _method->nCpl();};
+	size_t nBrCpl(){return _method->Waveset()->nBrCpl();};
 	size_t nPar(){return _method->Waveset()->getNpar();};
 	size_t nBra(){return _method->Waveset()->nBranch();};
 	size_t nFtw(){return _method->Waveset()->nFtw();};
@@ -88,6 +89,10 @@ struct chi2py:public minimize{
 		std::vector<double> xxx = _method->parameters();
 		return std_vector_to_py_list(xxx);
 	};
+	bp::list fullParameters(){
+		std::vector<double> xxx = _method->fullParameters();
+		return std_vector_to_py_list(xxx);
+	};
 	bp::list Amplitudes(double mass, int tbin, bp::object param_in){
 		std::vector<double> par = to_std_vector<double>(param_in);
 		std::vector<std::complex<double> > amps = _method->amplitudes(mass, tbin, par, true);
@@ -104,6 +109,10 @@ struct chi2py:public minimize{
 	bp::list borders_waves(){
 		std::vector<size_t> brd = *_method->Waveset()->borders_waves();
 		return std_vector_to_py_list(brd);
+	};
+	bp::list getFuncParameters(int ftw){
+		std::vector<size_t> params = _method->Waveset()->getFuncParameters(ftw);
+		return std_vector_to_py_list(params);
 	};
 	bp::list upperLims(){
 		std::vector<double> lims = *_method->Waveset()->upperLims();
@@ -197,6 +206,7 @@ BOOST_PYTHON_MODULE(libchi2py){
 
 	chi2.def("nTot",				&chi2py::nTot					);
 	chi2.def("nCpl",				&chi2py::nCpl					);
+	chi2.def("nBrCpl",				&chi2py::nBrCpl					);
 	chi2.def("nPar",				&chi2py::nPar					);
 	chi2.def("nBra",				&chi2py::nBra					);
 	chi2.def("nFtw",				&chi2py::nFtw					);
@@ -220,6 +230,7 @@ BOOST_PYTHON_MODULE(libchi2py){
 	chi2.def("relPar",				&chi2py::relPar					);
 	chi2.def("fixPar",				&chi2py::fixPar					);
 	chi2.def("parameters",				&chi2py::parameters				);
+	chi2.def("fullParameters",			&chi2py::fullParameters				);
 
 	chi2.def("write_plots",				&chi2py::write_plots				);
 	chi2.def("setParLimits",			&chi2py::setParLimits				);
@@ -234,6 +245,7 @@ BOOST_PYTHON_MODULE(libchi2py){
 	chi2.def("lowerLims",				&chi2py::lowerLims				);
 	chi2.def("upperLims",				&chi2py::upperLims				);
 	chi2.def("get_component_name",			&chi2py::get_component_name			);
+	chi2.def("getFuncParameters",			&chi2py::getFuncParameters			);
 };
 
 

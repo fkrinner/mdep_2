@@ -12,9 +12,11 @@ from rootpy import ROOT, asrootpy
 from pycpwa.spindensityplots.plotcollection import PlotCollection, TBinPlots
 from mass_independent_result import spinDensityMatrix
 from pycpwa.definitions.wave import Wave
+from ROOT import TH1D
+import numpy as np
 
 
-def get_fit_histogram(chi2,typ,tbin,wave1, wave2 = None, mmin = .5, mmax = 2.5, nbin = 500,component = -1):
+def get_fit_histogram(chi2,typ,tbin,wave1, wave2 = None, mmin = .5, mmax = 2.5, nbin = 500,component = -1, parameters = None):
 	"""
 	Gets a single histogram from a chi2 object
 	@param chi2: Chi2 from where the histogrm is built
@@ -43,21 +45,49 @@ def get_fit_histogram(chi2,typ,tbin,wave1, wave2 = None, mmin = .5, mmax = 2.5, 
 	@return Specified histogram
 	@rtyp Hist
 	"""
-	hist = Hist(nbin,mmin,mmax)
-	step = (mmax - mmin)/nbin
-	parameters = chi2.parameters()
+	nWaves = chi2.nWaves()
 	nTbin= chi2.nTbin()
-	nCpl = chi2.nCpl()/nTbin
+	perT = chi2.nBrCpl()
+	nCpl = perT*nTbin
+
+
+	hist = Hist(nbin,mmin,mmax)
+	if typ.startswith("all_waves"):
+		if not component == -1:
+			raise ValueError # Not possible with specified component
+		hist = []
+		for i in range(nWaves):
+			histLine = []
+			for j in range(nWaves):
+				histLine.append(Hist(nbin,mmin,mmax))
+			hist.append(histLine)
+
+	step = (mmax - mmin)/nbin
+	if not parameters:
+		parameters = chi2.fullParameters()
+	print '-----------------------------------------------------'
+	print '-----------------------------------------------------'
+	print tbin,wave1,component
+	print '-----------------------------------------------------'
+	print parameters[:2*nTbin*perT]
 	if not component == -1:
-		for tBin in range(nTbin):
-			pass
-			for cpl in range(nCpl):
-				if not component == cpl:
-					parameters[2*nCpl*tBin + 2*cpl  ] = 0.
-					parameters[2*nCpl*tBin + 2*cpl+1] = 0.
+		params_to_keep = chi2.getFuncParameters(component)
+		for i in range(2*nCpl):
+			if not i in params_to_keep:
+				parameters[i] = 0.
+	print parameters[:2*nTbin*perT]
+	for i in range(nTbin):
+		if not i == tbin:
+			for j in range(perT):
+				parameters[2*(j+i*perT)  ] = 0. # Set eveything in the wrong tbin to zero, just to be shure
+				parameters[2*(j+i*perT)+1] = 0.
+	print '-----------------------------------------------------'
+	print parameters[:2*nTbin*perT]
+
 	for i in range(1,nbin+1):
 		m = mmin+(i-.5)*step
 		amps = chi2.Amplitudes(m,tbin, parameters)
+
 		if typ == "intensity":
 			hist.SetBinContent(i,abs(amps[wave1])**2)
 		elif typ == "ampl_real":
@@ -66,6 +96,16 @@ def get_fit_histogram(chi2,typ,tbin,wave1, wave2 = None, mmin = .5, mmax = 2.5, 
 			hist.SetBinContent(i,amps[wave1].imag)
 		elif typ == "ampl_phase":
 			hist.SetBinContent(i,math.atan2(amps[wave1].imag,amps[wave1].real)*180./math.pi)
+		elif typ.startswith("all_waves"):
+			for k in range(nWaves):
+				for l in range(nWaves):
+					interference = amps[k]*amps[l].conjugate()
+					if typ.endswith("real"):
+						hist[k][l].SetBinContent(i,interference.real)
+					if typ.endswith("imag"):
+						hist[k][l].SetBinContent(i,interference.imag)
+					if typ.endswith("phase"):
+						hist[k][l].SetBinConetnt(i,math.atan2(interference.imag,interference.real)*180./math.pi)
 		else:
 			interference = amps[wave1]*amps[wave2].conjugate()
 			if typ =="real":
@@ -79,10 +119,138 @@ def get_fit_histogram(chi2,typ,tbin,wave1, wave2 = None, mmin = .5, mmax = 2.5, 
 		name = "mass-dependent"
 	else:
 		name = chi2.get_component_name(component)
-	hist.SetTitle(name)
-	hist.SetName(name)	
+	if not typ.startswith("all_waves"):
+		hist.SetTitle(name)
+		hist.SetName(name)	
+	else:
+		for i in range(nWaves):
+			for j in range(nWaves):
+				hist[i][j].SetTitle(name)
+				hist[i][j].SetName(name)	
 	return hist
 
+def get_mcmc_value(chi2, tbin, wave, component=-1,mmin=.5,mmax=2.5,nPoints = 1000, nEval = 1000, nStepPerEval = 100):
+	"""
+	Gets the mcmc integral value with error for the specified component and t' bin
+	@param chi2: Chi2 to be evaluated
+	@type chi2: chi2
+	@param tbin: t' bin to be used
+	@type tbin: int
+	@param wave: Number of the wave to be used
+	@type wave: int
+	@param component: Component to be used
+	@type component: int
+	@param mmin: Lower integral limit
+	@type mmin: float
+	@param mmax: Upper integral limit
+	@type mmax: float
+	@param nPoints: Number of points used for integration
+	@type nPoints: int
+	@param nEval: Number of evaluations of the Integral
+	@type nEval: int
+	@param nStepPerEval: Number of mcmc steps between the integral evaluations
+	@type nStepPerEval:int
+	"""
+	nCpl = chi2.nCpl()
+	nTbin = chi2.nTbin()
+	for t in range(nTbin):
+		if not tbin == t:
+			chi2.setEvalTbin(t,False)
+	
+
+	params_to_vary = None # Still to write
+	parameters = Chi2.parameters()
+	startpar = []
+	for i in params_to_vary:
+		startpar.append(parameters[i])
+	def EvalFunc(par):
+		for i,j in enumerate(params_to_vary):
+			parameters[j] = par[i]
+		return chi2.Eval(parameters)
+		
+	markov = markov(startpar, EvalFunc)
+	ints = []
+	for i in range(nEval):
+		for j in range(nStepPerEval):
+			markov.step()
+		ints.append(get_integral_value(chi2,tbin,wave,component,mmin,mmax,nPoints,parameters))
+	mean = 0.
+	for val in ints:
+		mean+=val/nEval
+	err = 0.
+	for val in ints:
+		err+=(val-mean)**2/(nEval-1)
+	err**=.5
+	for t in range(mTbin):
+		chi2.setEvalTbin(t,True)
+	return mean,err
+
+
+
+def get_integral_value(chi2,tbin,wave,component=-1,mmin=.5,mmax=2.5,nPoints=1000, parameters=None):
+	"""
+	Returns integral for one specified component and t' bin
+	@param chi2: Chi2 to be evaluated
+	@type chi2: chi2
+	@param tbin: t' bin to be used
+	@type tbin: int
+	@param wave: Number of the wave to be used
+	@type wave: int
+	@param component: Component to be used
+	@type component: int
+	@param mmin: Lower integral limit
+	@type mmin: float
+	@param mmax: Upper integral limit
+	@type mmax: float
+	@param nPoints: Number of points used for integration
+	@type nPoints: int
+	@param parameters: List pf parameters to bes used
+	@type paramters: list
+	@return: Integrated intensity of the components
+	@rtype: float
+	"""
+	oneHist = get_fit_histogram(chi2,'intensity',tbin,wave,mmin=mmin,mmax=mmax,nbin=nPoints,component = component)
+	value = 0.
+	name = oneHist.GetTitle()
+	for bin in range(1,oneHist.GetNbinsX()+1):
+		value+=oneHist.GetBinContent(bin)
+	return value
+
+def get_fit_t_dependece(chi2, t_binning, wave, component = -1, mmin = .5, mmax = 2.5, nPoints = 1000):
+	"""
+	Returns t' dependence histogram specified
+	@param chi2: Chi2 to be evaluated
+	@type chi2: chi2
+	@param tbin: t_binning bin to be used
+	@type tbin: list
+	@param wave: Number of the wave to be used
+	@type wave: int
+	@param component: Component to be used
+	@type component: int
+	@param mmin: Lower integral limit
+	@type mmin: float
+	@param mmax: Upper integral limit
+	@type mmax: float
+	@param nPoints: Number of points used for integration
+	@type nPoints: int
+	@return: t' dependence histogram
+	@rtype: Hist
+	"""
+	nTbin = len(t_binning)-1
+	if not nTbin == chi2.nTbin():
+		raise IndexError # Number of tBins does not match
+	values = []
+	name = ''
+	for tbin in range(nTbin):
+		values.append(get_integral_value(chi2,tbin,wave,component,mmin,mmax,nPoints))
+	hist = TH1D(name,name,nTbin,np.asarray(t_binning,dtype = np.float64))
+	hist.SetTitle(name)
+	hist.SetName(name)
+	for i in range(nTbin):
+		hist.SetBinContent(i+1,values[i]/(t_binning[i+1]-t_binning[i]))
+	with root_open("samuel.root","RECREATE"):
+		hist.Write()
+	return hist
 
 
 def get_plotcollection(chi2, mmin = .5, mmax = 2.5, nbins = 500):
@@ -115,10 +283,30 @@ def get_plotcollection(chi2, mmin = .5, mmax = 2.5, nbins = 500):
 		parametrization_file = parametrization_file.replace("<card_path>",os.path.dirname(YAML_file)+os.sep)
 	with open(parametrization_file, 'r') as inin:
 		parametrizations = yaml.load(inin)
+	tbin_borders = []
 	for i_tbin in range(nTbin):
-		result = spinDensityMatrix(wave_names,card["mass_independent_fit"][i_tbin])
-		tbin_plots = TBinPlots()
+		fit_folder = card["mass_independent_fit"][i_tbin]
+		result = spinDensityMatrix(wave_names,fit_folder)
+		tstring = ''
+		i_tstring = 1
+		while tstring == '':
+			tstring = fit_folder.split('/')[-i_tstring]
+			i_tstring+=1
+		tbin_lower = float(tstring.split('-')[0])
+		tbin_upper = float(tstring.split('-')[1])
+
+		if not tbin_lower in tbin_borders:
+			tbin_borders.append(tbin_lower)
+		if not tbin_upper in tbin_borders:
+			tbin_borders.append(tbin_upper)
+
+		tbin_plots = TBinPlots(tbin_lower,tbin_upper)
+		hists_re = get_fit_histogram(chi2,"all_waves_real",i_tbin,None,None,mmin=mmin,mmax=mmax,nbin=nbins)
+		hists_im = get_fit_histogram(chi2,"all_waves_real",i_tbin,None,None,mmin=mmin,mmax=mmax,nbin=nbins)
+		hists_ph = get_fit_histogram(chi2,"all_waves_real",i_tbin,None,None,mmin=mmin,mmax=mmax,nbin=nbins)
+
 		for i_wave, wave in enumerate(wave_names):
+			print wave
 			hist = result.get_hist("intensity",i_wave)
 			act_wave = Wave(wave)
 			LaTeX_namemap[wave] = act_wave.toRootLatex()
@@ -153,23 +341,25 @@ def get_plotcollection(chi2, mmin = .5, mmax = 2.5, nbins = 500):
 				tbin_plots.ampl_imag_[act_wave].Add(hist)
 			for j_wave, wave2 in enumerate(wave_names):
 				act_wave2 = Wave(wave2)
+				print wave2
 				# Real
 				hist = result.get_hist("real",i_wave,j_wave)
 				tbin_plots.real_[act_wave][act_wave2].Add(hist)
-				hist = get_fit_histogram(chi2,"real",i_tbin,i_wave,j_wave,mmin=mmin,mmax=mmax,nbin=nbins)
+				hist = hists_re[i_wave][j_wave]
 				tbin_plots.real_[act_wave][act_wave2].Add(hist)
 				# Imag
 				hist = result.get_hist("imag",i_wave,j_wave)
 				tbin_plots.imag_[act_wave][act_wave2].Add(hist)
-				hist = get_fit_histogram(chi2,"imag",i_tbin,i_wave,j_wave,mmin=mmin,mmax=mmax,nbin=nbins)
+				hist = hists_im[i_wave][j_wave]
 				tbin_plots.imag_[act_wave][act_wave2].Add(hist)
 				# Phase
 				hist = result.get_hist("phase",i_wave,j_wave)
 				tbin_plots.phase_[act_wave][act_wave2].Add(hist)
-				hist = get_fit_histogram(chi2,"phase",i_tbin,i_wave,j_wave,mmin=mmin,mmax=mmax,nbin=nbins)
+				hist = hists_ph[i_wave][j_wave]
 				tbin_plots.phase_[act_wave][act_wave2].Add(hist)
 
 		collection._tbins.append(tbin_plots)
+	tbin_borders.sort()
 	collection.setWavesFromIntensities()
 	collection.setLatexnames(LaTeX_namemap)
 	collection.setMassdependentFitRanges(limits_map)

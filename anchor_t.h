@@ -133,11 +133,12 @@ class anchor_t : public method{
 		size_t 					getNtot			()							const			{return getNtotAnc();};
 		size_t					getNcpl			()							const			{return getNanc();};
 		
-		bool 					setUseBranch(bool in);
+		bool 					setUseBranch		(bool in);
+		const std::vector<double>		fullParameters		()							const;
 
 
 	// OTHER METHODS
-		std::string 				className		()const										{return "anchor_t";};
+		std::string 				className		()							const			{return "anchor_t";};
 		void 					printStatus		()							const;
 		void 					set_is_ampl		(bool is_ampl);
 		void 					setTbinning		(std::vector<std::vector<double> > binning);

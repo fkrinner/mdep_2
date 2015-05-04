@@ -45,5 +45,8 @@ def make_data_files(card, path):
 	
 
 if __name__ == "__main__":
+
+# old_method works, other modes still to be tested
+
 	make_data_files(sys.argv[1],'/nfs/mds/user/fkrinner/data_mdep_fit/testFiles')
 

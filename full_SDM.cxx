@@ -51,8 +51,8 @@ std::vector<std::complex<double> > full_SDM::getAllCouplings(
 	}else{
 		throw std::invalid_argument("Unknown format for couplings");
 	};
-
-
+//	std::cout<<"SDM: ";
+//	print_vector(cpl_all);
 	return cpl_all;
 };
 //########################################################################################################################################################

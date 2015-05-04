@@ -112,13 +112,10 @@ std::vector<std::complex<xdouble> > waveset::amps(
 		if ((m[0] >= _lowerLims[wave] and m[0]<_upperLims[wave]) or ignore_limits){
 			if(-1==n_iso_bin){
 				std::complex<xdouble> amp(0.,0.);
-//				std::cout<<wave<<": ";
 				for (int nFunc = loBor; nFunc<upBor; nFunc++){
 					int func = _funcs_to_waves[nFunc]; // Number of function contributing to the actual wave
 					amp+=std::complex<xdouble>(ps[wave],0.)*cpl[nFunc]*funcEval[func];
-//					std::cout<<" + ("<<std::complex<xdouble>(ps[wave],0.)<<" * "<<cpl[nFunc]<<" * "<<funcEval[func]<<")";
 				};
-//				std::cout<<std::endl;
 				ampl[amplcount]=amp;
 				amplcount++;
 			}else{
@@ -137,7 +134,6 @@ std::vector<std::complex<xdouble> > waveset::amps(
 				amplcount+=abs(n_iso_bin);
 		};
 	};
-
 	return ampl;
 };
 template std::vector<std::complex<double> > waveset::amps(const double *m, const std::complex<double> *cpl,const double *par, std::vector<std::vector<std::complex<double> > > &funcEvals2pi, bool ignore_limits) const;
@@ -1397,6 +1393,37 @@ std::string waveset::getIsoConstName(
 	};
 	std::cerr<<"waveset::getIsoConstName(...): Error: Isobar Constant #"<<i<<" does not exist"<<std::endl;
 	return "not_used";
+};
+//########################################################################################################################################################
+///Gets all parameter indices used for function i
+std::vector<size_t> waveset::getFuncParameters(
+							size_t							ftw)	const{
+
+	std::vector<size_t> ret;
+	size_t nCpl = _n_cpls.at(ftw);
+	for (size_t tbin = 0;tbin<_nTbin;++tbin){
+		ret.push_back(2*tbin*_nBrCpl+2*nCpl  );
+		ret.push_back(2*tbin*_nBrCpl+2*nCpl+1);
+	};
+	std::vector<int> params = get_function_pars(_funcs_to_waves.at(ftw));
+	for (size_t ii=0; ii<params.size();++ii){
+		ret.push_back((size_t)(2*_nBrCpl*_nTbin+params.at(ii)));
+	};
+	int nBra = _n_branch.at(ftw);
+	std::vector<int> lastpars = get_function_pars(_funcs_to_waves.at(_nFtw-1));
+	size_t nPar = lastpars.at(lastpars.size()-1)+1;
+	if (nBra > -1){
+		ret.push_back((size_t)(2*_nBrCpl*_nTbin+nPar+2*nBra));
+		ret.push_back((size_t)(2*_nBrCpl*_nTbin+nPar+2*nBra+1));
+	};
+	int iso = _iso_to_waves.at(ftw);
+	if (iso > -1){
+		std::vector<int> iso_params = get_isobar_pars(iso);
+		for (size_t ii=0;ii<iso_params.size();++ii){
+			ret.push_back(2*_nBrCpl*_nTbin+nPar+2*_nBranch+iso_params.at(ii));
+		};
+	};
+	return ret;
 };
 //########################################################################################################################################################
 ///Gets the mass bin for a certain m3Pi

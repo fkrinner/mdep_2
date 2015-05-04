@@ -1,6 +1,11 @@
 import os
 import numpy
 import numpy.linalg as la
+
+#BEST_FITS = "./bestFits.txt"
+BEST_FITS = "/nfs/hicran/project/compass/analysis/fkrinner/fkrinner/trunk/massDependentFit/scripts/chi_squared_retry/bestFits.txt"
+
+NUMERICAL_LIMIT = 1.E-6
 #------------------------------------------------------------------------------------------------------------------------------------
 def readTextFile(inFile): 
 	"""
@@ -96,6 +101,56 @@ def readTextFile(inFile):
 					raise Exception("'while True:' loop seems to be stuck. Rank > 1000 seems not right")
 	return [waves,covarianceMatrix]	
 #------------------------------------------------------------------------------------------------------------------------------------
+def getLike(inFile):
+	"""
+	Returns the log-likelihood of 'inFile'
+	@param inFile: Input Filename
+	@type inFile: str
+	@return: Likelihood
+	@rtype: float
+	"""
+	nextIsLike=False
+	nextIsNevents=False
+	data=open(inFile,'r')
+	for line in data.readlines():
+		if nextIsLike:
+			like=float(line)
+			if nevents > 0:
+				data.close()
+				return like
+			else:
+				data.close()
+				return float('nan')
+		if nextIsNevents:
+			nevents = int(line)
+			nextIsNevents=False
+		if 'likelihood' in line:
+			nextIsLike=True
+		if 'Number of events' in line:
+			nextIsNevents=True
+	data.close()
+	return float('nan')
+#------------------------------------------------------------------------------------------------------------------------------------
+def getBestLike(direct='.'): 
+	"""
+	Returns the file with the bes log-likelihood in the directory 'direct'
+	@param direct: Directory to scan
+	@type dorect: str
+	@return: File name for the best fit
+	@rtype: str
+	"""
+	maxLike = float('nan')
+	bestFile=''
+	for fn in os.listdir(direct):
+    		if os.path.isfile(direct+os.sep+fn):
+			likeNew=getLike(direct+os.sep+fn)
+			print "  Found file with likelihood: "+str(likeNew)
+			if maxLike<likeNew or not maxLike == maxLike:
+				maxLike=likeNew
+				bestFile=fn
+	print "Best file is: '"+bestFile+"'"
+	return bestFile
+#------------------------------------------------------------------------------------------------------------------------------------
 def getBestFits(inDirect=os.curdir+os.sep): 
 	"""
 	Returns a list of files with the best log-likelihoods
@@ -105,7 +160,7 @@ def getBestFits(inDirect=os.curdir+os.sep):
 	@rtype: list
 	"""
 	direct=inDirect
-	while True: # Remove // from path so it can be found in the 'bestFits.txt' even if //, /// or ... is given in the path
+	while True: # Remove // from path so it can be found in the BEST_FITS even if //, /// or ... is given in the path
 		directOld=direct
 		direct=direct.replace(os.sep+os.sep,os.sep)
 		if direct == directOld:
@@ -113,9 +168,9 @@ def getBestFits(inDirect=os.curdir+os.sep):
 	fits=[]
 	foundDirect=False
 	foundDirectTot=False
-	if not os.path.isfile('bestFits.txt'): #Store results, so if the best likelihoods are determined once, they can be found more easyly
-		open('bestFits.txt', 'a').close()
-	read=open('bestFits.txt','r')
+	if not os.path.isfile(BEST_FITS): #Store results, so if the best likelihoods are determined once, they can be found more easyly
+		open(BEST_FITS, 'a').close()
+	read=open(BEST_FITS,'r')
 	for line in read.readlines():
 #		print line
 		chunks=line.split()
@@ -125,7 +180,7 @@ def getBestFits(inDirect=os.curdir+os.sep):
 			fits.append([chunks[0],float(chunks[1]),float(chunks[2])])
 		if chunks[0]=='DIRECTORY:':
 			if chunks[1]==direct:
-				print "Found directory in 'bestFits.txt': Do not scan the folders, but take the results from the file."
+				print "Found directory in BEST_FITS: Do not scan the folders, but take the results from the file."
 				foundDirect=True	
 				foundDirectTot=True	
 	if not foundDirectTot:
@@ -136,7 +191,7 @@ def getBestFits(inDirect=os.curdir+os.sep):
 				m3PiMax=float(chunks[6])/1000	
 				bestFile=getBestLike(direct+os.sep+fn)
 				fits.append([direct+os.sep+fn+os.sep+bestFile,m3PiMin,m3PiMax])
-		store=open('bestFits.txt','a')
+		store=open(BEST_FITS,'a')
 		store.write('DIRECTORY: '+direct+'\n')
 		for i in range(0,len(fits)):
 			store.write(fits[i][0]+'  '+str(fits[i][1])+'  '+str(fits[i][2])+'\n')
@@ -300,10 +355,30 @@ def getComaData(	waves,		# List of waves
 #		final_coma_inv = invert_right_submatrix(final_coma,flagg, eps)
 		if not flagg == "ANCHOR_FIRST":
 			raise ValueError # Other methods not supported at the moment
-		final_coma_inv = la.pinv(final_coma).tolist()
+#		final_coma_inv = la.pinv(final_coma).tolist()
+		final_coma_inv = own_pinv(final_coma,NUMERICAL_LIMIT).tolist()
 		final_comas_inv.append(final_coma_inv)
 		data_points.append(data_point)
 	return [data_points,final_comas_inv]
+#------------------------------------------------------------------------------------------------------------------------------------
+def own_pinv(matrix, minev =0.):
+	"""
+	Own implementation of the pseudo inverse for symmetric matrices
+	@param matrix: Matrix to invert (list of lists)
+	@type matrix: list
+	@param minev: Minimal absolute value for an eigenvalue that is not assumed to be zero
+	@type minev: float
+	@return: Pseudo-inverte matrix (list of lists)
+	@rtype: list
+	"""
+	val,vec = la.eig(matrix)
+	dim = len(val)
+	new = numpy.zeros((dim,dim))
+	for i in range(dim):
+		if abs(val[i]) > minev:
+			new[i,i] = 1/val[i]
+	ret = numpy.dot(vec,numpy.dot(new,numpy.transpose(vec)))
+	return ret
 #------------------------------------------------------------------------------------------------------------------------------------
 def getRelevantData(waves,direct):
 	"""
@@ -339,9 +414,9 @@ def getRelevantData(waves,direct):
 			comaLine2=[]
 			for wave2 in wavesStrip:
 				mm = waveNumbers[wave2][1]
-				comaLine1.append(fitData[1][2*nn][2*mm]*nevents)
-				comaLine1.append(fitData[1][2*nn][2*mm+1]*nevents)
-				comaLine2.append(fitData[1][2*nn+1][2*mm]*nevents)
+				comaLine1.append(fitData[1][2*nn  ][2*mm  ]*nevents)
+				comaLine1.append(fitData[1][2*nn  ][2*mm+1]*nevents)
+				comaLine2.append(fitData[1][2*nn+1][2*mm  ]*nevents)
 				comaLine2.append(fitData[1][2*nn+1][2*mm+1]*nevents)
 			Ts.append(re)
 			Ts.append(im)

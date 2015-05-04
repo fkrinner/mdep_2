@@ -43,7 +43,7 @@ anchor_t::anchor_t(
 	loadDataComa(Ycard);
 	std::cout<<"anchor_t::anchot_t(...): Data and coma loaded\nLoad parameter values"<<std::endl;
 	loadParameterValues(Ycard, Yparam);
-	std::cout<<"anchor_t::anchot_t(...): Paramter values loaded"<<std::endl;
+	std::cout<<"anchor_t::anchot_t(...): Parameter values loaded"<<std::endl;
 	std::cout<<"anchor_t::anchot_t(...): anchor_t loaded"<<std::endl;
 };
 #endif//USE_YAML
@@ -429,6 +429,7 @@ AandB<xdouble> anchor_t::get_AB(
 				size_t up2=(*_waveset.borders_waves())[1];
 				//// (RR + j II)*(R - j I)*(r - j i) = (RR R r - RR I i - II I r + II R i)+j(II R r + II I i - RR r I - RR R i)
 
+
 				AB.B[2*ind1  ] += AB1.real() * lines[2*point1-2] * 2;							//// >>>> now is Point
 				AB.B[2*ind1  ] += AB1.imag() * lines[2*point1-1] * 2;							//// >>>> now is Point
 
@@ -462,6 +463,10 @@ AandB<xdouble> anchor_t::get_AB(
 				
 
 						//// (RR + j II)*(R - j I)*(r - j i) = (RR R r - RR I i - II I r + II R i)+j(II R r + II I i - RR r I - RR R i)
+
+//						if (ind1==0 and ind2==0){
+//							std::cout<<AB.A[2*ind1  ][2*ind2  ]<<" += "<<AB1.real()<<" * "<<_coma[tbin][bin][2*point1-1][2*point2-1]<<" * "<<AB2.real()<<std::endl;
+//						};
 
 						AB.A[2*ind1  ][2*ind2  ]+= AB1.real() * _coma[tbin][bin][2*point1-1][2*point2-1] * AB2.real();	//// >>>> are points1/2 now
 						AB.A[2*ind1  ][2*ind2  ]+= AB1.real() * _coma[tbin][bin][2*point1-1][2*point2  ] * AB2.imag();	//// >>>> are points1/2 now
@@ -525,11 +530,20 @@ std::vector<std::complex<xdouble> > anchor_t::getMinimumCpl(
 	int nNon = _waveset.nFtw() - nCplAnc;
 	std::vector<std::complex<xdouble> > cpl = std::vector<std::complex<xdouble> >(_waveset.nFtw());
 	for (int i=0; i<nCplAnc; i++){
+//		std::cout<<"cpl("<<i<<"): "<<anchor_cpl[i]<<std::endl;
 		cpl[i] = anchor_cpl[i];
 	};
 	AandB<xdouble>AB = get_AB(tbin,anchor_cpl,par,iso_par);
-
+//	std::cout<<"B:_____________________________________________"<<std::endl;
+//	print_vector(AB.B);
+//	std::cout<<"A:_____________________________________________"<<std::endl;
+//	for (size_t i=0;i<AB.A.size();++i){
+//		std::cout<<"-----------------------------------------------"<<std::endl;
+//		print_vector(AB.A[i]);
+//	};	
+//	std::cout<<"D:_____________________________________________"<<std::endl;
 	std::vector<xdouble> D = cholesky::cholesky_solve(AB.A,AB.B);
+//	print_vector(D);
 
 	for (int i=0;i<nNon;i++){
 		// Short explanation:
@@ -803,8 +817,11 @@ std::vector<std::complex<double> > anchor_t::getAllCouplings(
 		for (size_t i=0;i<_nBrCplAnc;i++){
 			cpl_t.push_back(cpl[tbin*_nBrCplAnc+i]);
 		};
+//		print_vector(cpl_t);
 		cpl_all = getMinimumCplBra(tbin,&bra[0],&cpl_t[0],&par[0],&iso[0]);//[0]//
+//		print_vector(cpl_all);
 		cpl_all = getUnbranchedCouplings(cpl_all,bra);
+//		print_vector(cpl_all);
 //		std::cout<<"getAllCouplings(...): Take couplings as anchor couplings for all t' bins"<<std::endl;
 	}else if (cpl.size() == _nBrCplAnc){ 			// Anchor couplings for one t' bin
 		cpl_all = getMinimumCplBra(tbin,&bra[0],&cpl[0],&par[0],&iso[0]);//[0]//
@@ -831,6 +848,8 @@ std::vector<std::complex<double> > anchor_t::getAllCouplings(
 	}else{
 		std::cerr<<"anchor_t::getAllCouplings(...): Error: Can't determine the format of the couplings"<<std::endl;
 	};
+//	std::cout<<"anc: ";
+//	print_vector(cpl_all);
 	return cpl_all;
 };
 //########################################################################################################################################################
@@ -959,6 +978,56 @@ size_t anchor_t::getNanc()																const{
 bool anchor_t::setUseBranch(bool in){
 	_useBranch = in;
 	return true;
+};
+//########################################################################################################################################################
+/// Get the full parameter set, with couplings for all ftw
+const std::vector<double> anchor_t::fullParameters()													const{
+
+	std::vector<double> paramet = parameters();
+	std::vector<std::complex<double> > cpl(_nCpl);
+	std::vector<double> par(_nPar);	
+	std::vector<std::complex<double> > bra(_nBra);
+	std::vector<double> iso(_nIso);
+
+	int count =0;
+	for (size_t i=0;i<_nCpl;i++){
+		cpl[i] = std::complex<double>(paramet[count],paramet[count+1]);
+		count+=2;
+	};
+	for (size_t i=0;i<_nPar;i++){
+		par[i] = paramet[count];
+		count++;
+	};
+	for (size_t i=0;i<_nBra;i++){
+		bra[i] = std::complex<double>(paramet[count],paramet[count+1]);
+		count+=2;
+	};
+	for (size_t i=0;i<_nIso;i++){
+		iso[i]=paramet[count];
+		count++;
+	};
+	size_t nTbin = _waveset.nTbin();
+	std::vector<double> fullParam(2*_waveset.nBrCpl()*nTbin+_nPar+2*_nBra+_nIso);
+	size_t nFullCpl = 0;
+	for (size_t tbin =0;tbin<nTbin;++tbin){
+		std::vector<std::complex<double> > cpl_all = getMinimumCplBra(tbin,&bra[0],&cpl[(_nCpl/nTbin)*tbin],&par[0],&iso[0]);
+		nFullCpl = cpl_all.size();
+		for (size_t ii=0;ii<nFullCpl;++ii){
+			fullParam[2*(nFullCpl*tbin+ii)  ] = cpl_all[ii].real();
+			fullParam[2*(nFullCpl*tbin+ii)+1] = cpl_all[ii].imag();
+		};
+	};
+	for (size_t p=0;p<_nPar;++p){
+			fullParam[2*nFullCpl*nTbin+p] = par[p];
+	};
+	for (size_t b=0;b<_nBra;++b){
+			fullParam[2*nFullCpl*nTbin+_nPar+2*b  ]=bra[b].real();
+			fullParam[2*nFullCpl*nTbin+_nPar+2*b+1]=bra[b].imag();
+	};
+	for (size_t i=0;i<_nIso;++i){
+			fullParam[2*nFullCpl*nTbin+_nPar+2*_nBra+i]=iso[i];
+	};
+	return fullParam;
 };
 //########################################################################################################################################################
 ///Gets the total number of paramters with only anchor couplings

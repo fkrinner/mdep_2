@@ -47,6 +47,8 @@ class method{
 		std::vector<std::complex<double> >	getUnbranchedCouplings				(const std::vector<std::complex<double> > &cpl,const std::vector<std::complex<double> > &bra) 	const;
 		void 					update_min_max_bin				();
 		void 					update_definitions				();
+		virtual const std::vector<double>	fullParameters					()										const	{return parameters();};
+
 		virtual std::string			className					()										const	{return "undefined_method";};
 
 		virtual size_t				getNtot						()										const	{std::cout<<"method.h: getNtot not overwritten"<<std::endl;throw;return 0;};
@@ -93,7 +95,7 @@ class method{
 		size_t 									_nCpl; 			// Number of couplings (total, all t' bins summed)
 		size_t 									_nBra; 			// Number of branchings
 		size_t 									_nIso;			// Number of isobar parameters
-		size_t 									_nBrCpl;		// Number of couplings with branchings in the anchor wave
+		size_t 									_nBrCpl;		// Number of couplings with branchings 
 
 		// PARAMETERS AND DATA
 		std::vector<double>							_parameters; 		// Acutal paramters (2*_nCpl,_nPar,2*_nBra,_nIso) - these are 'all' parameters!!!
