@@ -1,6 +1,6 @@
 #include<boost/python.hpp>
 #include<boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include"minimize.h"
+#include"minuit_root.h"
 #include<string>
 namespace bp = boost::python;
 
@@ -31,10 +31,10 @@ std::vector<std::vector<T> > to_std_vector_vector(const bp::object& iterable){
 };
 
 
-struct chi2py:public minimize{
+struct chi2py:public minuit_root{
 
 	chi2py(std::string card):
-		minimize(card){};
+		minuit_root(card){};
 
 	size_t nTot(){return _method->nTot();};
 	size_t nTbin(){return _method->Waveset()->nTbin();};
@@ -46,10 +46,10 @@ struct chi2py:public minimize{
 	size_t nWaves(){return _method->Waveset()->nWaves();};
 
 	void relPar(std::string inin){
-		minimize::relPar(inin);
+		minuit_root::relPar(inin);
 	};
 	void fixPar(std::string inin){
-		minimize::fixPar(inin);
+		minuit_root::fixPar(inin);
 	};
 	void printParameters(){
 		_method->Waveset()->printParameters();
@@ -72,10 +72,10 @@ struct chi2py:public minimize{
 			std::cout<<"Error: Parameter '"<<name<<"' not definded"<<std::endl;
 	 		return std::numeric_limits<double>::quiet_NaN();
 		};
-		return minimize::getParameter(i);
+		return minuit_root::getParameter(i);
 	};
 	void setParameter(std::string name, double val){
-		minimize::setParameter(name,val);
+		minuit_root::setParameter(name,val);
 	};
 	void write_plots(std::string file_name, size_t tbin){
 		_method->write_plots(file_name,tbin);
@@ -123,7 +123,7 @@ struct chi2py:public minimize{
 		return std_vector_to_py_list(lims);
 	};
 	void setParLimits(std::string name, double upper, double lower){
-		minimize::setParLimits(name,upper,lower);
+		minuit_root::setParLimits(name,upper,lower);
 	};
 	void setParameterFile(std::string fileName){
 		_method->setParameterFile(fileName);
@@ -138,10 +138,10 @@ struct chi2py:public minimize{
 		_method->readParameters(fileName);
 	};
 	void initCouplings(size_t nseeds){
-		minimize::initCouplings(nseeds,-1);
+		minuit_root::initCouplings(nseeds,-1);
 	};
 	void initSingleTbin(size_t nseeds, size_t tbin){
-		minimize::initCouplings(nseeds,tbin);
+		minuit_root::initCouplings(nseeds,tbin);
 	};
 	std::string YAML_file(){
 		return _method->Waveset()->YAML_file();

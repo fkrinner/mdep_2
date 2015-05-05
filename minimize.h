@@ -11,10 +11,6 @@
 
 typedef method METHOD; // Otherwise, the class method 'method()' and the type 'method' would have the same name --> typedef method METHOD
 
-#include"Math/Minimizer.h"
-#include"Math/Factory.h"
-#include"Math/Functor.h"
-
 #ifdef USE_YAML
 #include "yaml-cpp/yaml.h"
 #endif//USE_YAML
@@ -33,7 +29,6 @@ class minimize{
 		double 			operator()			(const double*xx)		{return (*_method)(xx);};
 
 		// Fitting routines
-		double 			fit				();
 		void 			initCouplings			(size_t nSeeds = 1, int ntbin = -1);
 
 	// Setters and getters
@@ -63,9 +58,15 @@ class minimize{
 		void 			printStatus();													// X
 
 	// Internal handlers
-		void 			update_definitions		();
-		void 			reload_par_definitions		(int mara_peter = -1);
-		bool 			initialize			(std::string s1="Minuit2", std::string s2="Migrad");
+		void		update_definitions		();
+		void		reload_par_definitions		(int mara_peter = -1);
+
+		virtual double 		fit				()				{std::cout<<"minimize.h: fit() not overwritten"<<std::endl;				throw;return 0.;};
+		virtual void		update_definitions_fitter	()				{std::cout<<"minimize.h: update_definitions_fitter() not overwritten"<<std::endl;	throw;};
+		virtual void		reload_par_definitions_fitter	(int ulim, int olim)		{std::cout<<"minimize.h: reload_par_definitions_fitter() not overwritten"<<std::endl;	throw;};
+		virtual bool		initialize			()				{std::cout<<"minimize.h: initialize() not overwritten"<<std::endl;			throw;return false;};
+		virtual const double *	minimizerParameters		()		const 		{std::cout<<"minimize.h: minimizerParameters() not overwritten"<<std::endl;		throw;return 0;};
+
 		void 			setRandomCpl			();										// X
 		void 			setRandomBra			();										// X
 		void			findRandRange			();
@@ -73,7 +74,7 @@ class minimize{
 		void			setMaxCalls			(size_t nCalls);
 
 	// MULTINEST
-		void			cube				(double* in)	const;
+
 
 #ifdef USE_YAML	
 		void 			loadFitterDefinitions(YAML::Node &waveset);
@@ -90,14 +91,11 @@ class minimize{
 		double 			_minStepSize;						// Minimal step size
 
 	// MINIMIZER STUFF
-		ROOT::Math::Minimizer* 	_min;							// ROOT Minimizer
-		ROOT::Math::Functor 	_f;							// ROOT Functor object
 		bool 			_init; 							// Flag for the initialization of the minimizer
 		size_t 			_maxFunctionCalls;					// Miminizer definition
 		size_t 			_maxIterations;						// Miminizer definition
 		double 			_tolerance;						// Miminizer definition
 		std::vector<double> 	_step_sizes;						// Step Size for each paramter	
 		std::vector<bool> 	_released; 						// Status of each paramters
-
 };
 #endif//MINIMIZE_MINI_MICE

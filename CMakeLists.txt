@@ -8,7 +8,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3  -fopenmp")
 set(create_python_links ON)
 set(use_auto_diff ON) 
 set(use_YAML ON)
-#set(use_multiNest ON)
 #set(use_anchor_t ON)
 
 set(CMAKE_MODULE_PATH  ${PROJECT_SOURCE_DIR} )
@@ -59,12 +58,6 @@ if( use_auto_diff )
   )
 endif()
 
-if( use_multiNest )
-  set( INCLUDE_DIRS
-      ${INCLUDE_DIRS}
-      /nfs/hicran/project/compass/analysis/fkrinner/MultiNest-master/include
-  )
-endif()
 
 if(create_python_links)
   add_library(chi2py SHARED chi2py.cxx)
@@ -83,6 +76,7 @@ add_library(anchor_t              SHARED anchor_t.cxx           )
 add_library(full_covariance       SHARED full_covariance.cxx    )
 add_library(old_method            SHARED old_method.cxx         )
 add_library(minimize              SHARED minimize.cxx           )
+add_library(minuit_root           SHARED minuit_root.cxx        )
 
 
 #set execuatbles
@@ -91,9 +85,6 @@ add_executable(fitmd.exe         fitmd.cc                       )
 #add_executable(standard_test.exe standard_test.cc               )
 add_executable(amplitude         test_amplitude.cc              )
 
-if ( use_multiNest )
-  add_executable(multinest       multinest.cc                   )
-endif()
 
 
 #link own libraries
@@ -104,9 +95,10 @@ target_link_libraries(minimize   anchor_t                       )
 target_link_libraries(minimize   full_covariance                )
 target_link_libraries(minimize   old_method                     )
 target_link_libraries(minimize   full_SDM                       )
+target_link_libraries(minuit_root minimize                      )
 target_link_libraries(fitmd.exe  method                         )
 target_link_libraries(fitmd.exe  old_method                     )
-target_link_libraries(fitmd.exe  minimize                       )
+target_link_libraries(fitmd.exe  minuit_root                    )
 #target_link_libraries(standard_test.exe minimize                )
 #target_link_libraries(de_isobarring anchor_t                    )
 
@@ -130,11 +122,6 @@ if ( use_auto_diff )
 endif()
 
 if(create_python_links)
-  target_link_libraries(chi2py minimize)
+  target_link_libraries(chi2py minuit_root)
   target_link_libraries(chi2py ${Boost_LIBRARIES})
-endif()
-
-if ( use_multiNest )
-  target_link_libraries(multinest  /nfs/hicran/project/compass/analysis/fkrinner/MultiNest-master/lib/libmultinest.so )
-  target_link_libraries(multinest minimize)
 endif()

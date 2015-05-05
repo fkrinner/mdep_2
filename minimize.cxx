@@ -8,9 +8,7 @@
 #include<cstdlib>
 #include<stdexcept>
 
-#include "Math/Minimizer.h"
-#include "Math/Factory.h"
-#include "Math/Functor.h"
+
 
 #ifdef ADOL_ON
 #include "adolc/adolc.h"
@@ -67,32 +65,6 @@ minimize::minimize(
 	std::cout<<"minimize::minimize(...): Setup finished"<<std::endl;
 };
 #endif//USE_YAML
-//########################################################################################################################################################
-///Actual call for fitter. At the moment the instance is copied and fitted, this might be improved...
-double minimize::fit(){ 
-
-	reload_par_definitions();
-	print_vector(_released);
-	if (_method_type == 0){
-		_f=ROOT::Math::Functor(*((anchor_t*)_method),_method->nTot());
-	}else if(_method_type == 1){
-		_f=ROOT::Math::Functor(*((full_covariance*)_method),_method->nTot());
-	}else if(_method_type ==2){
-		_f=ROOT::Math::Functor(*((old_method*)_method),_method->nTot());
-	};
-	if(_init){
-		_min->Minimize();
-		const double *xs = _min->X();
-		std::vector<double> best_par(_method->nTot());
-		for (size_t i=0;i<_method->nTot();i++){
-			_method->setParameter(i,xs[i]);
-		};
-		return (*_method)(xs);
-	}else{
-		std::cerr<<"minimize::fit(): Error: Fitter not initialized"<<std::endl;
-		return std::numeric_limits<double>::quiet_NaN();
-	};
-};
 //########################################################################################################################################################
 ///Finds start values for couplings and branchings // works only for anchot_t, for full_covariance not
 void minimize::initCouplings(
@@ -235,7 +207,7 @@ void minimize::initCouplings(
 				relPar(2*i+1);
 			};
 		};
-		std::cout<<"minimize::initCouplings(...): Total: "<<(*_method)(_min->X())<<std::endl;
+		std::cout<<"minimize::initCouplings(...): Total: "<<(*_method)(minimizerParameters())<<std::endl;
 		std::cout<<"minimize::initCouplings(...): Couplings and branchings found"<<std::endl;
 		std::cout<<"minimize::initCouplings(...): Setting automatic limits for couplings and branchings"<<std::endl;
 		for (size_t i=0;i<_method->nCpl();i++){
@@ -441,108 +413,11 @@ void minimize::printStatus(){
 	print_vector(_released);
 };
 //########################################################################################################################################################
-///Updates internal definitions
-void minimize::update_definitions(){ 
-
-	_method->update_definitions();
-	std::vector<bool> rels;
-	for (size_t i=0;i<_method->nCpl();i++){
-		rels.push_back(true);
-		rels.push_back(true);
-	};
-	for (size_t i=0;i<_method->nPar();i++){
-		rels.push_back(false);
-	};
-	for (size_t i=0;i<_method->nBra();i++){
-		rels.push_back(false);
-		rels.push_back(false);
-	};
-	for (size_t i=0;i<_method->nIso();i++){
-		rels.push_back(false);
-	};
-	_released = rels;
-	if(_init){
-		_min->SetTolerance(_tolerance);
-		_min->SetMaxFunctionCalls(_maxFunctionCalls);
-		_min->SetMaxIterations(_maxIterations);
-	};
-};
-//########################################################################################################################################################
 ///Sets maxFunction Calls
 void minimize::setMaxCalls(				size_t						nCalls){
 
 	_maxFunctionCalls = nCalls;
 	update_definitions();
-};
-//########################################################################################################################################################
-///Update the parameter definitions for parameter number mara_peter, if mara_peter ==-1, then all are updated
-void minimize::reload_par_definitions(
-							int 						mara_peter){ 
-
-	int uLim = 0;
-	int oLim = _method->nTot();
-	if (mara_peter > -1){
-		uLim = mara_peter;
-		oLim = mara_peter+1;
-	};
-	if((*_method->lower_parameter_limits()).size() != _method->parameters().size()){
-		_method->init_lower_limits(_method->parameters().size());
-	};
-	if((*_method->upper_parameter_limits()).size() != _method->parameters().size()){
-		_method->init_upper_limits(_method->parameters().size());
-	};
-	if(_init){
-		for(int i=uLim;i<oLim;i++){
-			if(_released[i]){
-				if((*_method->lower_parameter_limits())[i] < (*_method->upper_parameter_limits())[i]){
-					_min->SetLimitedVariable(i,(*_method->parNames())[i],_method->parameters()[i],_step_sizes[i],(*_method->lower_parameter_limits())[i],(*_method->upper_parameter_limits())[i]);
-//					std::cout<<(*_method->parNames())[i]<<" limited to "<<(*_method->lower_parameter_limits())[i]<<"-"<<(*_method->upper_parameter_limits())[i]<<std::endl;
-				}else{
-					_min->SetVariable(i,(*_method->parNames())[i],_method->parameters()[i],_step_sizes[i]);
-				};
-			}else{
-				_min->SetFixedVariable(i,(*_method->parNames())[i],_method->parameters()[i]);
-			};
-		};
-	};
-};
-//########################################################################################################################################################
-///Initializes the fitter
-bool minimize::initialize(std::string s1, std::string s2){ 
-
-	if (_method->parameters().size()<_method->nTot()){
-		std::cerr<<"minimize::initialize(...): Error: _method->parameters().size() < _method->nTot(). Abort initialize(initialization."<<std::endl;
-		return false;
-	};
-	if ((*_method->parNames()).size()<_method->nTot()){
-		std::cerr<<"minimize::initialize(...): Error: (*_method->parNames()).size() < _method->nTot(). Abort initialization."<<std::endl;
-		return false;
-	};
-	if (_step_sizes.size()<_method->nTot()){
-		std::cerr<<"minimize::initialize(...): Error: _step_sizes.size() < _method->nTot(). Abort initialization."<<std::endl;
-		return false;
-	};
-	if (_released.size()<_method->nTot()){
-		std::cerr<<"minimize::initialize(...): Error: _released.size() < _method->nTot(). Abort initialization."<<std::endl;
-		return false;
-	};
-	_min = ROOT::Math::Factory::CreateMinimizer(s1,s2);
-	_min->SetMaxFunctionCalls(_maxFunctionCalls);
-	_min->SetMaxIterations(_maxIterations);
-	_min->SetTolerance(_tolerance);
-	if (_method_type == 0){
-		_f=ROOT::Math::Functor(*((anchor_t*)_method),_method->nTot());
-	}else if(_method_type == 1){
-		_f=ROOT::Math::Functor(*((full_covariance*)_method),_method->nTot());
-	}else if(_method_type ==2){
-		_f=ROOT::Math::Functor(*((old_method*)_method),_method->nTot());
-	};
-
-	_min->SetFunction(_f);
-	_init = true;
-	update_definitions();
-	reload_par_definitions();
-	return true;
 };
 //########################################################################################################################################################
 ///Randomize couplings within _randRange
@@ -610,7 +485,6 @@ void minimize::finish_setUp(){
 	};
 	setRandomCpl();
 	setRandomBra();
-	initialize();
 };
 #ifdef USE_YAML
 //########################################################################################################################################################
@@ -636,6 +510,7 @@ void minimize::loadFitterDefinitions(
 		};
 	};
 };
+#endif//USE_YAML
 //########################################################################################################################################################
 size_t minimize::get_method(
 							YAML::Node					&card)						const{
@@ -652,16 +527,52 @@ size_t minimize::get_method(
 	if (card["method"].as<std::string>() == "old_method"){
 		return 2;
 	};
-	throw runtime_error("Invalid method ginven in the 'card'");
+	throw runtime_error("Invalid method given in the 'card'");
 	return 1111111;
 };
-#endif//USE_YAML
 //########################################################################################################################################################
-///Cube required by the MultiNest package
-void minimize::cube(					double						*in)						const{
-	
-	for (size_t i=0;i<_method->nTot();i++){
-		in[i] = (1-in[i])*(*_method->lower_parameter_limits())[i]+ in[i]*(*_method->upper_parameter_limits())[i];
+///Update the parameter definitions for parameter number mara_peter, if mara_peter ==-1, then all are updated
+void minimize::reload_par_definitions(
+							int 						mara_peter){ 
+
+	int uLim = 0;
+	int oLim = _method->nTot();
+	if (mara_peter > -1){
+		uLim = mara_peter;
+		oLim = mara_peter+1;
+	};
+	if((*_method->lower_parameter_limits()).size() != _method->parameters().size()){
+		_method->init_lower_limits(_method->parameters().size());
+	};
+	if((*_method->upper_parameter_limits()).size() != _method->parameters().size()){
+		_method->init_upper_limits(_method->parameters().size());
+	};
+	if(_init){
+		reload_par_definitions_fitter(uLim,oLim);
 	};
 };
 //########################################################################################################################################################
+///Updates internal definitions
+void minimize::update_definitions(){ 
+
+	_method->update_definitions();
+	std::vector<bool> rels;
+	for (size_t i=0;i<_method->nCpl();i++){
+		rels.push_back(true);
+		rels.push_back(true);
+	};
+	for (size_t i=0;i<_method->nPar();i++){
+		rels.push_back(false);
+	};
+	for (size_t i=0;i<_method->nBra();i++){
+		rels.push_back(false);
+		rels.push_back(false);
+	};
+	for (size_t i=0;i<_method->nIso();i++){
+		rels.push_back(false);
+	};
+	_released = rels;
+	if(_init){
+		update_definitions_fitter();
+	};
+};
