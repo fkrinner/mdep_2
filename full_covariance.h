@@ -43,11 +43,11 @@ class full_covariance : public full_SDM{
 								const double	 					*par,
 								const double						*iso_par)			const;
 #ifdef ADOL_ON
-		adouble EvalTbin(
+		adtl::adouble EvalTbin(	// Need to declare explicit adtl::adouble method to cicumvent troubles with openMP 
 								int 							tbin,
-								const std::complex<adouble> 				*cpl,
-								const adouble	 					*par,
-								const adouble						*iso_par)			const;
+								const std::complex<adtl::adouble> 				*cpl,
+								const adtl::adouble	 					*par,
+								const adtl::adouble						*iso_par)			const;
 #endif//ADOL_ON
 
 
@@ -70,8 +70,7 @@ class full_covariance : public full_SDM{
 
 	// DERIVATIVES
 #ifdef ADOL_ON
-		std::vector<double> 			Diff(std::vector<double> &xx)								const;
-		std::vector<double> 			Diff(const double* xx)									const;
+		std::vector<double> 			Diff(const double* xx)										const;
 #endif//ADOL_ON
 	// DATA HANDLING
 		bool 					set_data(int tbin, int bin, std::vector<double> data);

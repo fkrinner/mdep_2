@@ -10,26 +10,28 @@
 #include <string>
 // double mPi=1.3957018;///\pm0.00035MeV // Particle Data Booklet 2012
 
-#ifdef ADOL_ON // Some function on std::complex<adouble>, needed for automatic differentiation.
-#include <adolc/adolc.h>  
-std::complex<adouble> log(std::complex<adouble> z){
-	adouble re = std::real(z);
-	adouble im = std::imag(z);
+#ifdef ADOL_ON // Some function on std::complex<adtl::adouble>, needed for automatic differentiation.
+#include <adolc/adouble.h>  
+namespace complex_adtl{
+	std::complex<adtl::adouble> log(std::complex<adtl::adouble> z){
+		adtl::adouble re = std::real(z);
+		adtl::adouble im = std::imag(z);
 
-	adouble newReal = pow(re*re+im+im,.5);
-	adouble newImag = atan2(im,re);
+		adtl::adouble newReal = pow(re*re+im+im,.5);
+		adtl::adouble newImag = atan2(im,re);
 
-	return std::complex<adouble>(newReal,newImag);
-};
-std::complex<adouble> sqrt(std::complex<adouble> z){
-	return pow(z,0.5);
-};
-adouble abs(std::complex<adouble> z){
-	adouble squared = std::real(z*std::conj(z));
-	return pow(squared,0.5);
-};
-adouble sqrt(adouble x){
-	return pow(x,0.5);
+		return std::complex<adtl::adouble>(newReal,newImag);
+	};
+	std::complex<adtl::adouble> sqrt(std::complex<adtl::adouble> z){
+		return pow(z,0.5);
+	};
+	adtl::adouble abs(std::complex<adtl::adouble> z){
+		adtl::adouble squared = std::real(z*std::conj(z));
+		return pow(squared,0.5);
+	};
+	adtl::adouble sqrt(adtl::adouble x){
+		return pow(x,0.5);
+	};
 };
 #endif//ADOL_ON
 
@@ -139,8 +141,8 @@ class amplitude {
 		virtual std::complex<double> Eval(const double* var, const double* par, const double* con)	const		{return std::complex<double>(1.,0.);};
 
 #ifdef ADOL_ON
-		std::complex<adouble> Eval(const double* var, const adouble* par)				const		{return Eval(var, par, (adouble*)&_constants[0]);};
-		virtual std::complex<adouble> Eval(const double* var, const adouble* par, const adouble* con)	const		{return std::complex<adouble>(1.,0.);};
+		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par)				const		{return Eval(var, par, &_constants[0]);};
+		virtual std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)	const		{return std::complex<adtl::adouble>(1.,0.);};
 #endif//ADOL_ON
 
 		size_t 			nVar()									const		{return _nVar;};

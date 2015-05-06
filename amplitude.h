@@ -25,11 +25,11 @@ class breit_wigner : public amplitude{
 		std::string type()											const		{return "breit_wigner";};	
 
 		template<typename xdouble>
-		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const xdouble* con)		const;
+		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
 #ifdef ADOL_ON
-		std::complex<adouble> Eval(const double* var, const adouble* par, const adouble* con)			const		{return template_eval(var,par,con);};
+		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
 };
 
@@ -47,7 +47,7 @@ breit_wigner::breit_wigner():amplitude(1,2,0,0){
 };
 
 template <typename xdouble>
-std::complex<xdouble> breit_wigner::template_eval(const double* var, const xdouble* par, const xdouble* con)		const{
+std::complex<xdouble> breit_wigner::template_eval(const double* var, const xdouble* par, const double* con)		const{
 	std::complex<xdouble> denominator = std::complex<xdouble>(par[0]*par[0]-var[0]*var[0],-par[0]*par[1]);
 	return std::complex<xdouble>(par[0]*par[1])/denominator;
 };
@@ -63,11 +63,11 @@ class mass_dep_breit_wigner : public amplitude{
 		std::string type()											const		{return "mass_dep_breit_wigner";};	
 
 		template<typename xdouble>
-		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const xdouble* con)		const;
+		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
 #ifdef ADOL_ON
-		std::complex<adouble> Eval(const double* var, const adouble* par, const adouble* con)			const		{return template_eval(var,par,con);};
+		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
 };
 
@@ -95,7 +95,7 @@ mass_dep_breit_wigner::mass_dep_breit_wigner():amplitude(1,2,3,1){
 };
 
 template <typename xdouble>
-std::complex<xdouble> mass_dep_breit_wigner::template_eval(const double* var, const xdouble* par, const xdouble* con)	const{
+std::complex<xdouble> mass_dep_breit_wigner::template_eval(const double* var, const xdouble* par, const double* con)	const{
 	double m   = var[0];
 
 	xdouble m0  = par[0];
@@ -125,11 +125,11 @@ class two_channel_breit_wigner : public amplitude{
 		std::string type()											const		{return "two_channel_breit_wigner";};	
 
 		template<typename xdouble>
-		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const xdouble* con)		const;
+		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
 #ifdef ADOL_ON
-		std::complex<adouble> Eval(const double* var, const adouble* par, const adouble* con)			const		{return template_eval(var,par,con);};
+		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
 };
 
@@ -162,7 +162,7 @@ two_channel_breit_wigner::two_channel_breit_wigner():amplitude(1,2,6,2){
 };
 
 template <typename xdouble>
-std::complex<xdouble> two_channel_breit_wigner::template_eval(const double* var, const xdouble* par, const xdouble* con)const{
+std::complex<xdouble> two_channel_breit_wigner::template_eval(const double* var, const xdouble* par, const double* con)const{
 	double m     = var[0];
 
 	xdouble m0    = par[0];
@@ -201,11 +201,11 @@ class vandermeulen_phase_space : public amplitude{
 		std::string type()											const		{return "vandermeulen_phase_space";};	
 
 		template<typename xdouble>
-		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const xdouble* con)		const;
+		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
 #ifdef ADOL_ON
-		std::complex<adouble> Eval(const double* var, const adouble* par, const adouble* con)			const		{return template_eval(var,par,con);};
+		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
 };
 
@@ -227,17 +227,13 @@ vandermeulen_phase_space::vandermeulen_phase_space():amplitude(1,1,2,3){
 };
 
 template <typename xdouble>
-std::complex<xdouble> vandermeulen_phase_space::template_eval(const double* var, const xdouble* par, const xdouble* con)const{
+std::complex<xdouble> vandermeulen_phase_space::template_eval(const double* var, const xdouble* par, const double* con)const{
 	double m     = var[0];
-
 	xdouble alpha = par[0];
-
 	xdouble mPi   = con[0];
 	xdouble mIso  = con[1];
-
 	xdouble ampor = mPi + mIso;
 	std::complex<xdouble> value;
-
 	if ( m > ampor){
 		xdouble S = m*m;
 		xdouble E = (S + mPi * mPi - mIso*mIso)/(2*m);
@@ -260,11 +256,11 @@ class valera_dorofeev_background : public amplitude{
 		std::string type()											const		{return "valera_dorofeev_background";};	
 
 		template<typename xdouble>
-		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const xdouble* con)		const;
+		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
 #ifdef ADOL_ON
-		std::complex<adouble> Eval(const double* var, const adouble* par, const adouble* con)			const		{return template_eval(var,par,con);};
+		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
 };
 
@@ -286,7 +282,7 @@ valera_dorofeev_background::valera_dorofeev_background():amplitude(1,2,1,4){
 };
 
 template <typename xdouble>
-std::complex<xdouble> valera_dorofeev_background::template_eval(const double* var, const xdouble* par, const xdouble* con)const{
+std::complex<xdouble> valera_dorofeev_background::template_eval(const double* var, const xdouble* par, const double* con)const{
 	double m     = var[0];
 
 	xdouble alpha = par[0];
@@ -307,11 +303,11 @@ class bowler_parametrization : public amplitude{
 		std::string type()											const		{return "bowler_parametrization";};	
 
 		template<typename xdouble>
-		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const xdouble* con)		const;
+		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
 #ifdef ADOL_ON
-		std::complex<adouble> Eval(const double* var, const adouble* par, const adouble* con)			const		{return template_eval(var,par,con);};
+		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
 };
 
@@ -329,7 +325,7 @@ bowler_parametrization::bowler_parametrization():amplitude(1,2,0,5){
 };
 
 template <typename xdouble>
-std::complex<xdouble> bowler_parametrization::template_eval(const double* var, const xdouble* par, const xdouble* con)const{
+std::complex<xdouble> bowler_parametrization::template_eval(const double* var, const xdouble* par, const double* con)const{
 	double m     = var[0];
 
 	xdouble m0    = par[0];
@@ -351,11 +347,11 @@ class flatte : public amplitude{
 		std::string type()											const		{return "flatte";};	
 
 		template<typename xdouble>
-		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const xdouble* con)		const;
+		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
 #ifdef ADOL_ON
-		std::complex<adouble> Eval(const double* var, const adouble* par, const adouble* con)			const		{return template_eval(var,par,con);};
+		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
 };
 
@@ -381,7 +377,7 @@ flatte::flatte():amplitude(1,3,2,6){
 };
 
 template <typename xdouble>
-std::complex<xdouble> flatte::template_eval(const double* var, const xdouble* par, const xdouble* con)const{
+std::complex<xdouble> flatte::template_eval(const double* var, const xdouble* par, const double* con)const{
 	double m     = var[0];
 
 	xdouble m0    = par[0];
@@ -409,11 +405,11 @@ class gaus : public amplitude{
 		std::string type()											const		{return "gaus";};	
 
 		template<typename xdouble>
-		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const xdouble* con)		const;
+		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
 #ifdef ADOL_ON
-		std::complex<adouble> Eval(const double* var, const adouble* par, const adouble* con)			const		{return template_eval(var,par,con);};
+		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
 };
 
@@ -431,7 +427,7 @@ gaus::gaus():amplitude(1,2,0,9){
 };
 
 template <typename xdouble>
-std::complex<xdouble> gaus::template_eval(const double* var, const xdouble* par, const xdouble* con)const{
+std::complex<xdouble> gaus::template_eval(const double* var, const xdouble* par, const double* con)const{
 	double m     = var[0];
 
 	xdouble m0    = par[0];
@@ -450,11 +446,11 @@ class polynomial : public amplitude{
 		std::string type()											const		{return "polynomial";};	
 
 		template<typename xdouble>
-		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const xdouble* con)		const;
+		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
 #ifdef ADOL_ON
-		std::complex<adouble> Eval(const double* var, const adouble* par, const adouble* con)			const		{return template_eval(var,par,con);};
+		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
 };
 
@@ -482,7 +478,7 @@ polynomial::polynomial():amplitude(1,5,1,10){
 };
 
 template <typename xdouble>
-std::complex<xdouble> polynomial::template_eval(const double* var, const xdouble* par, const xdouble* con)const{
+std::complex<xdouble> polynomial::template_eval(const double* var, const xdouble* par, const double* con)const{
 		double m     = var[0];
 
 		xdouble c0    = par[0];
@@ -509,11 +505,11 @@ class mass_dep_bw_2 : public amplitude{
 		std::string type()											const		{return "mass_dep_bw_2";};	
 
 		template<typename xdouble>
-		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const xdouble* con)		const;
+		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
 #ifdef ADOL_ON
-		std::complex<adouble> Eval(const double* var, const adouble* par, const adouble* con)			const		{return template_eval(var,par,con);};
+		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
 };
 
@@ -546,7 +542,7 @@ mass_dep_bw_2::mass_dep_bw_2():amplitude(1,2,6,22){
 };
 
 template <typename xdouble>
-std::complex<xdouble> mass_dep_bw_2::template_eval(const double* var, const xdouble* par, const xdouble* con)const{
+std::complex<xdouble> mass_dep_bw_2::template_eval(const double* var, const xdouble* par, const double* con)const{
 	double m     = var[0];
 
 	xdouble m0    = par[0];
@@ -582,11 +578,11 @@ class t_dependent_background : public amplitude{
 		std::string type()											const		{return "t_dependent_background";};	
 
 		template<typename xdouble>
-		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const xdouble* con)		const;
+		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
 #ifdef ADOL_ON
-		std::complex<adouble> Eval(const double* var, const adouble* par, const adouble* con)			const		{return template_eval(var,par,con);};
+		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
 };
 
@@ -617,7 +613,7 @@ t_dependent_background::t_dependent_background():amplitude(2,4,3,101){
 };
 
 template <typename xdouble>
-std::complex<xdouble> t_dependent_background::template_eval(const double* var, const xdouble* par, const xdouble* con)const{
+std::complex<xdouble> t_dependent_background::template_eval(const double* var, const xdouble* par, const double* con)const{
 	double m     = var[0];
 	double tPrime= var[1];
 

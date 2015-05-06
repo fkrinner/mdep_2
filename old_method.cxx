@@ -11,9 +11,12 @@
 #include"string_utilities.h"
 
 #ifdef ADOL_ON
-#include "adolc/adolc.h"
-std::complex<adouble> operator*(std::complex<adouble> a,double d){// Define std::complex<adouble> * double
-	return std::complex<adouble>(a.real()*d,a.imag()*d);
+namespace adtl{
+	int ADOLC_numDir = NUMBER_DIRECTIONS;
+};
+#include "adolc/adouble.h"
+std::complex<adtl::adouble> operator*(std::complex<adtl::adouble> a,double d){// Define std::complex<adtl::adouble> * double
+	return std::complex<adtl::adouble>(a.real()*d,a.imag()*d);
 };
 #endif//ADOL_ON
 
@@ -164,14 +167,14 @@ double old_method::EvalTbin(
 	return chi2;
 };
 #ifdef ADOL_ON // Has to be twice, otherwise the openmp pragma would not work. Did not fins another workaround
-adouble old_method::EvalTbin(
+adtl::adouble old_method::EvalTbin(
 							int 								tbin,
-							const std::complex<adouble>	 				*cpl,
-							const adouble	 						*par,
-							const adouble 							*iso_par)		const{
+							const std::complex<adtl::adouble>	 				*cpl,
+							const adtl::adouble	 						*par,
+							const adtl::adouble 							*iso_par)		const{
 
-	adouble chi2 = 0.;
-	std::vector<std::vector<std::complex<adouble> > > iso_eval = _waveset.iso_funcs(iso_par);
+	adtl::adouble chi2 = 0.;
+	std::vector<std::vector<std::complex<adtl::adouble> > > iso_eval = _waveset.iso_funcs(iso_par);
 	for (size_t bin=_waveset.minBin(); bin<_waveset.maxBin(); bin++){
 		chi2+=EvalBin(tbin,bin,cpl,par,iso_eval);
 //		std::cout<<"bin #"<<bin<<" chi2++"<<EvalBin(tbin,bin,cpl,par,iso_eval)<<std::endl;
@@ -298,70 +301,55 @@ std::vector<xdouble> old_method::delta(
 };
 template std::vector<double> old_method::delta(int tbin, int bin,double mass, const std::complex<double> *cpl, const double *par, std::vector<std::vector<std::complex<double> > > &iso_eval) const;
 //########################################################################################################################################################
-///Instantiate auto diff methods, if needed (Enable adouble operations, if the auto diff package is loaded)
+///Instantiate auto diff methods, if needed (Enable adtl::adouble operations, if the auto diff package is loaded)
 #ifdef ADOL_ON
-template adouble old_method::EvalCP(const std::complex<adouble> *cpl,const adouble *par, const adouble *iso_par) const;
-template adouble old_method::EvalBranch(const std::complex<adouble> *branch, const std::complex<adouble> *cpl, const adouble *par, const adouble *iso_par) const;
-template adouble old_method::EvalBin(int tbin,int bin,const std::complex<adouble> *cpl,const adouble *par, std::vector<std::vector<std::complex<adouble> > > &iso_par) const;
-template std::vector<adouble> old_method::delta(int tbin, int bin,double mass, const std::complex<adouble> *cpl, const adouble *par, std::vector<std::vector<std::complex<adouble> > > &iso_eval) const;
-//#######################################################################################################################################################
-///Gets the gradient w.r.t. xx
-std::vector<double> old_method::Diff(
-							std::vector<double> 				&xx)						const{
-
-	return Diff(&xx[0]);
-};
+template adtl::adouble old_method::EvalCP(const std::complex<adtl::adouble> *cpl,const adtl::adouble *par, const adtl::adouble *iso_par) const;
+template adtl::adouble old_method::EvalBranch(const std::complex<adtl::adouble> *branch, const std::complex<adtl::adouble> *cpl, const adtl::adouble *par, const adtl::adouble *iso_par) const;
+template adtl::adouble old_method::EvalBin(int tbin,int bin,const std::complex<adtl::adouble> *cpl,const adtl::adouble *par, std::vector<std::vector<std::complex<adtl::adouble> > > &iso_par) const;
+template std::vector<adtl::adouble> old_method::delta(int tbin, int bin,double mass, const std::complex<adtl::adouble> *cpl, const adtl::adouble *par, std::vector<std::vector<std::complex<adtl::adouble> > > &iso_eval) const;
 //#######################################################################################################################################################
 ///Gets the gradient w.r.t. xx
 std::vector<double> old_method::Diff(
 							const double 					*xx)						const{
 
-	int nTape = 0;
-	double x[_nTot];
-	for (size_t i=0;i<_nTot;i++){
-		x[i] = xx[i];
-	};
-
-	trace_on(nTape);
-	std::vector<adouble>aCpl_r(2*_nCpl);
-	std::vector<adouble>aPar(_nPar);
-	std::vector<adouble>aBra_r(2*_nBra);
-	std::vector<adouble>aIso(_nIso);
-	int count=0;
+	std::vector<adtl::adouble>aCpl_r(2*_nCpl);
+	std::vector<adtl::adouble>aPar(_nPar);
+	std::vector<adtl::adouble>aBra_r(2*_nBra);
+	std::vector<adtl::adouble>aIso(_nIso);
+	size_t count=0;
 	for (size_t i=0;i<2*_nCpl;i++){
-		aCpl_r[i] <<= x[count];
+		aCpl_r[i] = xx[count];
+		aCpl_r[i].setADValue(count,1.0);
 		++count;
 	};
 	for (size_t i=0; i<_nPar;i++){
-		aPar[i] <<= x[count];
+		aPar[i] = xx[count];
+		aPar[i].setADValue(count,1.0);
 		++count;
 	};
 	for (size_t i=0;i<2*_nBra;i++){
-		aBra_r[i] <<= x[count];
+		aBra_r[i] = xx[count];
+		aBra_r[i].setADValue(count,1.0);
 		++count;
 	};
 	for (size_t i=0;i<_nIso;i++){
-		aIso[i] <<= x[count];
+		aIso[i] = xx[count];
+		aIso[i].setADValue(count,1.0);
 		++count;
 	};
-	std::vector<std::complex<adouble> > aCpl_c(_nCpl);
-	std::vector<std::complex<adouble> > aBra_c(_nBra);
+	std::vector<std::complex<adtl::adouble> > aCpl_c(_nCpl);
+	std::vector<std::complex<adtl::adouble> > aBra_c(_nBra);
 	for (size_t i=0;i<_nCpl;i++){
-		aCpl_c[i] = std::complex<adouble>(aCpl_r[2*i],aCpl_r[2*i+1]);
+		aCpl_c[i] = std::complex<adtl::adouble>(aCpl_r[2*i],aCpl_r[2*i+1]);
 	};
 	for (size_t i=0;i<_nBra;i++){
-		aBra_c[i] = std::complex<adouble>(aBra_r[2*i],aBra_r[2*i+1]);
+		aBra_c[i] = std::complex<adtl::adouble>(aBra_r[2*i],aBra_r[2*i+1]);
 	};
-	double Chi2;
-	adouble aChi2;
+	adtl::adouble aChi2;
 	aChi2 = EvalBranch(&aBra_c[0],&aCpl_c[0],&aPar[0],&aIso[0]);//[0]//
-	aChi2 >>= Chi2;
-	trace_off();
-	double grad[_nTot];
-	gradient(nTape,_nTot,x,grad);
 	vector<double> gradient(_nTot);
 	for (size_t i=0;i<_nTot;i++){
-		gradient[i]=grad[i];
+		gradient[i]=aChi2.getADValue(i);
 	};
 	return gradient;
 };

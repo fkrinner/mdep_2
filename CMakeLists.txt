@@ -43,6 +43,8 @@ add_definitions( -DSTORE_ACTIVE )
 
 if( use_YAML )
   add_definitions( -DUSE_YAML )
+  add_definitions( -DADOLC_TAPELESS )
+  add_definitions( -DNUMBER_DIRECTIONS=1000 )
   set( INCLUDE_DIRS
        ${INCLUDE_DIRS}
        /nfs/hicran/project/compass/analysis/fkrinner/yaml/include
@@ -80,10 +82,12 @@ add_library(minuit_root           SHARED minuit_root.cxx        )
 
 
 #set execuatbles
-add_executable(fitmd.exe         fitmd.cc                       )
+#add_executable(fitmd.exe         fitmd.cc                       )
 #add_executable(de_isobarring     test_de-isobar.cc              )
 #add_executable(standard_test.exe standard_test.cc               )
-add_executable(amplitude         test_amplitude.cc              )
+#add_executable(amplitude         test_amplitude.cc              )
+add_executable(adol_test.exe       adol_test.cc                  )
+
 
 
 
@@ -96,9 +100,9 @@ target_link_libraries(minimize   full_covariance                )
 target_link_libraries(minimize   old_method                     )
 target_link_libraries(minimize   full_SDM                       )
 target_link_libraries(minuit_root minimize                      )
-target_link_libraries(fitmd.exe  method                         )
-target_link_libraries(fitmd.exe  old_method                     )
-target_link_libraries(fitmd.exe  minuit_root                    )
+#target_link_libraries(fitmd.exe  method                         )
+#target_link_libraries(fitmd.exe  old_method                     )
+#target_link_libraries(fitmd.exe  minuit_root                    )
 #target_link_libraries(standard_test.exe minimize                )
 #target_link_libraries(de_isobarring anchor_t                    )
 
@@ -107,7 +111,7 @@ target_link_libraries(minimize ${ROOT_LIBS} )
 
 #link YAML
 if ( use_YAML )
-  target_link_libraries(fitmd.exe /nfs/hicran/project/compass/analysis/fkrinner/yaml/build/libyaml-cpp.so )
+#  target_link_libraries(fitmd.exe /nfs/hicran/project/compass/analysis/fkrinner/yaml/build/libyaml-cpp.so )
 #  target_link_libraries(standard_test.exe /nfs/hicran/project/compass/analysis/fkrinner/yaml/build/libyaml-cpp.so )
   target_link_libraries(waveset /nfs/hicran/project/compass/analysis/fkrinner/yaml/build/libyaml-cpp.so )
 endif()
@@ -118,7 +122,8 @@ if ( use_auto_diff )
   target_link_libraries(method    /nfs/hicran/home/fkrinner/private/lib/libadolc.so )
   target_link_libraries(anchor_t  /nfs/hicran/home/fkrinner/private/lib/libadolc.so )
   target_link_libraries(minimize  /nfs/hicran/home/fkrinner/private/lib/libadolc.so )
-  target_link_libraries(amplitude /nfs/hicran/home/fkrinner/private/lib/libadolc.so )
+  target_link_libraries(adol_test.exe  /nfs/hicran/home/fkrinner/private/lib/libadolc.so )
+#  target_link_libraries(amplitude /nfs/hicran/home/fkrinner/private/lib/libadolc.so )
 endif()
 
 if(create_python_links)

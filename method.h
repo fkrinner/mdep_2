@@ -51,23 +51,29 @@ class method{
 
 		virtual std::string			className					()										const	{return "undefined_method";};
 
-		virtual size_t				getNtot						()										const	{std::cout<<"method.h: getNtot not overwritten"<<std::endl;throw;return 0;};
+		virtual size_t				getNtot						()										const	{std::cout<<"method.h::getNtot not overwritten"<<std::endl;throw;return 0;};
 
-		virtual size_t				getNcpl						()										const	{std::cout<<"method.h: getNcpl not overwritten"<<std::endl;throw;return 0;};
+		virtual size_t				getNcpl						()										const	{std::cout<<"method.h::getNcpl not overwritten"<<std::endl;throw;return 0;};
 
 
-		virtual void 				update_n_cpls					()											{std::cout<<"method.h: update_n_cpls() not overwritten"<<std::endl;throw;};
+		virtual void 				update_n_cpls					()											{std::cout<<"method.h::update_n_cpls() not overwritten"<<std::endl;throw;};
 
-		virtual void 				printStatus					()										const	{std::cout<<"method.h: printStatus() not overwritten"<<std::endl;throw;};
+		virtual void 				printStatus					()										const	{std::cout<<"method.h::printStatus() not overwritten"<<std::endl;throw;};
 
-		virtual void 				conjugate					()											{std::cout<<"method.h: conjugate() not overwritten"<<std::endl;throw;};
+		virtual void 				conjugate					()											{std::cout<<"method.h::conjugate() not overwritten"<<std::endl;throw;};
 
-		virtual void 				loadData					(int tbin, const char* dataFile)							{std::cout<<"method.h: loadData(...) not overwritten"<<std::endl;throw;};
+		virtual void 				loadData					(int tbin, const char* dataFile)							{std::cout<<"method.h::loadData(...) not overwritten"<<std::endl;throw;};
 
-		virtual void 				loadComa					(int tbin, const char* comaFile)							{std::cout<<"method.h: loadComa(...) not overwritten"<<std::endl;throw;};
+		virtual void 				loadComa					(int tbin, const char* comaFile)							{std::cout<<"method.h::loadComa(...) not overwritten"<<std::endl;throw;};
 
 // This is a special method. The base classes just return 'false' autoCpl classes return 'true' and do something
 		virtual bool 				setUseBranch					(bool in)										{return false;};
+#ifdef ADOL_ON
+		std::vector<double> 			Diff						(const std::vector<double> &xx)							const	{return Diff(&xx[0]);};
+		virtual std::vector<double> 		Diff						(const double* xx)								const	{std::cout<<"method.h::Diff(...) not overwritten"<<std::endl;throw;return std::vector<double>();};
+#endif//ADOL_ON
+
+
 
 #ifdef USE_YAML
 	// YAML SETTER

@@ -11,7 +11,7 @@
 
 
 #ifdef ADOL_ON
-#include "adolc/adolc.h"
+#include "adolc/adouble.h"
 #endif//ADOL_ON
 
 #include"matrix_utilities.h"

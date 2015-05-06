@@ -65,7 +65,17 @@ struct chi2py:public minuit_root{
 	double EvalSelf(){
 		return (*_method)(&_method->parameters()[0]);
 	};
-
+#ifdef ADOL_ON
+	bp::list Diff(bp::object par){
+		std::vector<double> xxx = to_std_vector<double>(par);
+		std::vector<double> dif = _method->Diff(xxx);
+		return std_vector_to_py_list(dif);
+	};
+	bp::list DiffSelf(){
+		std::vector<double> dif = _method->Diff(_method->parameters());
+		return std_vector_to_py_list(dif);
+	};
+#endif//ADOL_ON
 	double getParameter(std::string name){
 		int i = _method->getParNumber(name);
 		if (i<0){
@@ -122,6 +132,8 @@ struct chi2py:public minuit_root{
 		std::vector<double> lims = *_method->Waveset()->lowerLims();
 		return std_vector_to_py_list(lims);
 	};
+
+
 	void setParLimits(std::string name, double upper, double lower){
 		minuit_root::setParLimits(name,upper,lower);
 	};
@@ -203,7 +215,10 @@ BOOST_PYTHON_MODULE(libchi2py){
 
 	chi2.def("Amplitudes",				&chi2py::Amplitudes				);
 	chi2.def("AmplitudesSelf",			&chi2py::AmplitudesSelf				);
-
+#ifdef ADOL_ON
+	chi2.def("Diff",				&chi2py::Diff					);
+	chi2.def("DiffSelf",				&chi2py::DiffSelf				);
+#endif//ADOL_ON
 	chi2.def("nTot",				&chi2py::nTot					);
 	chi2.def("nCpl",				&chi2py::nCpl					);
 	chi2.def("nBrCpl",				&chi2py::nBrCpl					);

@@ -10,9 +10,12 @@
 #include"string_utilities.h"
 
 #ifdef ADOL_ON
-#include "adolc/adolc.h"
-std::complex<adouble> operator*(std::complex<adouble> a,double d){// Define std::complex<adouble> * double
-	return std::complex<adouble>(a.real()*d,a.imag()*d);
+namespace adtl{
+	int ADOLC_numDir = NUMBER_DIRECTIONS;
+};
+#include "adolc/adouble.h"
+std::complex<adtl::adouble> operator*(std::complex<adtl::adouble> a,double d){// Define std::complex<adtl::adouble> * double
+	return std::complex<adtl::adouble>(a.real()*d,a.imag()*d);
 };
 #endif//ADOL_ON
 
@@ -687,77 +690,62 @@ std::vector<std::complex<xdouble> > anchor_t::getMinimumCplBra(
 };
 template std::vector<std::complex<double> > anchor_t::getMinimumCplBra(int tbin, const std::complex<double> *branch, const std::complex<double> *anchor_cpl, const double *par, const double *iso_par) const;
 //########################################################################################################################################################
-///Instantiate auto diff methods, if needed (Enable adouble operations, if the auto diff package is loaded)
+///Instantiate auto diff methods, if needed (Enable adtl::adouble operations, if the auto diff package is loaded)
 #ifdef ADOL_ON
-template adouble anchor_t::EvalCP(const std::complex<adouble> *cpl,const adouble *par, const adouble *iso_par) const;
-template adouble anchor_t::EvalBranch(const std::complex<adouble> *branch, const std::complex<adouble> *cpl, const adouble *par, const adouble *iso_par) const;
-template adouble anchor_t::EvalTbin(int tbin, const std::complex<adouble> *cpl,const adouble *par, const adouble *iso_par) const;
-template adouble anchor_t::EvalBin(int tbin,int bin,const std::complex<adouble> *cpl,const adouble *par, std::vector<std::vector<std::complex<adouble> > > &iso_par) const;
-template std::vector<adouble> anchor_t::delta(int tbin, int bin,double mass, const std::complex<adouble> *cpl, const adouble *par, std::vector<std::vector<std::complex<adouble> > > &iso_eval) const;
-template adouble anchor_t::EvalAutoCpl(const std::complex<adouble> *cpl,const adouble *par, const adouble *iso_par)const;
-template adouble anchor_t::EvalAutoCplBranch(const std::complex<adouble> *bra, const std::complex<adouble> *cpl, const adouble *par, const adouble *iso_par)const;
-template adouble anchor_t::EvalAutoCplTbin(int tbin, const std::complex<adouble> *cpl, const adouble *par, const adouble *iso_par)const;
-template AandB<adouble> anchor_t::get_AB(int tbin,const std::complex<adouble> *anchor_cpl, const adouble *par, const adouble *iso_par) const;
-template std::vector<std::complex<adouble> > anchor_t::getMinimumCpl(int tbin,const std::complex<adouble> *anchor_cpl, const adouble *par, const adouble *iso_par) const;
-template std::vector<std::complex<adouble> > anchor_t::getMinimumCplBra(int tbin, const std::complex<adouble> *branch, const std::complex<adouble> *anchor_cpl, const adouble *par, const adouble *iso_par) const;
-//#######################################################################################################################################################
-///Gets the gradient w.r.t. xx
-std::vector<double> anchor_t::Diff(
-							std::vector<double> 				&xx)						const{
-
-	return Diff(&xx[0]);
-};
+template adtl::adouble anchor_t::EvalCP(const std::complex<adtl::adouble> *cpl,const adtl::adouble *par, const adtl::adouble *iso_par) const;
+template adtl::adouble anchor_t::EvalBranch(const std::complex<adtl::adouble> *branch, const std::complex<adtl::adouble> *cpl, const adtl::adouble *par, const adtl::adouble *iso_par) const;
+template adtl::adouble anchor_t::EvalTbin(int tbin, const std::complex<adtl::adouble> *cpl,const adtl::adouble *par, const adtl::adouble *iso_par) const;
+template adtl::adouble anchor_t::EvalBin(int tbin,int bin,const std::complex<adtl::adouble> *cpl,const adtl::adouble *par, std::vector<std::vector<std::complex<adtl::adouble> > > &iso_par) const;
+template std::vector<adtl::adouble> anchor_t::delta(int tbin, int bin,double mass, const std::complex<adtl::adouble> *cpl, const adtl::adouble *par, std::vector<std::vector<std::complex<adtl::adouble> > > &iso_eval) const;
+template adtl::adouble anchor_t::EvalAutoCpl(const std::complex<adtl::adouble> *cpl,const adtl::adouble *par, const adtl::adouble *iso_par)const;
+template adtl::adouble anchor_t::EvalAutoCplBranch(const std::complex<adtl::adouble> *bra, const std::complex<adtl::adouble> *cpl, const adtl::adouble *par, const adtl::adouble *iso_par)const;
+template adtl::adouble anchor_t::EvalAutoCplTbin(int tbin, const std::complex<adtl::adouble> *cpl, const adtl::adouble *par, const adtl::adouble *iso_par)const;
+template AandB<adtl::adouble> anchor_t::get_AB(int tbin,const std::complex<adtl::adouble> *anchor_cpl, const adtl::adouble *par, const adtl::adouble *iso_par) const;
+template std::vector<std::complex<adtl::adouble> > anchor_t::getMinimumCpl(int tbin,const std::complex<adtl::adouble> *anchor_cpl, const adtl::adouble *par, const adtl::adouble *iso_par) const;
+template std::vector<std::complex<adtl::adouble> > anchor_t::getMinimumCplBra(int tbin, const std::complex<adtl::adouble> *branch, const std::complex<adtl::adouble> *anchor_cpl, const adtl::adouble *par, const adtl::adouble *iso_par) const;
 //#######################################################################################################################################################
 ///Gets the gradient w.r.t. xx
 std::vector<double> anchor_t::Diff(
 							const double 					*xx)						const{
 
-	int nTape = 0;
-	double x[_nTot];
-	for (size_t i=0;i<_nTot;i++){
-		x[i] = xx[i];
-	};
-
-	trace_on(nTape);
-	std::vector<adouble>aCpl_r(2*_nCpl);
-	std::vector<adouble>aPar(_nPar);
-	std::vector<adouble>aBra_r(2*_nBra);
-	std::vector<adouble>aIso(_nIso);
-	int count=0;
+	std::vector<adtl::adouble>aCpl_r(2*_nCpl);
+	std::vector<adtl::adouble>aPar(_nPar);
+	std::vector<adtl::adouble>aBra_r(2*_nBra);
+	std::vector<adtl::adouble>aIso(_nIso);
+	size_t count=0;
 	for (size_t i=0;i<2*_nCpl;i++){
-		aCpl_r[i] <<= x[count];
+		aCpl_r[i] = xx[count];
+		aCpl_r[i].setADValue(count,1.0);
 		count++;
 	};
 	for (size_t i=0; i<_nPar;i++){
-		aPar[i] <<= x[count];
+		aPar[i] = xx[count];
+		aPar[i].setADValue(count,1.0);
 		count++;
 	};
 	for (size_t i=0;i<2*_nBra;i++){
-		aBra_r[i] <<= x[count];
+		aBra_r[i] = xx[count];
+		aBra_r[i].setADValue(count,1.0);
 		count++;
 	};
 	for (size_t i=0;i<_nIso;i++){
-		aIso[i] <<= x[count];
+		aIso[i] = xx[count];
+		aIso[i].setADValue(count,1.0);
 		count++;
 	};
-	std::vector<std::complex<adouble> > aCpl_c(_nCpl);
-	std::vector<std::complex<adouble> > aBra_c(_nBra);
+	std::vector<std::complex<adtl::adouble> > aCpl_c(_nCpl);
+	std::vector<std::complex<adtl::adouble> > aBra_c(_nBra);
 	for (size_t i=0;i<_nCpl;i++){
-		aCpl_c[i] = std::complex<adouble>(aCpl_r[2*i],aCpl_r[2*i+1]);
+		aCpl_c[i] = std::complex<adtl::adouble>(aCpl_r[2*i],aCpl_r[2*i+1]);
 	};
 	for (size_t i=0;i<_nBra;i++){
-		aBra_c[i] = std::complex<adouble>(aBra_r[2*i],aBra_r[2*i+1]);
+		aBra_c[i] = std::complex<adtl::adouble>(aBra_r[2*i],aBra_r[2*i+1]);
 	};
-	double Chi2;
-	adouble aChi2;
+	adtl::adouble aChi2;
 	aChi2 = EvalAutoCplBranch(&aBra_c[0],&aCpl_c[0],&aPar[0],&aIso[0]);//[0]//
-	aChi2 >>= Chi2;
-	trace_off();
-	double grad[_nTot];
-	gradient(nTape,_nTot,x,grad);
 	vector<double> gradient(_nTot);
 	for (size_t i=0;i<_nTot;i++){
-		gradient[i]=grad[i];
+		gradient[i]=aChi2.getADValue(i);
 	};
 	return gradient;
 };

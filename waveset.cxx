@@ -201,9 +201,9 @@ std::vector<double> waveset::phase_space(
 //########################################################################################################################################################
 ///Enable Auto-diff, if needed
 #ifdef ADOL_ON
-template std::vector<std::complex<adouble> > waveset::amps(const double* m, const std::complex<adouble> *cpl,const adouble *par, std::vector<std::vector<std::complex<adouble> > > &funcEvals2pi, bool ignore_limits) const;
-template std::vector<std::complex<adouble> > waveset::funcs(const double* m,const adouble *par, bool ignore_limits) const;
-template std::vector<std::vector<std::complex<adouble> > > waveset::iso_funcs(const adouble *par) const;
+template std::vector<std::complex<adtl::adouble> > waveset::amps(const double* m, const std::complex<adtl::adouble> *cpl,const adtl::adouble *par, std::vector<std::vector<std::complex<adtl::adouble> > > &funcEvals2pi, bool ignore_limits) const;
+template std::vector<std::complex<adtl::adouble> > waveset::funcs(const double* m,const adtl::adouble *par, bool ignore_limits) const;
+template std::vector<std::vector<std::complex<adtl::adouble> > > waveset::iso_funcs(const adtl::adouble *par) const;
 #endif//ADOL_ON
 //########################################################################################################################################################
 ///Adds a wave, increases the internal definitions
