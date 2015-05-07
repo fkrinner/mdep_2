@@ -33,6 +33,20 @@ if(create_python_links)
   )
 endif()
  
+find_package(Nlopt)
+if(NOT Nlopt_FOUND)
+	set(USE_NLOPT OFF)
+	message(STATUS "Cannot find NLopt installation. No NLopt components will be generated.")
+else()
+	set(USE_NLOPT ON)
+endif()
+if(Nlopt_FOUND)
+     set( INCLUDE_DIRS 
+     ${INCLUDE_DIRS} 
+     ${Nlopt_INCLUDE_DIR} 	)
+endif()
+
+
 #### Switch on single modules
 
 add_definitions( -DSTORE_ACTIVE )
@@ -79,6 +93,7 @@ add_library(full_covariance       SHARED full_covariance.cxx    )
 add_library(old_method            SHARED old_method.cxx         )
 add_library(minimize              SHARED minimize.cxx           )
 add_library(minuit_root           SHARED minuit_root.cxx        )
+add_library(nlopt_class           SHARED nlopt_class.cxx        )
 
 
 #set execuatbles
@@ -86,7 +101,7 @@ add_library(minuit_root           SHARED minuit_root.cxx        )
 #add_executable(de_isobarring     test_de-isobar.cc              )
 #add_executable(standard_test.exe standard_test.cc               )
 #add_executable(amplitude         test_amplitude.cc              )
-add_executable(adol_test.exe       adol_test.cc                  )
+add_executable(nlopt_test.exe    nlopt_test.cc                  )
 
 
 
@@ -100,6 +115,7 @@ target_link_libraries(minimize   full_covariance                )
 target_link_libraries(minimize   old_method                     )
 target_link_libraries(minimize   full_SDM                       )
 target_link_libraries(minuit_root minimize                      )
+target_link_libraries(nlopt_class minimize                      )
 #target_link_libraries(fitmd.exe  method                         )
 #target_link_libraries(fitmd.exe  old_method                     )
 #target_link_libraries(fitmd.exe  minuit_root                    )
@@ -122,11 +138,16 @@ if ( use_auto_diff )
   target_link_libraries(method    /nfs/hicran/home/fkrinner/private/lib/libadolc.so )
   target_link_libraries(anchor_t  /nfs/hicran/home/fkrinner/private/lib/libadolc.so )
   target_link_libraries(minimize  /nfs/hicran/home/fkrinner/private/lib/libadolc.so )
-  target_link_libraries(adol_test.exe  /nfs/hicran/home/fkrinner/private/lib/libadolc.so )
 #  target_link_libraries(amplitude /nfs/hicran/home/fkrinner/private/lib/libadolc.so )
 endif()
 
 if(create_python_links)
   target_link_libraries(chi2py minuit_root)
+  target_link_libraries(chi2py nlopt_class)
   target_link_libraries(chi2py ${Boost_LIBRARIES})
+endif()
+
+if(Nlopt_FOUND)
+  target_link_libraries(nlopt_test.exe ${Nlopt_LIBS} )
+  target_link_libraries(nlopt_class ${Nlopt_LIBS} )
 endif()

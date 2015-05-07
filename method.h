@@ -11,7 +11,7 @@ class method{
 		method(std::string card):_waveset(card),_nOut(1000),_count(0),_nOutFile(1000000),_parameterFile(""){};
 
 		double				operator()						()											{return mainEval(&parameters()[0]);};
-		double 				operator()						(std::vector<double> &xx)								{return mainEval(&xx[0]);};
+		double 				operator()						(const std::vector<double> &xx)								{return mainEval(&xx[0]);};
 		double 				operator()						(const double *xx)									{return mainEval( xx);};
 
 		virtual double 			mainEval						(const double *xx)									{std::cout<<"method.h: mainEval(...) not overwritten"<<std::endl;throw;return 0.;};

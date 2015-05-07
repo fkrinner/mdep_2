@@ -58,14 +58,18 @@ class minimize{
 		void 			printStatus();													// X
 
 	// Internal handlers
-		void		update_definitions		();
-		void		reload_par_definitions		(int mara_peter = -1);
+		void		update_definitions			();
+		void		reload_par_definitions			(int mara_peter = -1);
 
 		virtual double 		fit				()				{std::cout<<"minimize.h: fit() not overwritten"<<std::endl;				throw;return 0.;};
 		virtual void		update_definitions_fitter	()				{std::cout<<"minimize.h: update_definitions_fitter() not overwritten"<<std::endl;	throw;};
 		virtual void		reload_par_definitions_fitter	(int ulim, int olim)		{std::cout<<"minimize.h: reload_par_definitions_fitter() not overwritten"<<std::endl;	throw;};
 		virtual bool		initialize			()				{std::cout<<"minimize.h: initialize() not overwritten"<<std::endl;			throw;return false;};
 		virtual const double *	minimizerParameters		()		const 		{std::cout<<"minimize.h: minimizerParameters() not overwritten"<<std::endl;		throw;return 0;};
+
+// Genuine method to pass integers, doubles or strings to the minimizer
+		virtual void		setMinimizerSpecifications	(int spec_int = 0, double spec_double = 0., std::string spec_string = ""){std::cout<<"minimize.h: setMinimizerSpecifications() not overwritten"<<std::endl;throw;}; 
+
 
 		void 			setRandomCpl			();										// X
 		void 			setRandomBra			();										// X

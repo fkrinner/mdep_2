@@ -38,11 +38,10 @@ double minuit_root::fit(){
 		};
 		return (*_method)(xs);
 	}else{
-		std::cerr<<"minimize::fit(): Error: Fitter not initialized"<<std::endl;
+		std::cerr<<"minuit_root::fit(): Error: Fitter not initialized"<<std::endl;
 		return std::numeric_limits<double>::quiet_NaN();
 	};
 };
-
 //########################################################################################################################################################
 ///Update the parameter definitions in the fitter
 void minuit_root::reload_par_definitions_fitter(
@@ -66,19 +65,19 @@ void minuit_root::reload_par_definitions_fitter(
 bool minuit_root::initialize(){ 
 
 	if (_method->parameters().size()<_method->nTot()){
-		std::cerr<<"minimize::initialize(...): Error: _method->parameters().size() < _method->nTot(). Abort initialize(initialization."<<std::endl;
+		std::cerr<<"minuit_root::initialize(...): Error: _method->parameters().size() < _method->nTot(). Abort initialize(initialization."<<std::endl;
 		return false;
 	};
 	if ((*_method->parNames()).size()<_method->nTot()){
-		std::cerr<<"minimize::initialize(...): Error: (*_method->parNames()).size() < _method->nTot(). Abort initialization."<<std::endl;
+		std::cerr<<"minuit_root::initialize(...): Error: (*_method->parNames()).size() < _method->nTot(). Abort initialization."<<std::endl;
 		return false;
 	};
 	if (_step_sizes.size()<_method->nTot()){
-		std::cerr<<"minimize::initialize(...): Error: _step_sizes.size() < _method->nTot(). Abort initialization."<<std::endl;
+		std::cerr<<"minuit_root::initialize(...): Error: _step_sizes.size() < _method->nTot(). Abort initialization."<<std::endl;
 		return false;
 	};
 	if (_released.size()<_method->nTot()){
-		std::cerr<<"minimize::initialize(...): Error: _released.size() < _method->nTot(). Abort initialization."<<std::endl;
+		std::cerr<<"minuit_root::initialize(...): Error: _released.size() < _method->nTot(). Abort initialization."<<std::endl;
 		return false;
 	};
 	_min = ROOT::Math::Factory::CreateMinimizer(_s1,_s2);
@@ -105,5 +104,22 @@ void minuit_root::update_definitions_fitter(){
 	_min->SetTolerance(_tolerance);
 	_min->SetMaxFunctionCalls(_maxFunctionCalls);
 	_min->SetMaxIterations(_maxIterations);
+};
+//########################################################################################################################################################
+///Sets minuit_root specific stuff
+void	minuit_root::setMinimizerSpecifications(			int 						spec_int, 
+									double 						spec_double, 
+									std::string 					spec_string){
+	
+	std::cout<<"minuit_root::setMinimizerSpecifications(...): spec_double = "<<spec_double<<" will be ignored"<<std::endl;
+	if (spec_int == 1){
+		_s1 = spec_string;
+		std::cout<<"minuit_root::setMinimizerSpecifications(...): Minuit defining string '_s1' set to: "<<_s1<<std::endl;
+	}else if (spec_int ==2){
+		_s2 = spec_string;
+		std::cout<<"minuit_root::setMinimizerSpecifications(...): Minuit defining string '_s2' set to: "<<_s2<<std::endl;
+	}else{
+		std::cerr<<"minuit_root::setMinimizerSpecifications(...): Error: Configured specification not defined"<<std::endl;
+	};
 };
 //########################################################################################################################################################

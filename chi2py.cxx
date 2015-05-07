@@ -1,6 +1,6 @@
 #include<boost/python.hpp>
 #include<boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include"minuit_root.h"
+#include"nlopt_class.h"
 #include<string>
 namespace bp = boost::python;
 
@@ -31,10 +31,10 @@ std::vector<std::vector<T> > to_std_vector_vector(const bp::object& iterable){
 };
 
 
-struct chi2py:public minuit_root{
+struct chi2py:public nlopt_class{
 
 	chi2py(std::string card):
-		minuit_root(card){};
+		nlopt_class(card){};
 
 	size_t nTot(){return _method->nTot();};
 	size_t nTbin(){return _method->Waveset()->nTbin();};
@@ -46,10 +46,10 @@ struct chi2py:public minuit_root{
 	size_t nWaves(){return _method->Waveset()->nWaves();};
 
 	void relPar(std::string inin){
-		minuit_root::relPar(inin);
+		nlopt_class::relPar(inin);
 	};
 	void fixPar(std::string inin){
-		minuit_root::fixPar(inin);
+		nlopt_class::fixPar(inin);
 	};
 	void printParameters(){
 		_method->Waveset()->printParameters();
@@ -82,10 +82,10 @@ struct chi2py:public minuit_root{
 			std::cout<<"Error: Parameter '"<<name<<"' not definded"<<std::endl;
 	 		return std::numeric_limits<double>::quiet_NaN();
 		};
-		return minuit_root::getParameter(i);
+		return nlopt_class::getParameter(i);
 	};
 	void setParameter(std::string name, double val){
-		minuit_root::setParameter(name,val);
+		nlopt_class::setParameter(name,val);
 	};
 	void write_plots(std::string file_name, size_t tbin){
 		_method->write_plots(file_name,tbin);
@@ -135,7 +135,7 @@ struct chi2py:public minuit_root{
 
 
 	void setParLimits(std::string name, double upper, double lower){
-		minuit_root::setParLimits(name,upper,lower);
+		nlopt_class::setParLimits(name,upper,lower);
 	};
 	void setParameterFile(std::string fileName){
 		_method->setParameterFile(fileName);
@@ -150,10 +150,10 @@ struct chi2py:public minuit_root{
 		_method->readParameters(fileName);
 	};
 	void initCouplings(size_t nseeds){
-		minuit_root::initCouplings(nseeds,-1);
+		nlopt_class::initCouplings(nseeds,-1);
 	};
 	void initSingleTbin(size_t nseeds, size_t tbin){
-		minuit_root::initCouplings(nseeds,tbin);
+		nlopt_class::initCouplings(nseeds,tbin);
 	};
 	std::string YAML_file(){
 		return _method->Waveset()->YAML_file();
@@ -261,6 +261,7 @@ BOOST_PYTHON_MODULE(libchi2py){
 	chi2.def("upperLims",				&chi2py::upperLims				);
 	chi2.def("get_component_name",			&chi2py::get_component_name			);
 	chi2.def("getFuncParameters",			&chi2py::getFuncParameters			);
+	chi2.def("setMinimizerSpecifications",		&chi2py::setMinimizerSpecifications		);
 };
 
 

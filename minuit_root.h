@@ -16,6 +16,8 @@ class minuit_root:public minimize{
 		bool		initialize			();
 		const double *	minimizerParameters		()		const 		{return _min->X();};
 
+		void		setMinimizerSpecifications	(int spec_int = 0, double spec_double = 0., std::string spec_string = "");
+
 	protected:
 		ROOT::Math::Minimizer* 	_min;							// ROOT Minimizer
 		ROOT::Math::Functor 	_f;							// ROOT Functor object
