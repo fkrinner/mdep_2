@@ -14,42 +14,47 @@
 typedef amplitude constant_function; // Amplitude base class is already the constant function
 
 
-////////	////////	breit_wigner 			///////////////////////////////////////////////////////////
+//////// //////// breit_wigner ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 class breit_wigner : public amplitude{
-
 	public:
 		breit_wigner();
-
-		std::string type()											const		{return "breit_wigner";};	
-
+		std::string type() 											const		{return "breit_wigner";};
 		template<typename xdouble>
-		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
-
-		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
+		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con) 		const;
+		std::complex<double> Eval(const double* var, const double* par, const double* con) 			const		{return template_eval(var,par,con);};
+		std::vector<std::complex<double> > Diff(const double* var, const double* par, const double* con)	const;
 #ifdef ADOL_ON
-		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
-#endif//ADOL_ON	
+		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con) 	const		{return template_eval(var,par,con);};
+#endif//ADOL_ON
 };
 
 breit_wigner::breit_wigner():amplitude(1,2,0,0){
-
 	_name = "unnamed_breit_wigner";
-
 	_var_types[0] = "m";
-
 	_par_types[0] = "mass";
 	_par_types[1] = "width";
-
 	_par_names[0] = "unnamed_mass";
 	_par_names[1] = "unnamed_width";
 };
 
 template <typename xdouble>
-std::complex<xdouble> breit_wigner::template_eval(const double* var, const xdouble* par, const double* con)		const{
+std::complex<xdouble> breit_wigner::template_eval(const double* var, const xdouble* par, const double* con) const{
 	std::complex<xdouble> denominator = std::complex<xdouble>(par[0]*par[0]-var[0]*var[0],-par[0]*par[1]);
 	return std::complex<xdouble>(par[0]*par[1])/denominator;
+
+};
+std::vector<std::complex<double> > breit_wigner::Diff(const double* var, const double* par, const double* con)	const{
+
+	std::vector<std::complex<double> > ret(2);
+	std::complex<double> denominator = std::complex<double>(par[0]*par[0]-var[0]*var[0],-par[0]*par[1]);
+
+	std::complex<double> DdenominatorDpar0 = std::complex<double>(2*par[0],-par[1]);
+	std::complex<double> DdenominatorDpar1 = std::complex<double>(0.,-par[0]);
+
+	ret[0] = par[1]/denominator - par[0]*par[1]/(denominator*denominator)*DdenominatorDpar0;
+	ret[1] = par[0]/denominator - par[0]*par[1]/(denominator*denominator)*DdenominatorDpar1;
+	return ret;
 };
 
 ////////	////////	mass_dep_breit_wigner		///////////////////////////////////////////////////////////
@@ -66,6 +71,7 @@ class mass_dep_breit_wigner : public amplitude{
 		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
+		std::vector<std::complex<double> > Diff(const double* var, const double* par, const double* con)	const;
 #ifdef ADOL_ON
 		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
@@ -90,8 +96,6 @@ mass_dep_breit_wigner::mass_dep_breit_wigner():amplitude(1,2,3,1){
 	_con_names[0] = "m_Pi";
 	_con_names[1] = "m_Iso";
 	_con_names[2] = "L";
-
-	
 };
 
 template <typename xdouble>
@@ -114,6 +118,37 @@ std::complex<xdouble> mass_dep_breit_wigner::template_eval(const double* var, co
 	return std::complex<xdouble>(m0*G0,0.)/denominator;	
 };
 
+std::vector<std::complex<double> > mass_dep_breit_wigner::Diff(const double* var, const double* par, const double* con)	const{
+
+	std::vector<std::complex<double> > ret(2);
+
+	double m  = var[0];
+	
+	double m0  = par[0];
+	double G0  = par[1];
+
+	double mPi = con[0];
+	double mIso= con[1];
+
+	double q0 = breakupMomentumReal<double>(m0*m0,mPi*mPi,mIso*mIso);
+	double q  = breakupMomentumReal<double>(m* m ,mPi*mPi,mIso*mIso);
+	double Fl = barrierFactor<double>(q,con[2]);
+	double Fl0= barrierFactor<double>(q0,con[2]);
+
+	double Dq0Dm0 = DbreakupMomentumRealDM2(m0*m0,mPi*mPi,mIso*mIso)*2*m0;
+	double DFl0Dm0 = DbarrierFactorDq(q0,con[2])* Dq0Dm0;
+
+	double G  = G0* m0/m * q*Fl*Fl/q0/Fl0/Fl0; //G0 * m0/m q*Fl^2/(q0*Fl0^2)
+	double DGDm0 = G/m0 - G/q0*Dq0Dm0 - 2*G/Fl0*DFl0Dm0;
+	double DGDG0 = G/G0;
+
+	std::complex<double> den(m0*m0-m*m,-m0*G);
+
+	ret[0] = G0/den - (m0*G0)/(den*den)*std::complex<double>(2*m0,-G-m0*DGDm0);
+	ret[1] = m0/den - (m0*G0)/(den*den)*std::complex<double>(0.,-m0*DGDG0);
+
+	return ret;
+};
 ////////	////////	two_channel_breit_wigner	///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -128,6 +163,7 @@ class two_channel_breit_wigner : public amplitude{
 		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
+		std::vector<std::complex<double> > Diff(const double* var, const double* par, const double* con)	const;
 #ifdef ADOL_ON
 		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
@@ -184,12 +220,49 @@ std::complex<xdouble> two_channel_breit_wigner::template_eval(const double* var,
 	xdouble psl10= psl<xdouble>(m0, mPi, mIso1, R, L1);
 	xdouble psl20= psl<xdouble>(m0, mPi, mIso2, R, L2);
 
-	xdouble G = G0 * m0/m * ((1-X) * psl1/psl10 + X * psl2/psl20);
+	xdouble G = G0 * m0/m * ((1.-X) * psl1/psl10 + X * psl2/psl20);
 
 	std::complex<xdouble> denominator  = std::complex<xdouble>(m0*m0-m*m,-m0*G);
-	return std::complex<xdouble>(m0*G0,0)/denominator;
+	return std::complex<xdouble>(m0*G0,0.)/denominator;
 };
+std::vector<std::complex<double> > two_channel_breit_wigner::Diff(const double* var, const double* par, const double* con)	const{
 
+	std::vector<std::complex<double> >ret(2);
+	double m     = var[0];
+
+	double m0    = par[0];
+	double G0    = par[1];
+
+	double mPi   = con[0];
+	double mIso1 = con[1];
+	double mIso2 = con[2];
+	double X  = con[3];
+
+	double L1 = con[4];
+	double L2 = con[5];
+
+	double R = 5.;
+
+	double psl1 = psl<double>(m, mPi, mIso1, R, L1);
+	double psl2 = psl<double>(m, mPi, mIso2, R, L2);
+
+	double psl10= psl<double>(m0, mPi, mIso1, R, L1);
+	double Dpsl10Dm0 = DpslDm(m0, mPi, mIso1, R, L1);
+	double psl20= psl<double>(m0, mPi, mIso2, R, L2);
+	double Dpsl20Dm0 = DpslDm(m0, mPi, mIso2, R, L2);
+	
+	double G = G0 * m0/m * ((1.-X) * psl1/psl10 + X * psl2/psl20);
+	double DGDm0 = G/m0 - G0*m0/m*((1.-X)*psl1/psl10/psl10*Dpsl10Dm0 + X*psl2/psl20/psl20*Dpsl20Dm0);
+
+	std::complex<double> denominator  = std::complex<double>(m0*m0-m*m,-m0*G);
+	std::complex<double> DdenominatorDm0 = std::complex<double>(2.*m0,-G-m0*DGDm0);
+	std::complex<double> DdenominatorDG0 = std::complex<double>(0.,-m0*G/G0);
+
+	ret[0] = G0/denominator - m0*G0/denominator/denominator * DdenominatorDm0;
+	ret[1] = m0/denominator - m0*G0/denominator/denominator * DdenominatorDG0;
+
+	return ret;
+};
 ////////	////////	vandermeulen_phase_space	///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -204,6 +277,7 @@ class vandermeulen_phase_space : public amplitude{
 		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
+		std::vector<std::complex<double> > Diff(const double* var, const double* par, const double* con)	const;
 #ifdef ADOL_ON
 		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
@@ -244,7 +318,23 @@ std::complex<xdouble> vandermeulen_phase_space::template_eval(const double* var,
 	};
 	return value;
 };
-
+std::vector<std::complex<double> > vandermeulen_phase_space::Diff(const double* var, const double* par, const double* con)	const{
+	double m     = var[0];
+	double alpha = par[0];
+	double mPi   = con[0];
+	double mIso  = con[1];
+	double ampor = mPi + mIso;
+	std::vector<std::complex<double> >value(1);
+	if ( m > ampor){
+		double S = m*m;
+		double E = (S + mPi * mPi - mIso*mIso)/(2*m);
+		double PSQ = E*E - mPi*mPi;
+		value[0] = std::complex<double>(PSQ*exp(alpha*PSQ),0.);
+	}else{
+		value[0] = std::complex<double>(0.,0.);			
+	};
+	return value;
+};
 ////////	////////	valera_dorofeev_background	///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -259,6 +349,7 @@ class valera_dorofeev_background : public amplitude{
 		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
+		std::vector<std::complex<double> > Diff(const double* var, const double* par, const double* con)	const;
 #ifdef ADOL_ON
 		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
@@ -289,9 +380,24 @@ std::complex<xdouble> valera_dorofeev_background::template_eval(const double* va
 	xdouble beta  = par[1];
 
 	xdouble m0    = con[0];		
-	return std::complex<xdouble>(pow((m-m0)/0.5,alpha)*exp(-beta*(m-m0-0.5)),0);
+	return std::complex<xdouble>(pow((m-m0)/0.5,alpha)*exp(-beta*(m-m0-0.5)),0.);
 };
+std::vector<std::complex<double> > valera_dorofeev_background::Diff(const double* var, const double* par, const double* con)	const{
 
+	std::vector<std::complex<double> > ret(2);
+	double m     = var[0];
+
+	double alpha = par[0];
+	double beta  = par[1];
+
+	double m0    = con[0];		
+
+
+	ret[0] = std::complex<double>(log((m-m0)/0.5)*pow((m-m0)/0.5,alpha)*exp(-beta*(m-m0-0.5)),0.);
+	ret[1] = std::complex<double>(-(m-m0-0.5)*pow((m-m0)/0.5,alpha)*exp(-beta*(m-m0-0.5)),0.);
+
+	return ret;
+};
 ////////	////////	bowler_parametrization		///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -306,6 +412,7 @@ class bowler_parametrization : public amplitude{
 		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
+		std::vector<std::complex<double> > Diff(const double* var, const double* par, const double* con)	const;
 #ifdef ADOL_ON
 		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
@@ -336,6 +443,31 @@ std::complex<xdouble> bowler_parametrization::template_eval(const double* var, c
 
 	return std::complex<xdouble>(sqrt(m0*G0),0)/denominator;
 };
+std::vector<std::complex<double> > bowler_parametrization::Diff(const double* var, const double* par, const double* con)	const{
+
+	std::vector<std::complex<double> > ret(2);
+
+	double m     = var[0];
+
+	double m0    = par[0];
+	double G0    = par[1];
+
+	double delta = 1.E-6;
+	double bowlerm0 = bowler_integral_table<double>(m0);
+	double Dbowlerm0Dm0 = (bowler_integral_table<double>(m0+delta) - bowlerm0)/delta;// Since the bowler_integral_table() is a linear interpolation, this is valid
+
+	double G = G0*	bowler_integral_table<double>(m)/bowlerm0 * m0/m;
+	double DGDm0 = G/m0 - G/bowlerm0 * Dbowlerm0Dm0;
+
+	std::complex<double> denominator = std::complex<double>(m0*m0-m*m,-m0*G);
+	std::complex<double> DdenominatorDm0 = std::complex<double>(2.*m0,-G-m0*DGDm0);
+	std::complex<double> DdenominatorDG0 = std::complex<double>(0.,-m0*G/G0);
+
+	ret[0] = sqrt(G0/m0)/(2.*denominator) - sqrt(m0*G0)/denominator/denominator*DdenominatorDm0;
+	ret[1] = sqrt(m0/G0)/(2.*denominator) - sqrt(m0*G0)/denominator/denominator*DdenominatorDG0;
+
+	return ret;
+};
 ////////	////////	flatte				///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -350,6 +482,7 @@ class flatte : public amplitude{
 		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
+		std::vector<std::complex<double> > Diff(const double* var, const double* par, const double* con)	const;
 #ifdef ADOL_ON
 		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
@@ -393,7 +526,29 @@ std::complex<xdouble> flatte::template_eval(const double* var, const xdouble* pa
 	std::complex<xdouble> denominator = std::complex<xdouble>(m0*m0-m*m,-(g1*qpp*qpp + g2*qKK*qKK));
 	return std::complex<xdouble>(1,0)/denominator;
 };
+std::vector<std::complex<double> > flatte::Diff(const double* var, const double* par, const double* con)	const{
 
+	std::vector<std::complex<double> >ret(3);
+	double m     = var[0];
+	double m0    = par[0];
+	double g1    = par[1];
+	double g2    = par[2];
+
+	double mPi   = con[0];
+	double mK    = con[1];
+	
+	double qpp= breakupMomentumReal<double>(m*m,mPi*mPi,mPi*mPi);
+	double qKK= breakupMomentumReal<double>(m*m,mK*mK,mK*mK);
+
+	std::complex<double> denominator = std::complex<double>(m0*m0-m*m,-(g1*qpp*qpp + g2*qKK*qKK));
+	std::complex<double> prefak = -1./denominator/denominator;
+
+	ret[0] = prefak * std::complex<double>(2*m0,0.);
+	ret[1] = prefak * std::complex<double>(0.,-qpp*qpp);
+	ret[2] = prefak * std::complex<double>(0.,-qKK*qKK);
+
+	return ret;
+};
 ////////	////////	gaus				///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -408,6 +563,7 @@ class gaus : public amplitude{
 		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
+		std::vector<std::complex<double> > Diff(const double* var, const double* par, const double* con)	const;
 #ifdef ADOL_ON
 		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
@@ -433,7 +589,20 @@ std::complex<xdouble> gaus::template_eval(const double* var, const xdouble* par,
 	xdouble m0    = par[0];
 	xdouble sig   = par[1];
 
-	return std::complex<xdouble>(exp(-(m-m0)*(m-m0)/2/sig/sig),0);
+
+	return std::complex<xdouble>(exp(-(m-m0)*(m-m0)/2./sig/sig),0.);
+};
+
+std::vector<std::complex<double> > gaus::Diff(const double* var, const double* par, const double* con)	const{
+	double m     = var[0];
+	std::vector<std::complex<double> > ret(2);
+
+	double gaus = exp(-(m-par[0])*(m-par[0])/2./par[1]/par[1]);
+
+	ret[0] =  gaus*(m-par[0])/par[1]/par[1];
+	ret[1] = -gaus*(m-par[0])*(m-par[0])/par[1]/par[1]/par[1];
+
+	return ret;
 };
 ////////	////////	polynomial			///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -449,6 +618,7 @@ class polynomial : public amplitude{
 		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
+		std::vector<std::complex<double> > Diff(const double* var, const double* par, const double* con)	const;
 #ifdef ADOL_ON
 		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
@@ -491,9 +661,21 @@ std::complex<xdouble> polynomial::template_eval(const double* var, const xdouble
 
 		ret += con[0];
 
-		return std::complex<xdouble>(ret,0);
+		return std::complex<xdouble>(ret,0.);
 };
+std::vector<std::complex<double> > polynomial::Diff(const double* var, const double* par, const double* con)	const{
 
+	std::vector<std::complex<double> >ret(5);
+	double m = var[0];
+
+	ret[0] = std::complex<double>(1.,0.);
+	ret[1] = std::complex<double>(m,0.);
+	ret[2] = std::complex<double>(m*m,0.);
+	ret[3] = std::complex<double>(m*m*m,0.);
+	ret[4] = std::complex<double>(m*m*m*m,0.);
+	
+	return ret;
+};
 ////////	////////	mass_dep_bw_2			///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -508,6 +690,7 @@ class mass_dep_bw_2 : public amplitude{
 		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
+		std::vector<std::complex<double> > Diff(const double* var, const double* par, const double* con)	const;
 #ifdef ADOL_ON
 		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
@@ -562,11 +745,51 @@ std::complex<xdouble> mass_dep_bw_2::template_eval(const double* var, const xdou
 	xdouble Fl2= barrierFactor<xdouble>(q2,con[5]);
 	xdouble Fl20=barrierFactor<xdouble>(q20,con[5]);	
 
-	xdouble G  = G0 * m0/m* ((1-X)*q1*Fl1*Fl1/q10/Fl10/Fl10 + X* q2*Fl2*Fl2/q20/Fl20/Fl20);
+	xdouble G  = G0 * m0/m* ((1.-X)*q1*Fl1*Fl1/q10/Fl10/Fl10 + X* q2*Fl2*Fl2/q20/Fl20/Fl20);
 	std::complex<xdouble> denominator = std::complex<xdouble>(m0*m0-m*m,-m0*G);
 	return std::complex<xdouble>(m0*G0,0.)/denominator;	
 };
 
+std::vector<std::complex<double> >  mass_dep_bw_2::Diff(const double* var, const double* par, const double* con)	const{
+
+	std::vector<std::complex<double> > ret(2);
+
+	double m     = var[0];
+
+	double m0    = par[0];
+	double G0    = par[1];
+
+	double mPi   = con[0];
+	double mIso1 = con[1];
+	double mIso2 = con[2];
+	double X     = con[3];
+
+	double q1 = breakupMomentumReal<double>(m*m,mPi*mPi,mIso1*mIso1);
+	double q10= breakupMomentumReal<double>(m0*m0,mPi*mPi,mIso1*mIso1);
+	double Dq10Dm0 = DbreakupMomentumRealDM2(m0*m0,mPi*mPi,mIso1*mIso1)*2.*m0;
+
+	double q2 = breakupMomentumReal<double>(m*m,mPi*mPi,mIso2*mIso2);
+	double q20= breakupMomentumReal<double>(m0*m0,mPi*mPi,mIso2*mIso2);
+	double Dq20Dm0 = DbreakupMomentumRealDM2(m0*m0,mPi*mPi,mIso2*mIso2)*2.*m0;
+
+	double Fl1= barrierFactor<double>(q1,con[4]);
+	double Fl10=barrierFactor<double>(q10,con[4]);
+	double DFl10Dm0 = DbarrierFactorDq(q10,con[4])*Dq10Dm0;
+
+	double Fl2= barrierFactor<double>(q2,con[5]);
+	double Fl20=barrierFactor<double>(q20,con[5]);	
+	double DFl20Dm0 = DbarrierFactorDq(q20,con[5])*Dq20Dm0;
+
+	double G = G0 * m0/m* ((1.-X)*q1*Fl1*Fl1/q10/Fl10/Fl10 + X* q2*Fl2*Fl2/q20/Fl20/Fl20);
+	double DGDm0 = G/m0 - G0*m0/m*((1.-X)*q1/q10*Fl1*Fl1/Fl10/Fl10*(2./Fl10*DFl10Dm0 + 1./q10*Dq10Dm0) + X*q2/q20*Fl2*Fl2/Fl20/Fl20*(2./Fl20*DFl20Dm0 + 1./q20*Dq20Dm0));
+
+	std::complex<double> denominator = std::complex<double>(m0*m0-m*m,-m0*G);
+
+	ret[0] = G0/denominator - m0*G0/denominator/denominator*std::complex<double>(2.*m0,-G-m0*DGDm0);
+	ret[1] = m0/denominator - m0*G0/denominator/denominator*std::complex<double>(0.,-m0*G/G0);
+
+	return ret;
+};
 ////////	////////	t_dependent_background		///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -581,6 +804,7 @@ class t_dependent_background : public amplitude{
 		std::complex<xdouble> template_eval(const double* var, const xdouble* par, const double* con)		const;
 
 		std::complex<double> Eval(const double* var, const double* par, const double* con)			const		{return template_eval(var,par,con);};
+		std::vector<std::complex<double> > Diff(const double* var, const double* par, const double* con)	const;
 #ifdef ADOL_ON
 		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)			const		{return template_eval(var,par,con);};
 #endif//ADOL_ON	
@@ -634,6 +858,38 @@ std::complex<xdouble> t_dependent_background::template_eval(const double* var, c
 		PSQ = E*E - mPi*mPi;
 	};
 	return std::complex<xdouble>(pow(m-m0,b)*exp(PSQ*(c0+c1*tPrime+c2*tPrime*tPrime)),0.);
+};
+std::vector<std::complex<double> >t_dependent_background::Diff(const double* var, const double* par, const double* con)	const{
+	std::vector<std::complex<double> >ret(4);
+
+	double m     = var[0];
+	double tPrime= var[1];
+
+	double b     = par[0];
+	double c0    = par[1];
+	double c1    = par[2];
+	double c2    = par[3];
+
+	double m0    = con[0];
+	double mPi   = con[1];
+	double mIso  = con[2];
+
+
+	double PSQ = 0.;
+	double mpor = mPi + mIso;		
+	if (m > mpor){
+		double E = (m*m +mPi*mPi - mIso*mIso)/(2*m);
+		PSQ = E*E - mPi*mPi;
+	};
+
+	double val = pow(m-m0,b)*exp(PSQ*(c0+c1*tPrime+c2*tPrime*tPrime));
+
+	ret[0] = std::complex<double>(val*log(m-m0),0.);
+	ret[1] = std::complex<double>(val*PSQ,0.);
+	ret[2] = std::complex<double>(val*PSQ*tPrime,0.);
+	ret[3] = std::complex<double>(val*PSQ*tPrime*tPrime,0.);
+
+	return ret;
 };
 // End of special definitions
 

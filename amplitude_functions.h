@@ -8,6 +8,7 @@
 #include <complex>
 #include <iostream>
 #include <string>
+#include <limits>
 // double mPi=1.3957018;///\pm0.00035MeV // Particle Data Booklet 2012
 
 #ifdef ADOL_ON // Some function on std::complex<adtl::adouble>, needed for automatic differentiation.
@@ -40,11 +41,22 @@ const double PI  	= 3.141592653589793238463;
 
 //////////////////////////  SOME COMMON DEFINITIONS  //////////////////////////////////////////////////////////////////////
 template< typename xdouble> xdouble breakupMomentumReal(xdouble M2, xdouble m12, xdouble m22){ // Real breakup momentum: sqrt(lambda(M,m1,m2))/(2M) or 0.
-	xdouble lambda= M2*M2 + m12*m12 + m22*m22 - 2*M2*m12 -2*M2*m22 - 2*m12*m22;
+	xdouble lambda= M2*M2 + m12*m12 + m22*m22 - 2.*M2*m12 -2.*M2*m22 - 2.*m12*m22;
 	if ( lambda >= 0. ){
-		return sqrt(lambda)/(2*M2);
+		return sqrt(lambda)/(2.*M2);
 	}else{
-		std::cerr << "amplitude_functions.h: Error: Found 0 > q^2("<<M2<<","<<m12<<","<<m22<<") = "<<lambda/(4*M2*M2)<<". Sub-threshold decay."<<std::endl;
+		std::cerr << "amplitude_functions.h: Error: Found 0 > q^2("<<M2<<","<<m12<<","<<m22<<") = "<<lambda/(4.*M2*M2)<<". Sub-threshold decay."<<std::endl;
+		return 0.;
+	};
+};
+
+double DbreakupMomentumRealDM2(double M2, double m12, double m22){
+/// Derivative of breakupMomentumReal(...) w.r.t. the first argument
+	double lambda= M2*M2 + m12*m12 + m22*m22 - 2.*M2*m12 -2.*M2*m22 - 2.*m12*m22;
+	double DLambdaDM2 = 2.*M2 - 2.*m12 - 2.*m22;
+	if (lambda>0){
+		return 1./(2.*sqrt(lambda)) * DLambdaDM2/(2.*M2) - sqrt(lambda)/(2.*M2*M2);
+	}else{
 		return 0.;
 	};
 };
@@ -53,16 +65,16 @@ template<typename xdouble> xdouble barrierFactor(xdouble q, xdouble L){
 	double pr = 0.1973;
 	xdouble z=q*q/pr/pr;
 	xdouble res;
-	if (L == 0){
+	if (L == 0.){
 		res=1.;
-	}else if (L==1){
-		res=sqrt(2*z/(z+1));
-	}else if (L==2){
-		res=sqrt(13*z*z/((z-3)*(z-3)+9*z));
-	}else if (L==3){
-		res=sqrt(277*z*z*z/(z*(z-15)*(z-15)+9*pow(2*z-5,2)));
-	}else if (L==4){
-		res=sqrt(12746*pow(z,4)/(pow(z*z-45*z+105,2)+25*z*pow(2*z-21,2)));
+	}else if (L==1.){
+		res=sqrt(2.*z/(z+1.));
+	}else if (L==2.){
+		res=sqrt(13.*z*z/((z-3.)*(z-3.)+9.*z));
+	}else if (L==3.){
+		res=sqrt(277.*z*z*z/(z*(z-15.)*(z-15.)+9.*pow(2.*z-5.,2)));
+	}else if (L==4.){
+		res=sqrt(12746.*pow(z,4.)/(pow(z*z-45.*z+105.,2)+25.*z*pow(2.*z-21.,2)));
 	} else {
 		std::cerr << "amplitude_functions.h: Error: Barrier factors not defined for L =" << L <<std::endl;
 		res =0.;
@@ -70,22 +82,65 @@ template<typename xdouble> xdouble barrierFactor(xdouble q, xdouble L){
 	return res;
 };
 
+double DbarrierFactorDq(double q, double L){
+	double pr = 0.1973;
+	double z=q*q/pr/pr;
+
+	double dzdq = 2.*q/pr/pr;
+	double res = 0.;
+	if (L == 0.){
+		res=0.;
+	}else if (L==1.){
+		res=1./(2.*sqrt(2.*z/(z+1.)))*2.*(1.-z/(z+1.))/(z+1.);
+	}else if (L==2.){
+		res=1./(2.*sqrt(13.*z*z/((z-3.)*(z-3.)+9.*z)))*(26.*z/((z-3.)*(z-3.)+9.*z)-13.*z*z/(((z-3.)*(z-3.)+9.*z)*((z-3.)*(z-3.)+9.*z))*(2.*z+3.));
+	}else if (L==3.){
+		res=1./(2.*sqrt(277.*z*z*z/(z*(z-15.)*(z-15.)+9.*pow(2.*z-5.,2))))*(277.*3.*z*z/(z*(z-15.)*(z-15.)+9.*pow(2.*z-5.,2))-277.*z*z*z/pow(z*(z-15.)*(z-15.)+9.*pow(2.*z-5.,2),2)*(2.*z*(z-15.)+pow(z-15.,2)+36.*(2.*z-5.)));
+	}else if (L==4.){
+		double den = (pow(z*z-45.*z+105.,2)+25.*z*pow(2.*z-21.,2));
+		double sqr=sqrt(12746.*pow(z,4)/den);
+		res = 1./(2.*sqr)*(50984.*pow(z,3)/den - 12746.*pow(z,4)/(den*den)*(2.*(z*z-45.*z+105.)*(2.*z-45.)+25.*(pow(2.*z-21.,2)+z*4.*(2.*z-21.))));
+	} else {
+		std::cerr << "amplitude_functions.h: Error: Barrier factors not defined for L =" << L <<std::endl;
+		res =0.;
+	};
+	return res*dzdq;
+};
+
 template<typename xdouble>  // Some different definition for Barrier factors... used by Dimas program.
 xdouble fdl(xdouble P, xdouble R, xdouble L){
 	xdouble X = P*R;
-	if (L==0){
+	if (L==0.){
 		return 1.;
-	}else if(L==1){
+	}else if(L==1.){
 		return 1. + X*X;
-	}else if(L==2){
+	}else if(L==2.){
 		return 9. + 3.*X*X + X*X*X*X;
-	}else if(L==3){
-		return 225. + 45.*X*X + 6.*X*X*X*X * X*X*X*X*X*X;	
-	}else if(L==4){
-		return 11025. + 1575.*X*X + 135.*X*X*X*X + 10*X*X*X*X*X*X + X*X*X*X*X*X*X*X;
+	}else if(L==3.){
+		return 225. + 45.*X*X + 6.*X*X*X*X + X*X*X*X*X*X;	
+	}else if(L==4.){
+		return 11025. + 1575.*X*X + 135.*X*X*X*X + 10.*X*X*X*X*X*X + X*X*X*X*X*X*X*X;
 	}else{
 		std::cerr<<"amplitude_functions.h: Error: 'fdl(...)' not defined for 4 < L = "<< L << std::endl;
 		return 1.;
+	};
+};
+
+double DfdlDP(double P, double R, double L){
+	double X = P*R;
+	if (L==0.){
+		return 0.;
+	}else if (L==1.){
+		return 2*X*R;
+	}else if(L==2.){
+		return ( 6.*X + 4.*X*X*X)*R;
+	}else if(L==3.){
+		return (90.*X + 24.*X*X*X + 6.*X*X*X*X*X)*R;
+	}else if(L==4.){
+		return (3150.*X + 540.*X*X*X + 60. *X*X*X*X*X + 8.*X*X*X*X*X*X*X)*R;
+	}else{
+		std::cerr<<"amplitude_functions.h: Error: 'fdl(...)' not defined for 4 < L = "<< L << std::endl;
+		return 0.;
 	};
 };
 
@@ -102,6 +157,23 @@ xdouble psl(xdouble m, xdouble m1, xdouble m2, xdouble R, xdouble L){
 	};
 };
 
+double DpslDm (double m, double m1, double m2, double R, double L){
+	double ampor = m1+m2;
+	if (m > ampor){
+		double E = (m*m + m1*m1 - m2 * m2)/(2*m);
+		double DEDm = 1./2 - (m1*m1 - m2 * m2)/(2*m*m);
+	
+		double P = pow((E*E-m1*m1)*(E*E-m1*m1),.25);
+		double DPDm = pow((E*E-m1*m1)*(E*E-m1*m1),-.75) *(E*E-m1*m1) *E * DEDm;
+
+		double f = fdl<double>(P,R,L);
+		double DfDm = DfdlDP(P,R,L)*DPDm;
+
+		return (2*L+1)*pow(P,2*L)/f * DPDm - pow(P,2*L+1)/f/f *DfDm;
+	}else{
+		return 0.;
+	};
+};
 
 template<typename xdouble>
 xdouble bowler_integral_table(xdouble m){
@@ -140,9 +212,13 @@ class amplitude {
 		std::complex<double> Eval(const double* var, const double* par)					const		{return Eval(var, par, &_constants[0]);};
 		virtual std::complex<double> Eval(const double* var, const double* par, const double* con)	const		{return std::complex<double>(1.,0.);};
 
+		std::vector<std::complex<double> > Diff(const double* var)					const		{return Diff(var, &_parameters[0], &_constants[0]);};
+		std::vector<std::complex<double> > Diff(const double* var, const double* par)			const		{return Diff(var, par, &_constants[0]);};
+		virtual std::vector<std::complex<double> >Diff(const double* var, const double* par, const double* con) const	{std::cerr<<"amplitude::Diff(...): Error: amplitude::Diff(...) not overwritten"<<std::endl;throw;return std::vector<std::complex<double> >();};
+
 #ifdef ADOL_ON
-		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par)				const		{return Eval(var, par, &_constants[0]);};
-		virtual std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)	const		{return std::complex<adtl::adouble>(1.,0.);};
+		std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par)			const		{return Eval(var, par, &_constants[0]);};
+		virtual std::complex<adtl::adouble> Eval(const double* var, const adtl::adouble* par, const double* con)const	{return std::complex<adtl::adouble>(1.,0.);};
 #endif//ADOL_ON
 
 		size_t 			nVar()									const		{return _nVar;};
