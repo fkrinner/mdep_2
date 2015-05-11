@@ -44,6 +44,24 @@ class waveset {
 		std::vector<double> phase_space(
 								const double 						*m) 			const;
 
+		std::vector<std::vector<std::complex<double> > > diff_amps(
+								const double						*m,
+								const std::complex<double> 				*cpl,
+								const double						*par,	
+								std::vector<std::vector<std::complex<double> > >	&funcEvals2pi,
+								bool							ignore_limits = false)	const;
+
+		std::vector<std::complex<double> > diff_funcs(
+								const double						*m,
+								const double						*par,
+								bool							ignore_limits = false)	const;
+		
+	std::vector<std::vector<std::complex<double> > > diff_amps_full(
+								size_t 							tbin,
+								double							m,
+								const double						*parameters,
+								bool							ignore_limits)		const;
+
 	// SET UP WAVESET
 		// // WAVES AND FUNCTIONS
 		size_t 				add_wave		();

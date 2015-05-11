@@ -76,6 +76,15 @@ struct chi2py:public nlopt_class{
 		return std_vector_to_py_list(dif);
 	};
 #endif//ADOL_ON
+	bp::list diff_amps(size_t nAmp, size_t tbin, double mass, bp::object par){
+
+
+		std::vector<double> parameters = to_std_vector<double>(par);
+		std::vector<std::vector<std::complex<double> > > rett = _method->Waveset()->diff_amps_full(tbin,mass, &parameters[0], false);
+		return std_vector_to_py_list(rett[nAmp]);
+	};
+
+
 	double getParameter(std::string name){
 		int i = _method->getParNumber(name);
 		if (i<0){
@@ -227,6 +236,8 @@ BOOST_PYTHON_MODULE(libchi2py){
 	chi2.def("nFtw",				&chi2py::nFtw					);
 	chi2.def("nTbin",				&chi2py::nTbin					);
 	chi2.def("nWaves",				&chi2py::nWaves					);
+
+	chi2.def("diff_amps",				&chi2py::diff_amps				);
 
 	chi2.def("method",				&chi2py::method					);
 	chi2.def("className",				&chi2py::className				);

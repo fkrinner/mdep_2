@@ -102,32 +102,32 @@ std::vector<std::complex<xdouble> > waveset::amps(
 	std::vector<std::complex<xdouble> > ampl = std::vector<std::complex<xdouble> >(_nPoints,std::complex<xdouble>(0.,0.)); // Vector of final amplitudes
 	std::vector<double> ps = phase_space(m);
 	std::complex<xdouble> amp; // Actual wave amplitude
-	int upBor=0; // Upper limit for function number
-	int loBor=0; // Lower limit for function number
-	int amplcount=0;
-	for (size_t wave =0;wave<_nWaves;wave++){
+	size_t upBor=0; // Upper limit for function number
+	size_t loBor=0; // Lower limit for function number
+	size_t amplcount=0;
+	for (size_t wave =0;wave<_nWaves;++wave){
 		int n_iso_bin = _wave_binning_pts[wave];
 		loBor = upBor;
 		upBor = _borders_waves[wave];
 		if ((m[0] >= _lowerLims[wave] and m[0]<_upperLims[wave]) or ignore_limits){
 			if(-1==n_iso_bin){
 				std::complex<xdouble> amp(0.,0.);
-				for (int nFunc = loBor; nFunc<upBor; nFunc++){
+				for (size_t nFunc = loBor; nFunc<upBor;++nFunc){
 					int func = _funcs_to_waves[nFunc]; // Number of function contributing to the actual wave
 					amp+=std::complex<xdouble>(ps[wave],0.)*cpl[nFunc]*funcEval[func];
 				};
 				ampl[amplcount]=amp;
 				amplcount++;
 			}else{
-				for(int bin2=0;bin2<n_iso_bin;bin2++){
+				for(int bin2=0;bin2<n_iso_bin;++bin2){
 					std::complex<xdouble> amp(0.,0.);
-					for (int nFunc = loBor; nFunc<upBor;nFunc++){
+					for (size_t nFunc = loBor; nFunc<upBor;++nFunc){
 						int func =  _funcs_to_waves[nFunc];
 						int iso  =  _iso_to_waves[nFunc];
 						amp+=std::complex<xdouble>(ps[wave],0.)*cpl[nFunc]*funcEval[func]*funcEvals2pi[iso][bin2];
 					};
 					ampl[amplcount]=amp;
-					amplcount++;
+					++amplcount;
 				};
 			};
 		}else{
@@ -138,6 +138,131 @@ std::vector<std::complex<xdouble> > waveset::amps(
 };
 template std::vector<std::complex<double> > waveset::amps(const double *m, const std::complex<double> *cpl,const double *par, std::vector<std::vector<std::complex<double> > > &funcEvals2pi, bool ignore_limits) const;
 //########################################################################################################################################################
+///Gives the derivatives of the am[plitudes w.r.t. the couplings and the paramters as a std::vector<std::complex<double> > for each amplitude
+std::vector<std::vector<std::complex<double> > > waveset::diff_amps(
+							const double						*m,
+							const std::complex<double>				*cpl,
+							const double						*par,
+							std::vector<std::vector<std::complex<double> > >	&funcEvals2pi,
+							bool							ignore_limits)				const{
+	
+	std::vector<std::complex<double> > funcEval = funcs(m,par,ignore_limits);
+	std::vector<std::complex<double> > diffEval = diff_funcs(m,par,ignore_limits);
+	std::vector<std::vector<std::complex<double> > > Dampl = std::vector<std::vector<std::complex<double> > >(_nPoints,std::vector<std::complex<double> >(_nFtw+_nPar,std::complex<double>(0.,0.)));
+	std::vector<double> ps = phase_space(m);
+	size_t upBor=0; // Upper limit for function number
+	size_t loBor=0; // Lower limit for function number
+	size_t amplcount=0;
+	for (size_t wave=0;wave<_nWaves;++wave){
+		int n_iso_bin = _wave_binning_pts[wave];
+		loBor = upBor;
+		upBor = _borders_waves[wave];
+		if ((m[0] >= _lowerLims[wave] and m[0]<_upperLims[wave]) or ignore_limits){		
+			if(-1==n_iso_bin){
+				for (size_t nFunc = loBor; nFunc<upBor; ++nFunc){
+					size_t func = _funcs_to_waves[nFunc]; // Number of function contributing to the actual wave
+					Dampl[amplcount][nFunc] = ps[wave]*funcEval[func]; // Do not need derivative w.r.t. Re and Im here, since d/dIm = i*d/dRe
+					size_t loParBor = 0;
+					size_t upParBor = _borders_par[func];
+					if (func>0){
+						loParBor= _borders_par[func-1];
+					};
+					for (size_t par = loParBor;par <upParBor;++par){
+						Dampl[amplcount][_nFtw+par] =ps[wave] * cpl[nFunc] * diffEval[par];
+					};
+				};
+				++amplcount;
+			}else{
+				std::cerr<<"waveset::diff_amps(...): Error: Isobars not implemented in the derivatives at the moment"<<std::endl;
+				throw;
+			};
+		}else{
+			amplcount+=abs(n_iso_bin);
+		};
+	};
+	return Dampl;	
+};
+//########################################################################################################################################################
+std::vector<std::vector<std::complex<double> > > waveset::diff_amps_full(
+							size_t 							tbin,
+							double							m,
+							const double						*parameters,
+							bool							ignore_limits)				const{
+
+	std::vector<std::complex<double> > cpl(_nBrCpl);
+	for (size_t c=0; c<_nBrCpl;++c){
+		cpl[c] = std::complex<double>(parameters[2*_nBrCpl*tbin+2*c],parameters[2*_nBrCpl*tbin+2*c+1]);
+	};
+	std::vector<double> par(_nPar);
+	for (size_t p=0;p<_nPar;++p){
+		par[p] = parameters[2*_nBrCpl*_nTbin+p];
+	};
+	std::vector<std::complex<double> > bra(_nBranch);
+	for (size_t b =0;b<_nBranch;++b){
+		bra[b] = std::complex<double>(parameters[2*_nBrCpl*_nTbin+_nPar+2*b],parameters[2*_nBrCpl*_nTbin+_nPar+2*b+1]);
+	};
+/// Implement isobars here
+	if (_has_isobars){
+		std::cerr<<"waveset::diff_ampl_full_par(...): Error: Isobars not implemented in the derivatives at the moment"<<std::endl;
+		throw;
+	};
+	std::vector<std::complex<double> > cpl_full(_nFtw);
+	for (size_t ftw = 0;ftw<_nFtw;++ftw){
+		int nBra = _n_branch[ftw];
+		size_t nCpl = _n_cpls[ftw];
+		if (-1 == nBra){
+			cpl_full[ftw] = cpl[nCpl];
+		}else{
+			cpl_full[ftw] = cpl[nCpl]*bra[nBra];
+		};
+	};
+	std::vector<double>  var = getVar(m,tbin);
+	std::vector<std::vector<std::complex<double> > > iso = std::vector<std::vector<std::complex<double> > >();
+	std::vector<std::vector<std::complex<double> > > raw_diff = diff_amps(&var[0],&cpl[0],&par[0],iso, ignore_limits);
+	std::vector<std::vector<std::complex<double> > > diff = std::vector<std::vector<std::complex<double> > >(_nPoints,std::vector<std::complex<double> >(_nBrCpl*2*_nTbin+_nPar+2*_nBranch,std::complex<double>(0.,0.))); // complex parameters don't need to be counted twice since d/dIm = i*d/dRe
+	size_t upBor=0; // Upper limit for function number
+	size_t loBor=0; // Lower limit for function number
+	size_t amplcount=0;
+	for (size_t wave =0;wave<_nWaves;++wave){
+		int n_iso_bin = _wave_binning_pts[wave];
+		loBor = upBor;
+		upBor = _borders_waves[wave];
+		if ((m >= _lowerLims[wave] and m<_upperLims[wave]) or ignore_limits){		
+			if(-1==n_iso_bin){
+				for (size_t ftw = loBor; ftw<upBor; ++ftw){
+					size_t func = _funcs_to_waves[ftw]; // Number of function contributing to the actual wave
+					int b = _n_branch[ftw];
+					size_t c = _n_cpls[ftw];
+					if (-1==b){
+						diff[amplcount][2*_nBrCpl*tbin+2*c  ] = raw_diff[amplcount][ftw]; // Do not need derivative w.r.t. Re and Im here, since d/dIm = i*d/dRe
+						diff[amplcount][2*_nBrCpl*tbin+2*c+1] = std::complex<double>(0.,1.)*raw_diff[amplcount][ftw]; // Do not need derivative w.r.t. Re and Im here, since d/dIm = i*d/dRe
+					}else{
+						diff[amplcount][2*(_nBrCpl*tbin+c)  ] = raw_diff[amplcount][ftw]*bra[b];
+						diff[amplcount][2*(_nBrCpl*tbin+c)+1] = raw_diff[amplcount][ftw]*bra[b]*std::complex<double>(0.,1.);
+						diff[amplcount][2*(_nBrCpl*_nTbin)+_nPar+b  ] = raw_diff[amplcount][ftw]*cpl[c];
+						diff[amplcount][2*(_nBrCpl*_nTbin)+_nPar+b+1] = raw_diff[amplcount][ftw]*cpl[c]*std::complex<double>(0.,1.);
+					};
+					size_t loParBor = 0;
+					size_t upParBor = _borders_par[func];
+					if (func>0){
+						loParBor = _borders_par[func-1];
+					};
+					for (size_t p = loParBor;p <upParBor;++p){
+						diff[amplcount][2*_nBrCpl*_nTbin+p] =raw_diff[amplcount][_nFtw+p];
+					};
+				};
+				++amplcount;
+			}else{
+				std::cerr<<"waveset::diff_amps(...): Error: Isobars not implemented in the derivatives at the moment"<<std::endl;
+				throw;
+			};
+		}else{
+			amplcount+=abs(n_iso_bin);
+		};
+	};
+	return diff;
+};
+//########################################################################################################################################################
 ///Returns the function values at m3pi = m and shape parameters par
 template<typename xdouble>
 std::vector<std::complex<xdouble> > waveset::funcs(
@@ -146,9 +271,9 @@ std::vector<std::complex<xdouble> > waveset::funcs(
 							bool							ignore_limits)				const{
 
 	std::vector<std::complex<xdouble> > f = std::vector<std::complex<xdouble> >(_nFuncs);
-	int upPar=0;
-	int loPar=0;
-	for (size_t func=0; func<_nFuncs; func++){
+	size_t upPar=0;
+	size_t loPar=0;
+	for (size_t func=0; func<_nFuncs;++func){
 		loPar = upPar;
 		upPar = _borders_par[func];
 		if ((m[0] >= _funcLowerLims[func] and m[0] < _funcUpperLims[func]) or ignore_limits){ // Only calculate needed functions
@@ -156,11 +281,36 @@ std::vector<std::complex<xdouble> > waveset::funcs(
 		}else{
 			f[func]=std::complex<xdouble>(0.,0.);
 		};
-
 	};
 	return f;
 };
 template std::vector<std::complex<double> > waveset::funcs(const double *m,const double *par, bool ignore_limits) const;
+//########################################################################################################################################################
+std::vector<std::complex<double> > waveset::diff_funcs(
+							const double						*m,
+							const double						*par,
+							bool							ignore_limits)				const{
+
+	std::vector<std::complex<double> > Df = std::vector<std::complex<double> > (_nPar);
+	size_t upPar=0;
+	size_t loPar=0;
+	size_t count=0;
+	for(size_t func =0; func<_nFuncs; ++func){
+		std::vector<std::complex<double> > df(0);
+		loPar = upPar;
+		upPar = _borders_par[func];
+		if ((m[0] >= _funcLowerLims[func] and m[0] < _funcUpperLims[func]) or ignore_limits){ // Only calculate needed functions
+			df=_amp_funcs[func]->Diff(m,par+loPar);
+		}else{
+			df=std::vector<std::complex<double> >(upPar-loPar,std::complex<double>(0.,0.));
+		};
+		for(size_t i=0;i<upPar-loPar;++i){
+			Df[count] = df[i];
+			++count;
+		};
+	};
+	return Df;
+};
 //########################################################################################################################################################
 ///Evaluates the isobar paramterizations at ALL masses, so they do not have to be recalculated each time
 template<typename xdouble>
@@ -171,12 +321,12 @@ std::vector<std::vector<std::complex<xdouble> > > waveset::iso_funcs(
 		std::vector<std::vector<std::complex<xdouble> > > f = std::vector<std::vector<std::complex<xdouble> > >(_nIso,std::vector<std::complex<xdouble> >(_maxBinIso,std::complex<xdouble>(0.,0.)));
 		int upPar=0;
 		int loPar=0;
-		for (size_t iso=0;iso<_nIso;iso++){
+		for (size_t iso=0;iso<_nIso;++iso){
 			loPar = upPar;
 			upPar = _iso_borders_par[iso];
 			int nBins = _iso_binning_pts[iso];
 			int nBinning = _iso_n_binning[iso];
-			for(int bin=0;bin<nBins;bin++){
+			for(int bin=0;bin<nBins;++bin){
 				double m = (_iso_binnings[nBinning][bin]+_iso_binnings[nBinning][bin+1])/2;
 				f[iso][bin]=_amp_isos[iso]->Eval(&m,par+loPar);
 			};
@@ -1464,6 +1614,7 @@ std::vector<int> waveset::getFirstBranch()										const{
 void waveset::updateNftw(){
 
 	_nFtw = _funcs_to_waves.size();
+	_nPar = getNpar();
 };
 //########################################################################################################################################################
 ///Updates the number of employed points
