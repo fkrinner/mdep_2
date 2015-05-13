@@ -937,11 +937,16 @@ std::map<std::string,int> waveset::loadFunctions(
 						for (int con=0;con<nCon;con++){
 							std::string cName = param[fName]["constants"][con]["name"].as<std::string>();
 							setConstantName(cCount ,cName);
+							if (getConstantName(cCount) != cName){
+								std::cout<<"Here error"<<std::endl;
+								throw;
+							};
 							double value  = param[fName]["constants"][con]["value"].as<double>();
 							setConst(cCount,value);
 							cCount++;
 						};
 					}else{
+						throw;
 						std::cerr<<"waveset::loadFunctions(...): Error: Number of defined constants ("<<nConDef<<") does not match required number for "<<fName<<" ("<<nCon<<")"<<std::endl;
 					};
 				};
@@ -1371,6 +1376,8 @@ std::vector<int> waveset::get_function_pars(
 std::vector<int> waveset::get_function_const(
 							int 							func)	const{
 
+	std::cerr<<"waveset::get_function_const(...): Error: Finction broken!!! -> throw;"<<std::endl;
+	throw;
 	int before = 0;
 	for (int i =0;i<func-1;i++){
 		before+=_amp_funcs[i]->nCon();
@@ -1379,6 +1386,7 @@ std::vector<int> waveset::get_function_const(
 	for (size_t i=0; i<_amp_funcs[func]->nCon();i++){
 		ret.push_back(before+i);
 	};
+	print_vector(ret);
 	return ret;
 };
 //########################################################################################################################################################
@@ -2029,7 +2037,6 @@ void waveset::printParameters()												const{
 			std::cout << _amp_funcs[func]->name()<<" #"<< func_count  << std::endl;
 			func_count++;
 			std::vector<int> pars = get_function_pars(func);
-			std::vector<int> cons = get_function_const(func);
 			size_t k_max = pars.size();
 			for(size_t k=0;k<k_max;k++){
 				int par = pars[k];
@@ -2038,27 +2045,26 @@ void waveset::printParameters()												const{
 				}else{
 					std::cout <<"│ ";
 				};
-				if (k==pars.size()-1 and cons.size()==0 ){
+				if (k==pars.size()-1 and _amp_funcs[func]->nCon()==0 ){
 					std::cout <<"└─";
 				}else{
 					std::cout <<"├─";
 				};
 				std::cout<< getParameterName(par)<<": "<<getPar(par)<<std::endl;
 			};
-			k_max = cons.size();
+			k_max = _amp_funcs[func]->nCon();
 			for (size_t k=0;k<k_max;k++){
-				int con = cons[k];
 				if (j==funcs.size()-1 and 0==is_max){
 					std::cout<<"  ";
 				}else{
 					std::cout <<"│ ";
 				};
-				if (k==cons.size()-1 ){
+				if (k==_amp_funcs[func]->nCon()-1 ){
 					std::cout <<"└─";
 				}else{
 					std::cout <<"├─";
 				};
-				std::cout<< getConstantName(con)<<": "<<getCon(con)<<std::endl;
+				std::cout<< _amp_funcs[func]->getConName(k)<<": "<<_amp_funcs[func]->getConstant(k)<<std::endl;
 			};
 
 		};
