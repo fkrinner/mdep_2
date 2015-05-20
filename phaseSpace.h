@@ -35,16 +35,16 @@ double phaseSpace(double m3Pi, int mode=0, int L=0, double m_isobar=1.){
 		return pow(ints[pos-1]*(1-frac) + ints[pos]*frac,.5);
 	};
 	if (mode==2){ // 3 Particle phase-space with Barrier factors. 
-		double q = breakupMomentumReal<double>(m3Pi*m3Pi,m_isobar*m_isobar,PION_MASS*PION_MASS);
+		double q = qoverm<double>(m3Pi*m3Pi,m_isobar*m_isobar,PION_MASS*PION_MASS);
 		double B = barrierFactor<double>(q,L);
 		return B*phaseSpace(m3Pi,1,L,m_isobar);
 	};
 	if (mode==3){ // Barrier factors
-		double q = breakupMomentumReal<double>(m3Pi*m3Pi,m_isobar*m_isobar,PION_MASS*PION_MASS);
+		double q = qoverm<double>(m3Pi*m3Pi,m_isobar*m_isobar,PION_MASS*PION_MASS);
 		return barrierFactor<double>(q,L);
 	};
 	if (mode==4){ // Breakup momentum
-		return breakupMomentumReal<double>(m3Pi*m3Pi,m_isobar*m_isobar,PION_MASS*PION_MASS);
+		return qoverm<double>(m3Pi*m3Pi,m_isobar*m_isobar,PION_MASS*PION_MASS);
 	};
 	if(mode==10){ // Strange factor commonly used. ->X<-
 		double one = 250720.;

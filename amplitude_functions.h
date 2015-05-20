@@ -40,18 +40,18 @@ const double PION_MASS 	= 0.139;
 const double PI  	= 3.141592653589793238463;
 
 //////////////////////////  SOME COMMON DEFINITIONS  //////////////////////////////////////////////////////////////////////
-template< typename xdouble> xdouble breakupMomentumReal(xdouble M2, xdouble m12, xdouble m22){ // Real breakup momentum: sqrt(lambda(M,m1,m2))/(2M) or 0.
+template< typename xdouble> xdouble qoverm(xdouble M2, xdouble m12, xdouble m22){ // Real breakup momentum: sqrt(lambda(M,m1,m2))/(2M) or 0.
 	xdouble lambda= M2*M2 + m12*m12 + m22*m22 - 2.*M2*m12 -2.*M2*m22 - 2.*m12*m22;
 	if ( lambda >= 0. ){
-		return sqrt(lambda)/(2.*M2);
+		return sqrt(lambda)/(2.*M2); // Alex says: return sqrt(lambda)/(2.*sqrt(M2)); check with Dima's prgramm befor changing
 	}else{
 		std::cerr << "amplitude_functions.h: Error: Found 0 > q^2("<<M2<<","<<m12<<","<<m22<<") = "<<lambda/(4.*M2*M2)<<". Sub-threshold decay."<<std::endl;
 		return 0.;
 	};
 };
 
-double DbreakupMomentumRealDM2(double M2, double m12, double m22){
-/// Derivative of breakupMomentumReal(...) w.r.t. the first argument
+double DqovermDM2(double M2, double m12, double m22){
+/// Derivative of qoverm(...) w.r.t. the first argument
 	double lambda= M2*M2 + m12*m12 + m22*m22 - 2.*M2*m12 -2.*M2*m22 - 2.*m12*m22;
 	double DLambdaDM2 = 2.*M2 - 2.*m12 - 2.*m22;
 	if (lambda>0){

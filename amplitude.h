@@ -108,8 +108,8 @@ std::complex<xdouble> mass_dep_breit_wigner::template_eval(const double* var, co
 	xdouble mPi = con[0];
 	xdouble mIso= con[1];
 
-	xdouble q0 = breakupMomentumReal<xdouble>(m0*m0,mPi*mPi,mIso*mIso);
-	xdouble q  = breakupMomentumReal<xdouble>(m* m ,mPi*mPi,mIso*mIso);
+	xdouble q0 = qoverm<xdouble>(m0*m0,mPi*mPi,mIso*mIso);
+	xdouble q  = qoverm<xdouble>(m* m ,mPi*mPi,mIso*mIso);
 	xdouble Fl = barrierFactor<xdouble>(q,con[2]);
 	xdouble Fl0= barrierFactor<xdouble>(q0,con[2]);
 
@@ -130,12 +130,12 @@ std::vector<std::complex<double> > mass_dep_breit_wigner::Diff(const double* var
 	double mPi = con[0];
 	double mIso= con[1];
 
-	double q0 = breakupMomentumReal<double>(m0*m0,mPi*mPi,mIso*mIso);
-	double q  = breakupMomentumReal<double>(m* m ,mPi*mPi,mIso*mIso);
+	double q0 = qoverm<double>(m0*m0,mPi*mPi,mIso*mIso);
+	double q  = qoverm<double>(m* m ,mPi*mPi,mIso*mIso);
 	double Fl = barrierFactor<double>(q,con[2]);
 	double Fl0= barrierFactor<double>(q0,con[2]);
 
-	double Dq0Dm0 = DbreakupMomentumRealDM2(m0*m0,mPi*mPi,mIso*mIso)*2*m0;
+	double Dq0Dm0 = DqovermDM2(m0*m0,mPi*mPi,mIso*mIso)*2*m0;
 	double DFl0Dm0 = DbarrierFactorDq(q0,con[2])* Dq0Dm0;
 
 	double G  = G0* m0/m * q*Fl*Fl/q0/Fl0/Fl0; //G0 * m0/m q*Fl^2/(q0*Fl0^2)
@@ -520,8 +520,8 @@ std::complex<xdouble> flatte::template_eval(const double* var, const xdouble* pa
 	xdouble mPi   = con[0];
 	xdouble mK    = con[1];
 	
-	xdouble qpp= breakupMomentumReal<xdouble>(m*m,mPi*mPi,mPi*mPi);
-	xdouble qKK= breakupMomentumReal<xdouble>(m*m,mK*mK,mK*mK);
+	xdouble qpp= qoverm<xdouble>(m*m,mPi*mPi,mPi*mPi);
+	xdouble qKK= qoverm<xdouble>(m*m,mK*mK,mK*mK);
 
 	std::complex<xdouble> denominator = std::complex<xdouble>(m0*m0-m*m,-(g1*qpp*qpp + g2*qKK*qKK));
 	return std::complex<xdouble>(1,0)/denominator;
@@ -537,8 +537,8 @@ std::vector<std::complex<double> > flatte::Diff(const double* var, const double*
 	double mPi   = con[0];
 	double mK    = con[1];
 	
-	double qpp= breakupMomentumReal<double>(m*m,mPi*mPi,mPi*mPi);
-	double qKK= breakupMomentumReal<double>(m*m,mK*mK,mK*mK);
+	double qpp= qoverm<double>(m*m,mPi*mPi,mPi*mPi);
+	double qKK= qoverm<double>(m*m,mK*mK,mK*mK);
 
 	std::complex<double> denominator = std::complex<double>(m0*m0-m*m,-(g1*qpp*qpp + g2*qKK*qKK));
 	std::complex<double> prefak = -1./denominator/denominator;
@@ -736,10 +736,10 @@ std::complex<xdouble> mass_dep_bw_2::template_eval(const double* var, const xdou
 	xdouble mIso2 = con[2];
 	xdouble X     = con[3];
 
-	xdouble q1 = breakupMomentumReal<xdouble>(m*m,mPi*mPi,mIso1*mIso1);
-	xdouble q10= breakupMomentumReal<xdouble>(m0*m0,mPi*mPi,mIso1*mIso1);
-	xdouble q2 = breakupMomentumReal<xdouble>(m*m,mPi*mPi,mIso2*mIso2);
-	xdouble q20= breakupMomentumReal<xdouble>(m0*m0,mPi*mPi,mIso2*mIso2);
+	xdouble q1 = qoverm<xdouble>(m*m,mPi*mPi,mIso1*mIso1);
+	xdouble q10= qoverm<xdouble>(m0*m0,mPi*mPi,mIso1*mIso1);
+	xdouble q2 = qoverm<xdouble>(m*m,mPi*mPi,mIso2*mIso2);
+	xdouble q20= qoverm<xdouble>(m0*m0,mPi*mPi,mIso2*mIso2);
 	xdouble Fl1= barrierFactor<xdouble>(q1,con[4]);
 	xdouble Fl10=barrierFactor<xdouble>(q10,con[4]);
 	xdouble Fl2= barrierFactor<xdouble>(q2,con[5]);
@@ -764,13 +764,13 @@ std::vector<std::complex<double> >  mass_dep_bw_2::Diff(const double* var, const
 	double mIso2 = con[2];
 	double X     = con[3];
 
-	double q1 = breakupMomentumReal<double>(m*m,mPi*mPi,mIso1*mIso1);
-	double q10= breakupMomentumReal<double>(m0*m0,mPi*mPi,mIso1*mIso1);
-	double Dq10Dm0 = DbreakupMomentumRealDM2(m0*m0,mPi*mPi,mIso1*mIso1)*2.*m0;
+	double q1 = qoverm<double>(m*m,mPi*mPi,mIso1*mIso1);
+	double q10= qoverm<double>(m0*m0,mPi*mPi,mIso1*mIso1);
+	double Dq10Dm0 = DqovermDM2(m0*m0,mPi*mPi,mIso1*mIso1)*2.*m0;
 
-	double q2 = breakupMomentumReal<double>(m*m,mPi*mPi,mIso2*mIso2);
-	double q20= breakupMomentumReal<double>(m0*m0,mPi*mPi,mIso2*mIso2);
-	double Dq20Dm0 = DbreakupMomentumRealDM2(m0*m0,mPi*mPi,mIso2*mIso2)*2.*m0;
+	double q2 = qoverm<double>(m*m,mPi*mPi,mIso2*mIso2);
+	double q20= qoverm<double>(m0*m0,mPi*mPi,mIso2*mIso2);
+	double Dq20Dm0 = DqovermDM2(m0*m0,mPi*mPi,mIso2*mIso2)*2.*m0;
 
 	double Fl1= barrierFactor<double>(q1,con[4]);
 	double Fl10=barrierFactor<double>(q10,con[4]);
