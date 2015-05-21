@@ -1,6 +1,6 @@
 #include<boost/python.hpp>
 #include<boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include"nlopt_class.h"
+#include"chi2container.h"
 #include<string>
 namespace bp = boost::python;
 
@@ -31,48 +31,52 @@ std::vector<std::vector<T> > to_std_vector_vector(const bp::object& iterable){
 };
 
 
-struct chi2py:public nlopt_class{
+struct chi2py:public chi2container{
 
 	chi2py(std::string card):
-		nlopt_class(card){};
+		chi2container(card){};
 
-	size_t nTot(){return _method->nTot();};
-	size_t nTbin(){return _method->Waveset()->nTbin();};
-	size_t nCpl(){return _method->nCpl();};
-	size_t nBrCpl(){return _method->Waveset()->nBrCpl();};
-	size_t nPar(){return _method->Waveset()->getNpar();};
-	size_t nBra(){return _method->Waveset()->nBranch();};
-	size_t nFtw(){return _method->Waveset()->nFtw();};
-	size_t nWaves(){return _method->Waveset()->nWaves();};
+	size_t nTot()  {return _minimizeChi2->method()->nTot();};
+	size_t nTbin() {return _minimizeChi2->method()->Waveset()->nTbin();};
+	size_t nCpl()  {return _minimizeChi2->method()->nCpl();};
+	size_t nBrCpl(){return _minimizeChi2->method()->Waveset()->nBrCpl();};
+	size_t nPar()  {return _minimizeChi2->method()->Waveset()->getNpar();};
+	size_t nBra()  {return _minimizeChi2->method()->Waveset()->nBranch();};
+	size_t nFtw()  {return _minimizeChi2->method()->Waveset()->nFtw();};
+	size_t nWaves(){return _minimizeChi2->method()->Waveset()->nWaves();};
 
 	void relPar(std::string inin){
-		nlopt_class::relPar(inin);
+		_minimizeChi2->relPar(inin);
 	};
 	void fixPar(std::string inin){
-		nlopt_class::fixPar(inin);
+		_minimizeChi2->fixPar(inin);
 	};
 	void printParameters(){
-		_method->Waveset()->printParameters();
+		_minimizeChi2->method()->Waveset()->printParameters();
 	};
 	std::string method(){
-		return _method->className();
+		return _minimizeChi2->method()->className();
 	};
 
 	double Eval(bp::object par){
 		std::vector<double> xxx = to_std_vector<double>(par);
-		return (*_method)(xxx);
+		return (*(_minimizeChi2->method()))(xxx);
 	};
 	double EvalSelf(){
-		return (*_method)(&_method->parameters()[0]);
+		return (*(_minimizeChi2->method()))(&(_minimizeChi2->method())->parameters()[0]);
 	};
+	double fit(){
+		_minimizeChi2->fit();
+	};
+
 #ifdef ADOL_ON
 	bp::list Diff(bp::object par){
 		std::vector<double> xxx = to_std_vector<double>(par);
-		std::vector<double> dif = _method->Diff(xxx);
+		std::vector<double> dif = _minimizeChi2->method()->Diff(xxx);
 		return std_vector_to_py_list(dif);
 	};
 	bp::list DiffSelf(){
-		std::vector<double> dif = _method->Diff(_method->parameters());
+		std::vector<double> dif = _minimizeChi2->method()->Diff((_minimizeChi2->method())->parameters());
 		return std_vector_to_py_list(dif);
 	};
 #endif//ADOL_ON
@@ -80,95 +84,104 @@ struct chi2py:public nlopt_class{
 
 
 		std::vector<double> parameters = to_std_vector<double>(par);
-		std::vector<std::vector<std::complex<double> > > rett = _method->Waveset()->diff_amps_full(tbin,mass, &parameters[0], false);
+		std::vector<std::vector<std::complex<double> > > rett = _minimizeChi2->method()->Waveset()->diff_amps_full(tbin,mass, &parameters[0], false);
 		return std_vector_to_py_list(rett[nAmp]);
 	};
 
 
 	double getParameter(std::string name){
-		int i = _method->getParNumber(name);
+		int i = _minimizeChi2->method()->getParNumber(name);
 		if (i<0){
 			std::cout<<"Error: Parameter '"<<name<<"' not definded"<<std::endl;
 	 		return std::numeric_limits<double>::quiet_NaN();
 		};
-		return nlopt_class::getParameter(i);
+		return _minimizeChi2->method()->getParameter(i);
 	};
 	void setParameter(std::string name, double val){
-		nlopt_class::setParameter(name,val);
+		_minimizeChi2->method()->setParameter(name,val);
 	};
 	void write_plots(std::string file_name, size_t tbin){
-		_method->write_plots(file_name,tbin);
+		_minimizeChi2->method()->write_plots(file_name,tbin);
 	};
 
 	bp::list parameterNames(){
-		std::vector<std::string> names = *_method->parNames();
+		std::vector<std::string> names = *_minimizeChi2->method()->parNames();
 		return std_vector_to_py_list(names);
 	};
 	bp::list parameters(){
-		std::vector<double> xxx = _method->parameters();
+		std::vector<double> xxx = _minimizeChi2->method()->parameters();
 		return std_vector_to_py_list(xxx);
 	};
 	bp::list fullParameters(){
-		std::vector<double> xxx = _method->fullParameters();
+		std::vector<double> xxx = _minimizeChi2->method()->fullParameters();
 		return std_vector_to_py_list(xxx);
 	};
 	bp::list Amplitudes(double mass, int tbin, bp::object param_in){
 		std::vector<double> par = to_std_vector<double>(param_in);
-		std::vector<std::complex<double> > amps = _method->amplitudes(mass, tbin, par, true);
+		std::vector<std::complex<double> > amps = _minimizeChi2->method()->amplitudes(mass, tbin, par, true);
 		return std_vector_to_py_list(amps);
 	};
 	bp::list AmplitudesSelf(double mass, int tbin){
-		std::vector<std::complex<double> > ampl = _method->amplitudes(mass, tbin, _method->parameters(), true);
+		std::vector<std::complex<double> > ampl =_minimizeChi2->method()->amplitudes(mass, tbin, _minimizeChi2->method()->parameters(), true);
 		return std_vector_to_py_list(ampl);
 	};
 	bp::list waveNames(){
-		std::vector<std::string> names = *_method->Waveset()->waveNames();
+		std::vector<std::string> names = *_minimizeChi2->method()->Waveset()->waveNames();
 		return std_vector_to_py_list(names);
 	};
 	bp::list borders_waves(){
-		std::vector<size_t> brd = *_method->Waveset()->borders_waves();
+		std::vector<size_t> brd = *_minimizeChi2->method()->Waveset()->borders_waves();
 		return std_vector_to_py_list(brd);
 	};
 	bp::list getFuncParameters(int ftw){
-		std::vector<size_t> params = _method->Waveset()->getFuncParameters(ftw);
+		std::vector<size_t> params = _minimizeChi2->method()->Waveset()->getFuncParameters(ftw);
 		return std_vector_to_py_list(params);
 	};
 	bp::list upperLims(){
-		std::vector<double> lims = *_method->Waveset()->upperLims();
+		std::vector<double> lims = *_minimizeChi2->method()->Waveset()->upperLims();
 		return std_vector_to_py_list(lims);
 	};
 	bp::list lowerLims(){
-		std::vector<double> lims = *_method->Waveset()->lowerLims();
+		std::vector<double> lims = *_minimizeChi2->method()->Waveset()->lowerLims();
 		return std_vector_to_py_list(lims);
 	};
 
 
 	void setParLimits(std::string name, double upper, double lower){
-		nlopt_class::setParLimits(name,upper,lower);
+		_minimizeChi2->method()->setParLimits(name,upper,lower);
 	};
 	void setParameterFile(std::string fileName){
-		_method->setParameterFile(fileName);
+		_minimizeChi2->method()->setParameterFile(fileName);
 	};
 	void setNout(size_t n){
-		_method->setNoutFile(n);
+		_minimizeChi2->method()->setNoutFile(n);
 	};
 	void writeParameters(std::string fileName){
-		_method->writeParameters(fileName);
+		_minimizeChi2->method()->writeParameters(fileName);
 	};
 	void readParameters(std::string fileName){
-		_method->readParameters(fileName);
+		_minimizeChi2->method()->readParameters(fileName);
 	};
 	void initCouplings(size_t nseeds){
-		nlopt_class::initCouplings(nseeds,-1);
+		_minimizeChi2->initCouplings(nseeds,-1);
 	};
 	void initSingleTbin(size_t nseeds, size_t tbin){
-		nlopt_class::initCouplings(nseeds,tbin);
+		_minimizeChi2->initCouplings(nseeds,tbin);
 	};
 	std::string YAML_file(){
-		return _method->Waveset()->YAML_file();
+		return _minimizeChi2->method()->Waveset()->YAML_file();
 	};
 	std::string get_component_name(size_t i){
-		return _method->Waveset()->get_component_name(i);
+		return _minimizeChi2->method()->Waveset()->get_component_name(i);
+	};
+	void setRandomCpl(){
+		 _minimizeChi2->setRandomCpl();
+	};
+	void setRandomBra(){
+		 _minimizeChi2->setRandomBra();
+	};
+	void setMaxCalls(size_t nCalls){
+		 _minimizeChi2->setMaxCalls(nCalls);
 	};
 };
 

@@ -58,8 +58,8 @@ class minimize{
 		void 			printStatus();													// X
 
 	// Internal handlers
-		void		update_definitions			();
-		void		reload_par_definitions			(int mara_peter = -1);
+		void			update_definitions		();
+		void			reload_par_definitions		(int mara_peter = -1);
 
 		virtual double 		fit				()				{std::cout<<"minimize.h: fit() not overwritten"<<std::endl;				throw;return 0.;};
 		virtual void		update_definitions_fitter	()				{std::cout<<"minimize.h: update_definitions_fitter() not overwritten"<<std::endl;	throw;};

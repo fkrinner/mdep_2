@@ -94,7 +94,7 @@ add_library(old_method            SHARED old_method.cxx         )
 add_library(minimize              SHARED minimize.cxx           )
 add_library(minuit_root           SHARED minuit_root.cxx        )
 add_library(nlopt_class           SHARED nlopt_class.cxx        )
-
+add_library(chi2container         SHARED chi2container.cxx      )
 
 #set execuatbles
 #add_executable(fitmd.exe         fitmd.cc                       )
@@ -116,6 +116,10 @@ target_link_libraries(minimize   old_method                     )
 target_link_libraries(minimize   full_SDM                       )
 target_link_libraries(minuit_root minimize                      )
 target_link_libraries(nlopt_class minimize                      )
+
+target_link_libraries(chi2container   minimize                  )
+target_link_libraries(chi2container   minuit_root               )
+target_link_libraries(chi2container   nlopt_class               )
 #target_link_libraries(fitmd.exe  method                         )
 #target_link_libraries(fitmd.exe  old_method                     )
 #target_link_libraries(fitmd.exe  minuit_root                    )
@@ -129,7 +133,8 @@ target_link_libraries(minimize ${ROOT_LIBS} )
 if ( use_YAML )
 #  target_link_libraries(fitmd.exe /nfs/hicran/project/compass/analysis/fkrinner/yaml/build/libyaml-cpp.so )
 #  target_link_libraries(standard_test.exe /nfs/hicran/project/compass/analysis/fkrinner/yaml/build/libyaml-cpp.so )
-  target_link_libraries(waveset /nfs/hicran/project/compass/analysis/fkrinner/yaml/build/libyaml-cpp.so )
+  target_link_libraries(waveset /nfs/hicran/project/compass/analysis/fkrinner/yaml/build/libyaml-cpp.so       )
+  target_link_libraries(chi2container /nfs/hicran/project/compass/analysis/fkrinner/yaml/build/libyaml-cpp.so ) 
 endif()
 
 #link ADOL
@@ -142,8 +147,8 @@ if ( use_auto_diff )
 endif()
 
 if(create_python_links)
-  target_link_libraries(chi2py minuit_root)
-  target_link_libraries(chi2py nlopt_class)
+  target_link_libraries(chi2py chi2container)
+
   target_link_libraries(chi2py ${Boost_LIBRARIES})
 endif()
 
