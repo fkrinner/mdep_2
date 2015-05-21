@@ -129,7 +129,7 @@ xdouble old_method::EvalBranch(
 							const xdouble	 						*iso_par)		const{
 
 	std::vector<std::complex<xdouble> > cplin(_waveset.nFtw()*_waveset.nTbin());
-	for (size_t tbin=0;tbin<_waveset.nTbin();tbin++){
+	for (size_t tbin=0;tbin<_waveset.nTbin();++tbin){
 		if((*_waveset.eval_tbin())[tbin]){
 			for (size_t i =0;i<_waveset.nFtw();i++){
 				if ((*_waveset.n_branch())[i]==-1){
@@ -157,7 +157,7 @@ double old_method::EvalTbin(
 
 	double chi2 = 0.;
 	std::vector<std::vector<std::complex<double> > > iso_eval = _waveset.iso_funcs(iso_par);
-//Careful, multiprocessing messes up the output file!!! Bed for debugging
+//Careful, multiprocessing messes up the output file!!! Bad for debugging
 #pragma omp parallel for reduction(+:chi2)
 	for (size_t bin=_waveset.minBin(); bin<_waveset.maxBin(); bin++){
 		chi2+=EvalBin(tbin,bin,cpl,par,iso_eval);
@@ -354,6 +354,75 @@ std::vector<double> old_method::Diff(
 	return gradient;
 };
 #endif//ADOL_ON
+//########################################################################################################################################################
+std::vector<double> old_method::DiffAnalyt(             const std::vector<double>                                       &parameters)                    const{
+
+	size_t nTot = getNtot();
+	std::vector<double> returnVector(nTot,0.);
+	for(size_t tbin=0;tbin<_waveset.nTbin();++tbin){
+		if ((*_waveset.eval_tbin())[tbin]){
+			std::vector<double> diffTbin = DiffTbin(tbin,parameters);
+			for(size_t p=0;p<nTot;++p){
+				returnVector[p]+=diffTbin[p];
+			};
+		};
+	};
+	return returnVector;
+};
+//########################################################################################################################################################
+/// Calculates the derivative for a single t' bin
+std::vector<double> old_method::DiffTbin(               size_t                                                          tbin,
+                                                        const std::vector<double>                                       &parameters)                    const{
+
+	size_t nTot = getNtot();
+	std::vector<double> returnVector(nTot,0.);
+	for (size_t bin=_waveset.minBin(); bin<_waveset.maxBin(); bin++){
+		std::vector<double> diffBin = DiffBin(bin,tbin,parameters,true);
+		for (size_t p=0;p<_nTot;++p){
+			returnVector[p]+=diffBin[p];
+		};
+	};
+	return returnVector;                                                        
+};
+//########################################################################################################################################################
+/// Calculates the derivatives for a single mass- and t' bin
+std::vector<double> old_method::DiffBin(                size_t                                                          bin, 
+                                                        size_t                                                          tbin, 
+                                                        const std::vector<double>                                       &parameters,
+                                                        bool                                                            ignore_limits)                   const{
+
+	double mass = _waveset.get_m(bin);
+	std::vector<std::complex<double> > A = amplitudes(mass,tbin, parameters, ignore_limits); // Amplitudes
+	std::vector<std::vector<std::complex<double> > >dAdP = _waveset.diff_amps_full(tbin,mass,&parameters[0], ignore_limits); // Jacobi matrix of the amplitudes
+	size_t nTot = getNtot();
+	size_t nPoints = _waveset.nPoints();
+	std::vector<double> returnVector(nTot,0.);
+	for (size_t i = 0; i<nPoints;i++){
+		if (A[i] == std::complex<double>(0.,0.)){
+			continue;
+		};
+		std::complex<double> DintensDAi =2*_coma[tbin][bin][i*(nPoints+1)]*(std::norm(A[i])-_data[tbin][bin][i*(nPoints+1)])*std::conj(A[i]); // =  dChi2^+/dA (dChi2^+/dA* = (dChi2^+/dA)*
+		for (size_t p=0;p<nTot;++p){
+			returnVector[p]+= 2*std::real(DintensDAi * dAdP[i][p]); // 2*Re(dChi2^+/dA * dA/dP) = dChi2^+/dA * dA/dP + dChi2^+/dA* * dA*/dP
+		};
+		for (size_t j=0; j<i;++j){
+			if (A[j] == std::complex<double>(0.,0.)){
+				continue;
+			};
+
+			std::complex<double> inter = A[i]*std::conj(A[j]);
+
+			double real =   (std::real(inter) - _data[tbin][bin][nPoints*j+i])*_coma[tbin][bin][nPoints*j+i];    // real part
+			double imag =   (std::imag(inter) - _data[tbin][bin][nPoints*i+j])*_coma[tbin][bin][nPoints*i+j];    // imag part
+			for(size_t p=0;p<nTot;++p){
+				std::complex<double> DinterDA = std::conj(A[j])*dAdP[i][p]+A[i]*std::conj(dAdP[j][p]);
+				returnVector[p]+=2*real*std::real(DinterDA);
+				returnVector[p]+=2*imag*std::imag(DinterDA);
+			};
+		};
+	};
+	return returnVector;
+};
 //########################################################################################################################################################
 ///Set coma manually
 bool old_method::set_coma(

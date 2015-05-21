@@ -216,9 +216,10 @@ std::vector<std::vector<std::complex<double> > > waveset::diff_amps_full(
 			cpl_full[ftw] = cpl[nCpl]*bra[nBra];
 		};
 	};
+
 	std::vector<double>  var = getVar(m,tbin);
 	std::vector<std::vector<std::complex<double> > > iso = std::vector<std::vector<std::complex<double> > >();
-	std::vector<std::vector<std::complex<double> > > raw_diff = diff_amps(&var[0],&cpl[0],&par[0],iso, ignore_limits);
+	std::vector<std::vector<std::complex<double> > > raw_diff = diff_amps(&var[0],&cpl_full[0],&par[0],iso, ignore_limits);
 	std::vector<std::vector<std::complex<double> > > diff = std::vector<std::vector<std::complex<double> > >(_nPoints,std::vector<std::complex<double> >(_nBrCpl*2*_nTbin+_nPar+2*_nBranch,std::complex<double>(0.,0.))); // complex parameters don't need to be counted twice since d/dIm = i*d/dRe
 	size_t upBor=0; // Upper limit for function number
 	size_t loBor=0; // Lower limit for function number
@@ -239,8 +240,8 @@ std::vector<std::vector<std::complex<double> > > waveset::diff_amps_full(
 					}else{
 						diff[amplcount][2*(_nBrCpl*tbin+c)  ] = raw_diff[amplcount][ftw]*bra[b];
 						diff[amplcount][2*(_nBrCpl*tbin+c)+1] = raw_diff[amplcount][ftw]*bra[b]*std::complex<double>(0.,1.);
-						diff[amplcount][2*(_nBrCpl*_nTbin)+_nPar+b  ] = raw_diff[amplcount][ftw]*cpl[c];
-						diff[amplcount][2*(_nBrCpl*_nTbin)+_nPar+b+1] = raw_diff[amplcount][ftw]*cpl[c]*std::complex<double>(0.,1.);
+						diff[amplcount][2*(_nBrCpl*_nTbin)+_nPar+2*b  ] = raw_diff[amplcount][ftw]*cpl[c];
+						diff[amplcount][2*(_nBrCpl*_nTbin)+_nPar+2*b+1] = raw_diff[amplcount][ftw]*cpl[c]*std::complex<double>(0.,1.);
 					};
 					size_t loParBor = 0;
 					size_t upParBor = _borders_par[func];

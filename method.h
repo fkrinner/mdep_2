@@ -73,6 +73,7 @@ class method{
 		virtual std::vector<double> 		Diff						(const double* xx)								const	{std::cout<<"method.h::Diff(...) not overwritten"<<std::endl;throw;return std::vector<double>();};
 #endif//ADOL_ON
 
+		virtual std::vector<double>             DiffAnalyt                                      (const std::vector<double> &xx)                                                 const   {std::cout<<"method.h::DiffAnalyt(...) not overwritten"<<std::endl; throw; return std::vector<double>();};
 
 
 #ifdef USE_YAML

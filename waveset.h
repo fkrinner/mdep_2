@@ -29,97 +29,99 @@ class waveset {
 								const std::complex<xdouble> 				*cpl,
 								const xdouble	 					*par,
 								std::vector<std::vector<std::complex<xdouble> > > 	&funcEvals2pi,
-								bool							ignore_limits = false) 	const;
+								bool							ignore_limits = false)  const;
 
 		template<typename xdouble>
 		std::vector<std::complex<xdouble> > funcs(
 								const double 						*m,
 								const xdouble 						*par,
-								bool							ignor_limits = false)	const;
+								bool							ignor_limits = false)   const;
 
 		template<typename xdouble>
 		std::vector<std::vector<std::complex<xdouble> > > iso_funcs(
-								const xdouble 						*par) 			const;
+								const xdouble 						*par)                   const;
 
 		std::vector<double> phase_space(
-								const double 						*m) 			const;
-
-		std::vector<std::vector<std::complex<double> > > diff_amps(
-								const double						*m,
-								const std::complex<double> 				*cpl,
-								const double						*par,	
-								std::vector<std::vector<std::complex<double> > >	&funcEvals2pi,
-								bool							ignore_limits = false)	const;
+								const double 						*m)                     const;
 
 		std::vector<std::complex<double> > diff_funcs(
 								const double						*m,
 								const double						*par,
-								bool							ignore_limits = false)	const;
+								bool							ignore_limits = false)  const;
+
+		std::vector<std::vector<std::complex<double> > > diff_amps(
+								const double						*m,
+								const std::complex<double> 				*cpl,
+								const double						*par,
+								std::vector<std::vector<std::complex<double> > >	&funcEvals2pi,
+								bool							ignore_limits = false)  const;
 		
-	std::vector<std::vector<std::complex<double> > > diff_amps_full(
+		std::vector<std::vector<std::complex<double> > > diff_amps_full(
 								size_t 							tbin,
 								double							m,
 								const double						*parameters,
-								bool							ignore_limits)		const;
+								bool							ignore_limits)          const;
+
+
 
 	// SET UP WAVESET
 		// // WAVES AND FUNCTIONS
-		size_t 				add_wave		();
-		size_t 				add_func		(int i);
-		size_t 				add_iso			(int i);
+		size_t                          add_wave                ();
+		size_t                          add_func                (int i);
+		size_t                          add_iso                 (int i);
 
 		// // SET AMPLITUDE DEFINITIONS
-		void 				add_func_to_wave	(int wave, int func);
-		void 				add_funcs_to_wave	(int wave, int func, int func2);
-		void 				couple_funcs		(int i, int j);
+		void                            add_func_to_wave        (int wave, int func);
+		void                            add_funcs_to_wave       (int wave, int func, int func2);
+		void                            couple_funcs            (int i, int j);
 
 		// // SETTINGS FOR DIFFERENT WAVES
-		void 				setWaveLimits		(int i, double lower, double upper);
-		void 				setWaveSpin		(int i, int L);
-		void 				setWaveIsobarSpin	(int wave, int L);
-		void 				setGlobalPhaseSpace	(int i);
-		void 				setWavePhaseSpace	(int i, std::string name, std::string integralFile);
-		void 				setWaveIsobarBinning	(int wave, int binning);
-		void 				setConst		(int i,double con);
-		void 				set_iso_const		(int con, double value);
-		void 				add_isobar_binning	(std::vector<double> binning);
+		void                            setWaveLimits           (int i, double lower, double upper);
+		void                            setWaveSpin             (int i, int L);
+		void                            setWaveIsobarSpin       (int wave, int L);
+		void                            setGlobalPhaseSpace     (int i);
+		void                            setWavePhaseSpace       (int i, std::string name, std::string integralFile);
+		void                            setWaveIsobarBinning    (int wave, int binning);
+		void                            setConst                (int i,double con);
+		void                            set_iso_const           (int con, double value);
+		void                            add_isobar_binning      (std::vector<double> binning);
 
 		// // NAMES
-		void 				setWaveName		(int i, std::string name);
-		void 				setFunctionName		(int i, std::string name);
-		void 				setParameterName	(int i, std::string name);
-		void 				setConstantName		(int i, std::string name);
-		void 				setIsobarName		(int i, std::string name);
-		void 				setIsoParName		(int i, std::string name);
-		void 				setIsoConstName		(int i, std::string name);
+		void                            setWaveName             (int i, std::string name);
+		void                            setFunctionName         (int i, std::string name);
+		void                            setParameterName        (int i, std::string name);
+		void                            setConstantName         (int i, std::string name);
+		void                            setIsobarName           (int i, std::string name);
+		void                            setIsoParName           (int i, std::string name);
+		void                            setIsoConstName         (int i, std::string name);
 
 		// // BINNING
-		void 				setBinning		(std::vector<double> binning);
-		void 				setTbinning		(std::vector<std::vector<double> > binning);
-		void 				setEvalTbin		(int i, bool flag);
-		void 				setMinBin		(int in);
-		void 				setMaxBin		(int in);
+		void                            setBinning              (std::vector<double> binning);
+		void                            setTbinning             (std::vector<std::vector<double> > binning);
+		void                            setEvalTbin             (int i, bool flag);
+		void                            setMinBin               (int in);
+		void                            setMaxBin               (int in);
 
 
 #ifdef USE_YAML
 		// // YAML LOADER
-		bool				loadGlobalPhaseSpace	(YAML::Node &waveset);
-		std::map<std::string,int>	loadFunctions		(YAML::Node &waveset, YAML::Node &param);
-		bool 				loadWaves		(YAML::Node &waveset, YAML::Node &defs);
-		void				loadFtw			(YAML::Node &waveset, std::map<std::string,int> &fMap);
-		void				loadBranchings		(YAML::Node &waveset);
-		void				loadBinnings		(YAML::Node &waveset);
-		void				loadIsoBinnings		(YAML::Node &waveset, YAML::Node &iso_binnings);
+		bool                            loadGlobalPhaseSpace    (YAML::Node &waveset);
+		std::map<std::string,int>       loadFunctions           (YAML::Node &waveset, YAML::Node &param);
+		bool                            loadWaves               (YAML::Node &waveset, YAML::Node &defs);
+		void                            loadFtw                 (YAML::Node &waveset, std::map<std::string,int> &fMap);
+		void                            loadBranchings          (YAML::Node &waveset);
+		void                            loadBinnings            (YAML::Node &waveset);
+		void                            loadIsoBinnings         (YAML::Node &waveset, YAML::Node &iso_binnings);
 #endif//USE_YAML
 
 	// GETTERS
 
 		// // ONE LINE GETTERS
-		bool 				write_out		()		const		{return _write_out;};			
-		bool				has_isobars		()		const		{return _has_isobars;};				
-		size_t				minBin			()		const		{return _minBin;};			
-		size_t				maxBin			()		const		{return _maxBin;};			
-		size_t				nBrCpl			()		const		{return _nBrCpl;};		
+		bool 				write_out		()		const		{return _write_out;};
+		bool				has_isobars		()		const		{return _has_isobars;};
+		size_t				minBin			()		const		{return _minBin;};
+		size_t				maxBin			()		const		{return _maxBin;};
+		size_t				nBrCpl			()		const		{return _nBrCpl;};
 		const std::vector<std::string>*	waveNames		()		const		{return &_waveNames;};
 		// // SIMPLE OVER ALL NUMBERS
 		size_t				nWaves			()		const		{return _nWaves;};
@@ -223,8 +225,8 @@ class waveset {
 		std::vector<std::string> 		_waveNames;
 		size_t					_nPoints; 		// Number of amplitudes in the end (+1 for each wave, +1 for each isobar step)
 		size_t 					_nFtw; 			// Number of function-wave couplings (should be _funcs_to_waves.size())
-		std::vector<double>			_upperLims; 		// Gives     limits	each
-		std::vector<double> 			_lowerLims; 		// 	 the	    for	     wave
+		std::vector<double>			_upperLims; 		// Gives     limits     each
+		std::vector<double> 			_lowerLims; 		//       the        for      wave
 		std::vector<int> 			_L; 			// Gives the Spin of each wave
 		std::vector<int> 			_L_iso; 		// Gives the spin of the isobar for the single waves
 		std::vector<int> 			_wave_binning_pts; 	// Number of bins for the isobars
@@ -238,7 +240,7 @@ class waveset {
 		std::vector<amplitude*>			_amp_funcs;		// Defined amplitude functions
 		std::vector<size_t> 			_borders_waves; 	// Tells, which entries in funcs to waves belong to which wave
 		std::vector<double> 			_funcUpperLims; 	// Mass limits for each function
-		std::vector<double> 			_funcLowerLims; 	// ''	''	''	''
+		std::vector<double> 			_funcLowerLims; 	// ''  ''     ''       ''
 
 	// ISOBARS
 		std::vector<int> 			_iso_to_waves; 		// Couples isobars to waves (-1 -> no isobar paramtrization -> Standard mdep fit)
