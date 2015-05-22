@@ -153,7 +153,7 @@ double old_method::EvalTbin(
 							int 								tbin,
 							const std::complex<double>	 				*cpl,
 							const double	 						*par,
-							const double 							*iso_par)		const{
+							const double 							*iso_par)			const{
 
 	double chi2 = 0.;
 	std::vector<std::vector<std::complex<double> > > iso_eval = _waveset.iso_funcs(iso_par);
@@ -191,7 +191,7 @@ xdouble old_method::EvalBin(
 							int 								bin,
 							const std::complex<xdouble>					*cpl,
 							const xdouble	 						*par,
-							std::vector<std::vector<std::complex<xdouble> > > 		&iso_eval)		const{
+							std::vector<std::vector<std::complex<xdouble> > > 		&iso_eval)			const{
 
 	double mass = _waveset.get_m(bin); // Eval at bin center.
 
@@ -247,7 +247,7 @@ std::vector<xdouble> old_method::delta(
 							double 								mass,
 							const std::complex<xdouble> 					*cpl,
 							const xdouble	 						*par,
-							std::vector<std::vector<std::complex<xdouble> > > 		&iso_eval)		const{
+							std::vector<std::vector<std::complex<xdouble> > > 		&iso_eval)			const{
 
 	size_t nPoints = _waveset.nPoints();
 	std::vector<double> var = _waveset.getVar(mass,tbin);
@@ -309,8 +309,8 @@ template adtl::adouble old_method::EvalBin(int tbin,int bin,const std::complex<a
 template std::vector<adtl::adouble> old_method::delta(int tbin, int bin,double mass, const std::complex<adtl::adouble> *cpl, const adtl::adouble *par, std::vector<std::vector<std::complex<adtl::adouble> > > &iso_eval) const;
 //#######################################################################################################################################################
 ///Gets the gradient w.r.t. xx
-std::vector<double> old_method::Diff(
-							const double 					*xx)						const{
+std::vector<double> old_method::DiffAuto(
+                                                        const std::vector<double>                                       &xx)                            const{
 
 	std::vector<adtl::adouble>aCpl_r(2*_nCpl);
 	std::vector<adtl::adouble>aPar(_nPar);
@@ -355,7 +355,8 @@ std::vector<double> old_method::Diff(
 };
 #endif//ADOL_ON
 //########################################################################################################################################################
-std::vector<double> old_method::DiffAnalyt(             const std::vector<double>                                       &parameters)                    const{
+std::vector<double> old_method::Diff(
+                                                        const std::vector<double>                                       &parameters)                    const{
 
 	size_t nTot = getNtot();
 	std::vector<double> returnVector(nTot,0.);

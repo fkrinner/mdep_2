@@ -80,14 +80,13 @@ struct chi2py:public chi2container{
 		return std_vector_to_py_list(dif);
 	};
 #endif//ADOL_ON
-	bp::list DiffAnalyt(bp::object par){
+	bp::list DiffAuto(bp::object par){
 		std::vector<double> xxx = to_std_vector<double>(par);
-		std::vector<double> dif = _minimizeChi2->method()->DiffAnalyt(xxx);
+		std::vector<double> dif = _minimizeChi2->method()->DiffAuto(xxx);
 		return std_vector_to_py_list(dif);
 	};
 
 	bp::list diff_amps(size_t nAmp, size_t tbin, double mass, bp::object par){
-
 
 		std::vector<double> parameters = to_std_vector<double>(par);
 		std::vector<std::vector<std::complex<double> > > rett = _minimizeChi2->method()->Waveset()->diff_amps_full(tbin,mass, &parameters[0], false);
@@ -238,62 +237,62 @@ BOOST_PYTHON_MODULE(libchi2py){
 	bp::class_<chi2py_wrap> chi2 = bp::class_<chi2py_wrap>("chi2",bp::init<std::string>());
 
 
-	chi2.def("Eval",                                &chi2py::Eval					);
-	chi2.def("EvalSelf",                            &chi2py::EvalSelf				);
+	chi2.def("Eval",                                &chi2py::Eval                                   );
+	chi2.def("EvalSelf",                            &chi2py::EvalSelf                               );
 
-	chi2.def("Amplitudes",                          &chi2py::Amplitudes				);
-	chi2.def("AmplitudesSelf",                      &chi2py::AmplitudesSelf				);
+	chi2.def("Amplitudes",                          &chi2py::Amplitudes                             );
+	chi2.def("AmplitudesSelf",                      &chi2py::AmplitudesSelf                         );
+
+	chi2.def("Diff",                                &chi2py::Diff                                   );
+	chi2.def("DiffSelf",                            &chi2py::DiffSelf                               );
 #ifdef ADOL_ON
-	chi2.def("Diff",                                &chi2py::Diff					);
-	chi2.def("DiffSelf",                            &chi2py::DiffSelf				);
+	chi2.def("DiffAuto",                            &chi2py::DiffAuto                               );
 #endif//ADOL_ON
-	chi2.def("DiffAnalyt",                          &chi2py::DiffAnalyt				);
+	chi2.def("nTot",                                &chi2py::nTot                                   );
+	chi2.def("nCpl",                                &chi2py::nCpl                                   );
+	chi2.def("nBrCpl",                              &chi2py::nBrCpl                                 );
+	chi2.def("nPar",                                &chi2py::nPar                                   );
+	chi2.def("nBra",                                &chi2py::nBra                                   );
+	chi2.def("nFtw",                                &chi2py::nFtw                                   );
+	chi2.def("nTbin",                               &chi2py::nTbin                                  );
+	chi2.def("nWaves",                              &chi2py::nWaves                                 );
 
-	chi2.def("nTot",                                &chi2py::nTot					);
-	chi2.def("nCpl",                                &chi2py::nCpl					);
-	chi2.def("nBrCpl",                              &chi2py::nBrCpl					);
-	chi2.def("nPar",                                &chi2py::nPar					);
-	chi2.def("nBra",                                &chi2py::nBra					);
-	chi2.def("nFtw",                                &chi2py::nFtw					);
-	chi2.def("nTbin",                               &chi2py::nTbin					);
-	chi2.def("nWaves",                              &chi2py::nWaves					);
+	chi2.def("diff_amps",                           &chi2py::diff_amps                              );
 
-	chi2.def("diff_amps",                           &chi2py::diff_amps				);
-
-	chi2.def("method",                              &chi2py::method					);
-	chi2.def("className",                           &chi2py::className				);
-	chi2.def("printStatus",                         &chi2py::printStatus				);
-	chi2.def("printParameters",                     &chi2py::printParameters			);
-	chi2.def("setParameter",                        &chi2py::setParameter				);
-	chi2.def("getParameter",                        &chi2py::getParameter				);
+	chi2.def("method",                              &chi2py::method                                 );
+	chi2.def("className",                           &chi2py::className                              );
+	chi2.def("printStatus",                         &chi2py::printStatus                            );
+	chi2.def("printParameters",                     &chi2py::printParameters                        );
+	chi2.def("setParameter",                        &chi2py::setParameter                           );
+	chi2.def("getParameter",                        &chi2py::getParameter                           );
 	
-	chi2.def("parameterNames",                      &chi2py::parameterNames				);
-	chi2.def("setRandomCpl",                        &chi2py::setRandomCpl				);
-	chi2.def("setRandomBra",                        &chi2py::setRandomBra				);
+	chi2.def("parameterNames",                      &chi2py::parameterNames                         );
+	chi2.def("setRandomCpl",                        &chi2py::setRandomCpl                           );
+	chi2.def("setRandomBra",                        &chi2py::setRandomBra                           );
 
-	chi2.def("fit",                                 &chi2py::fit					);
-	chi2.def("initCouplings",                       &chi2py::initCouplings				);
-	chi2.def("initSingleTbin",                      &chi2py::initSingleTbin			);
-	chi2.def("relPar",                              &chi2py::relPar					);
-	chi2.def("fixPar",                              &chi2py::fixPar					);
-	chi2.def("parameters",                          &chi2py::parameters				);
-	chi2.def("fullParameters",                      &chi2py::fullParameters				);
+	chi2.def("fit",                                 &chi2py::fit                                    );
+	chi2.def("initCouplings",                       &chi2py::initCouplings                          );
+	chi2.def("initSingleTbin",                      &chi2py::initSingleTbin                         );
+	chi2.def("relPar",                              &chi2py::relPar                                 );
+	chi2.def("fixPar",                              &chi2py::fixPar                                 );
+	chi2.def("parameters",                          &chi2py::parameters                             );
+	chi2.def("fullParameters",                      &chi2py::fullParameters                         );
 
-	chi2.def("write_plots",                         &chi2py::write_plots				);
-	chi2.def("setParLimits",                        &chi2py::setParLimits				);
-	chi2.def("setParameterFile",                    &chi2py::setParameterFile			);
-	chi2.def("setNout",                             &chi2py::setNout				);
-	chi2.def("writeParameters",                     &chi2py::writeParameters			);
-	chi2.def("readParameters",                      &chi2py::readParameters				);
-	chi2.def("setMaxCalls",                         &chi2py::setMaxCalls				);
-	chi2.def("YAML_file",                           &chi2py::YAML_file				);
-	chi2.def("waveNames",                           &chi2py::waveNames				);
-	chi2.def("borders_waves",                       &chi2py::borders_waves				);
-	chi2.def("lowerLims",                           &chi2py::lowerLims				);
-	chi2.def("upperLims",                           &chi2py::upperLims				);
-	chi2.def("get_component_name",                  &chi2py::get_component_name			);
-	chi2.def("getFuncParameters",                   &chi2py::getFuncParameters			);
-	chi2.def("setMinimizerSpecifications",          &chi2py::setMinimizerSpecifications		);
+	chi2.def("write_plots",                         &chi2py::write_plots                            );
+	chi2.def("setParLimits",                        &chi2py::setParLimits                           );
+	chi2.def("setParameterFile",                    &chi2py::setParameterFile                       );
+	chi2.def("setNout",                             &chi2py::setNout                                );
+	chi2.def("writeParameters",                     &chi2py::writeParameters                        );
+	chi2.def("readParameters",                      &chi2py::readParameters                         );
+	chi2.def("setMaxCalls",                         &chi2py::setMaxCalls                            );
+	chi2.def("YAML_file",                           &chi2py::YAML_file                              );
+	chi2.def("waveNames",                           &chi2py::waveNames                              );
+	chi2.def("borders_waves",                       &chi2py::borders_waves                          );
+	chi2.def("lowerLims",                           &chi2py::lowerLims                              );
+	chi2.def("upperLims",                           &chi2py::upperLims                              );
+	chi2.def("get_component_name",                  &chi2py::get_component_name                     );
+	chi2.def("getFuncParameters",                   &chi2py::getFuncParameters                      );
+	chi2.def("setMinimizerSpecifications",          &chi2py::setMinimizerSpecifications             	);
 };
 
 

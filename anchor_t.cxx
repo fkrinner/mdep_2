@@ -706,7 +706,7 @@ template std::vector<std::complex<adtl::adouble> > anchor_t::getMinimumCplBra(in
 //#######################################################################################################################################################
 ///Gets the gradient w.r.t. xx
 std::vector<double> anchor_t::Diff(
-							const double 					*xx)						const{
+                                                        const std::vector<double>                                       &xx)                            const{
 
 	std::vector<adtl::adouble>aCpl_r(2*_nCpl);
 	std::vector<adtl::adouble>aPar(_nPar);

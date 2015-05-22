@@ -104,7 +104,7 @@ class anchor_t : public method{
 								const xdouble	 					*iso_par)			const;
 	// DERIVATIVES
 #ifdef ADOL_ON
-		std::vector<double> 			Diff			(const double* xx)							const;
+		std::vector<double>                     Diff                    (const std::vector<double> &xx)                                         const;
 #endif//ADOL_ON
 	// PARAMETER HANDLING
 

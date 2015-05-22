@@ -10,6 +10,7 @@ chi2container::chi2container(std::string card){
 	YAML::Node Ycard   = YAML::LoadFile(card);
 	if (not Ycard["minimizer"]){
 		std::cerr<<"chi2container::chi2container(std::string): Error: minimizer not defined in the card ('"<<card<<"')"<<std::endl;
+		throw;
 	};
 	std::string minimizerType = Ycard["minimizer"].as<std::string>();
 	if (minimizerType == "minuit_root"){

@@ -70,10 +70,10 @@ class old_method : public full_SDM{
 
 	// DERIVATIVES
 #ifdef ADOL_ON
-		std::vector<double>                     Diff(
-		                                                const double                                            *xx)                            const;
+		std::vector<double>                     DiffAuto(
+		                                                const std::vector<double>                               &xx)                            const;
 #endif//ADOL_ON
-		std::vector<double>                     DiffAnalyt(
+		std::vector<double>                     Diff(
 		                                                const std::vector<double>                               &xx)                            const;
                                                                
 		std::vector<double>                     DiffTbin(

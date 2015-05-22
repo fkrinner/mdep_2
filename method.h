@@ -68,13 +68,11 @@ class method{
 
 // This is a special method. The base classes just return 'false' autoCpl classes return 'true' and do something
 		virtual bool 				setUseBranch					(bool in)										{return false;};
+		virtual std::vector<double> 		Diff						(const std::vector<double> &xx)							const	{std::cout<<"method.h::Diff(...) not overwritten"<<std::endl;throw;return std::vector<double>();};
+
 #ifdef ADOL_ON
-		std::vector<double> 			Diff						(const std::vector<double> &xx)							const	{return Diff(&xx[0]);};
-		virtual std::vector<double> 		Diff						(const double* xx)								const	{std::cout<<"method.h::Diff(...) not overwritten"<<std::endl;throw;return std::vector<double>();};
+		virtual std::vector<double>             DiffAuto                                      (const std::vector<double> &xx)                                                 const   {std::cout<<"method.h::DiffAnalyt(...) not overwritten"<<std::endl; throw; return std::vector<double>();};
 #endif//ADOL_ON
-
-		virtual std::vector<double>             DiffAnalyt                                      (const std::vector<double> &xx)                                                 const   {std::cout<<"method.h::DiffAnalyt(...) not overwritten"<<std::endl; throw; return std::vector<double>();};
-
 
 #ifdef USE_YAML
 	// YAML SETTER

@@ -330,7 +330,7 @@ template std::vector<adtl::adouble> full_covariance::delta(int tbin, int bin,dou
 //#######################################################################################################################################################
 ///Gets the gradient w.r.t. xx
 std::vector<double> full_covariance::Diff(
-							const double 					*xx)						const{
+                                                        const std::vector<double>                                       &xx)                            const{
 
 	std::vector<adtl::adouble>aCpl_r(2*_nCpl);
 	std::vector<adtl::adouble>aPar(_nPar);
