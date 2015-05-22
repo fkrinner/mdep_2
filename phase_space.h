@@ -36,9 +36,15 @@ phase_space_func::phase_space_func(){
 
 phase_space_func::phase_space_func(std::string waveName, std::string integralFile){
  
-	_wave_name = waveName;
-	_isempty = !get_binning(integralFile);
-	fill_integral(waveName, integralFile);	
+	if (integralFile != ""){
+		_wave_name = waveName;
+		_isempty = !get_binning(integralFile);
+		fill_integral(waveName, integralFile);	
+	}else{
+		_isempty = true;
+		std::cerr<<"phase_space_func::phase_space_func(std::string, std::string): No integral file given. Use constant phase space"<<std::endl;
+		throw;
+	};
 };
 
 bool phase_space_func::get_binning(std::string integralFile){

@@ -292,7 +292,7 @@ BOOST_PYTHON_MODULE(libchi2py){
 	chi2.def("upperLims",                           &chi2py::upperLims                              );
 	chi2.def("get_component_name",                  &chi2py::get_component_name                     );
 	chi2.def("getFuncParameters",                   &chi2py::getFuncParameters                      );
-	chi2.def("setMinimizerSpecifications",          &chi2py::setMinimizerSpecifications             	);
+	chi2.def("setMinimizerSpecifications",          &chi2py::setMinimizerSpecifications             );
 };
 
 

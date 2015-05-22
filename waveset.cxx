@@ -1037,7 +1037,12 @@ bool waveset::loadWaves(
 			};
 		};
 		if (set_phase_space){
-			setWavePhaseSpace(i,wName,waveset["integralFile"].as<std::string>());
+			if (waveset["integralFile"]){
+				setWavePhaseSpace(i,wName,waveset["integralFile"].as<std::string>());
+			}else{
+				std::cout<<"waveset::loadWaves(...): Warning: No integral file found, try to set phaseSpace without integral file"<<std::endl;
+				setWavePhaseSpace(i,wName,"");
+			};
 		};
 	};
 	return ookk;
