@@ -25,7 +25,10 @@ nlopt_class::nlopt_class():
 nlopt_class::nlopt_class(std::string card):
 	minimize(card),
 	_algorithm(nlopt::LN_COBYLA){
-
+	if (not initialize_nlopt(card)){
+		std::cerr<<"nlopt_class::nlopt_class(std::string): Error: initialize_nlopt(std::string) failed"<<std::endl;
+		throw;
+	};
 	initialize();
 };
 //########################################################################################################################################################
@@ -100,11 +103,28 @@ void nlopt_class::setMinimizerSpecifications(int spec_int, double spec_double, s
 			_algorithm = nlopt::LN_NELDERMEAD;
 		}else if (spec_string == "SBPLX"){
 			_algorithm = nlopt::LN_SBPLX;
+		}else if (spec_string == "LBFGS"){
+			_algorithm = nlopt::LD_LBFGS;
 		}else{
 			std::cerr<<"nlopt_class::setMinimizerSpecifications(...): Error: Unknown algirithm: "<<spec_string<<std::endl;
 			throw;
 		};
 		std::cout<<"nlopt_class::setMinimizerSpecifications(...): Set algorithm to "<<nlopt::algorithm_name(_algorithm)<<std::endl;
 	};
+};
+//########################################################################################################################################################
+///Load nlopt_definitions from card
+bool nlopt_class::initialize_nlopt(std::string card){
+	YAML::Node Ycard = YAML::LoadFile(card);
+	if (Ycard["nlopt"]){
 
+		return true;
+	}else if(Ycard["nlopt_definition_file"]){
+		return initialize_nlopt(Ycard["nlopt_definition_file"].as<std::string>());
+		if (Ycard["nlopt"]["algorithm"]){
+			setMinimizerSpecifications(1,0.,Ycard["nlopt"]["algorithm"].as<std::string>());
+		};
+	};
+	std::cout<< "nlopt_class::initilize_nlopt(std::string): Warning: No definitions given in "<<card<<std::endl;
+	return true;
 };
