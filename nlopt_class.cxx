@@ -44,6 +44,7 @@ double nlopt_class::nlopt_function(const std::vector<double> &x, std::vector<dou
 		};
 	};
 	if (grad.size() != 0){
+		size_t size_in = grad.size();
 		std::vector<double> diff = _method->Diff(_fitter_parameters);
 		count = 0;
 		for (size_t i=0;i<nTot;++i){
@@ -53,7 +54,8 @@ double nlopt_class::nlopt_function(const std::vector<double> &x, std::vector<dou
 			};
 		};
 	};
-	return (*_method)(_fitter_parameters);
+	double returnValue = (*_method)(_fitter_parameters);
+	return returnValue;
 };
 //########################################################################################################################################################
 ///Actual call for fitter. At the moment the instance is copied and fitted, this might be improved...
@@ -64,10 +66,23 @@ double nlopt_class::fit(){
 	_init = initialize();
 	if(_init){
 		double bestval;
-		std::vector<double> parameters = _method->parameters();
-		_opt.optimize(parameters, bestval);
+		std::vector<double> inPar;
+		size_t count = 0;
+		for (size_t p=0;p<_method->nTot();++p){
+			if (_released[p]){
+				inPar.push_back(_fitter_parameters[p]);
+				++count;
+			};
+		};
+		std::vector<double> steps = std::vector<double>(count,0.001);
+		_opt.set_initial_step(steps);
+		_opt.optimize(inPar, bestval);
+		count = 0;
 		for (size_t i=0;i<_method->nTot();i++){
-			_method->setParameter(i,parameters[i]);
+			if (_released[i]){
+				_method->setParameter(i,inPar[count]);
+				++count;
+			};
 		};
 		return bestval;
 	}else{
@@ -83,7 +98,13 @@ bool nlopt_class::initialize(){
 	if (_fitter_parameters.size() != par.size()){
 		_fitter_parameters = par;
 	};
-	_opt = nlopt::opt(_algorithm, _method->getNtot());
+	size_t nReleased = 0;
+	for (size_t p =0;p<_method->getNtot();++p){
+		if (_released[p]){
+			++nReleased;
+		};
+	};
+	_opt = nlopt::opt(_algorithm, nReleased);
 	_opt.set_ftol_abs(1.E-2);
 	_opt.set_min_objective(ff_nlopt, this);
 	return true;
@@ -101,10 +122,14 @@ void nlopt_class::setMinimizerSpecifications(int spec_int, double spec_double, s
 	if(spec_int == 1){ // Specify algorithm
 		if (spec_string == "NELDERMEAD"){
 			_algorithm = nlopt::LN_NELDERMEAD;
+		}else if (spec_string == "COBYLA"){
+			_algorithm = nlopt::LN_COBYLA;
 		}else if (spec_string == "SBPLX"){
 			_algorithm = nlopt::LN_SBPLX;
 		}else if (spec_string == "LBFGS"){
 			_algorithm = nlopt::LD_LBFGS;
+		}else if (spec_string == "MMA"){
+			_algorithm = nlopt::LD_MMA;
 		}else{
 			std::cerr<<"nlopt_class::setMinimizerSpecifications(...): Error: Unknown algirithm: "<<spec_string<<std::endl;
 			throw;
@@ -117,13 +142,13 @@ void nlopt_class::setMinimizerSpecifications(int spec_int, double spec_double, s
 bool nlopt_class::initialize_nlopt(std::string card){
 	YAML::Node Ycard = YAML::LoadFile(card);
 	if (Ycard["nlopt"]){
-
+		if (Ycard["nlopt"]["algorithm"]){
+			std::cout<<"nlopt_class::initialize_nlopt(std::string): Info: Setting nlopt algorithm to "<<Ycard["nlopt"]["algorithm"].as<std::string>()<<std::endl;
+			setMinimizerSpecifications(1,0.,Ycard["nlopt"]["algorithm"].as<std::string>());
+		};
 		return true;
 	}else if(Ycard["nlopt_definition_file"]){
 		return initialize_nlopt(Ycard["nlopt_definition_file"].as<std::string>());
-		if (Ycard["nlopt"]["algorithm"]){
-			setMinimizerSpecifications(1,0.,Ycard["nlopt"]["algorithm"].as<std::string>());
-		};
 	};
 	std::cout<< "nlopt_class::initilize_nlopt(std::string): Warning: No definitions given in "<<card<<std::endl;
 	return true;
